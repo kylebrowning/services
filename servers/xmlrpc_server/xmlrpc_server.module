@@ -1,0 +1,42 @@
+<?php
+
+function xmlrpc_server_server_info() {
+  return array(
+    '#path' => 'xmlrpc'
+  );
+}
+
+function xmlrpc_server_server() {
+  require_once './includes/xmlrpc.inc';
+  require_once './includes/xmlrpcs.inc';
+  return xmlrpc_server(xmlrpc_server_xmlrpc());
+}
+
+function xmlrpc_server_xmlrpc() {
+  $callbacks = array();
+  foreach (service_get_all() as $method) {
+    $args = array();
+    foreach ($method['#args'] as $arg) {
+      if (!is_array($arg)) {
+        $args[] = $arg;
+      }
+      else {
+        $args[] = $arg['#type'];
+      }
+    }
+    $callbacks[] = array(
+      $method['#method'], 
+      'xmlrpc_server_call_wrapper', 
+      array_merge(array($method['#return']), $args),
+      $method['#help']);
+  }
+  return array_merge($defaults, $callbacks);
+}
+
+function xmlrpc_server_call_wrapper() {
+  $xmlrpc_server = xmlrpc_server_get();
+  $method_name = $xmlrpc_server->message->methodname;
+  $args = func_get_args();
+  return service_method_call($method_name, $args);
+}
+

@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * Implementation of hook_help().
+ */
+function node_service_help($section) {
+  switch ($section) {
+    case 'admin/help#services_node':
+      return t('<p>Provides node methods to services applications. Requires services.module.</p>');
+    case 'admin/modules#description':
+      return t('Provides node methods to services applications. Requires services.module.');
+  }
+}
+
+/**
+ * Implementation of hook_service()
+ */
+function node_service_service() {
+  return array(
+    
+    // node.load
+    array(
+      '#method'   => 'node.load',
+      '#callback' => 'node_service_load',
+      '#args'     => array(
+        array(
+          '#name'         => 'nid',
+          '#type'         => 'int',
+          '#description'  => t('A node id.')),
+        array(
+          '#name'         => 'fields',
+          '#type'         => 'array',
+          '#optional'     => TRUE, 
+          '#description'  => t('A list of fields to return.'))),
+      '#return'   => 'struct',
+      '#help'     => t('Returns a node.')),
+      
+    // node.save
+    array(
+      '#method'   => 'node.save',
+      '#callback' => 'node_save',
+      '#args'     => array(
+        array(
+          '#name'         => 'node',
+          '#type'         => 'struct',
+          '#description'  => t('A node object.'))),
+      '#return'   => 'struct',
+      '#help'     => t('Save a node object into the database.')),
+    
+    // node.delete
+    array(
+      '#method'   => 'node.delete',
+      '#callback' => 'node_delete',
+      '#args'     => array(
+        array(
+          '#name'         => 'nid',
+          '#type'         => 'int',
+          '#description'  => t('A node id.'))),
+      '#help'     => t('Delete a node.')),
+  );
+}
+
+/**
+ * Returns a specified node.
+ */
+function node_service_load($nid, $fields = array()) {
+  $node = node_service_format(node_load(array('nid' => $nid)), $fields);
+  
+  if (!$node) {
+    return services_error(t("Could not find the node."));
+  }
+
+  return $node;
+}
+
+/**
+ * Make any changes we might want to make to node
+ */
+function node_service_format($node, $fields = array()) {
+  if (!$node->nid) {
+    return null;
+  }
+  
+  
+  // apply filters to fields
+  $node->body = check_markup($node->body, $node->filter, FALSE);
+
+  // loop through and get only requested fields
+  if (count($fields) > 0) {
+    foreach($fields as $field) {
+      $val->{$field} = $node->{$field};
+    }
+  } else {
+    $val = $node;
+  }
+
+  return $val;
+}

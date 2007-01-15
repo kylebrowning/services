@@ -1,0 +1,7 @@
+/* @override http://services.drupal.local/sites/services.drupal.local/modules/services/service_browser.css */
+
+#service-browser-arguments .type {
+  width: 40px;
+  display: block;
+  float: left;
+}

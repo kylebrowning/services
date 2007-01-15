@@ -1,0 +1,37 @@
+<?php
+/**
+ * Implementation of hook_install().
+ */
+function services_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("CREATE TABLE {services_keys} (
+        kid varchar(32) NOT NULL default '',
+        title varchar(255) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        PRIMARY KEY (kid)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */");
+
+      break;
+    case 'pgsql':
+      db_query("CREATE TABLE {services_keys} (
+        kid varchar(32) NOT NULL default '',
+        title varchar(255) NOT NULL default '',
+        domain varchar(255) NOT NULL default '',
+        PRIMARY KEY (kid)
+      )");
+      
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function services_uninstall() {
+  db_query('DROP TABLE {services_keys}');
+  variable_del('services_use_key');
+  variable_del('services_use_sessid');
+  variable_del('services_debug');
+}
