@@ -1,3 +1,4 @@
+; $Id$
 name = System Service
 description = Provides system services.
 package = Services - services

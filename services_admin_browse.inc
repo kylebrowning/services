@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * Callback for 'services/browse'
@@ -140,6 +141,7 @@ function services_admin_browse_test_unserialize_args($values) {
     $value = $values[$c];
     
     // remove empty values from end of array
+    // once we find a value, we can no longer skip
     if (empty($value) && !$noskip) continue;
     $noskip = true;
     
@@ -158,7 +160,7 @@ function services_admin_browse_test_unserialize_args($values) {
     }
   }
   
-  ksort($return);
+  if ($return) ksort($return);
   
   //die(print_r($return, true));
   

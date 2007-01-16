@@ -1,3 +1,4 @@
+; $Id$
 name = User Service
 description = Provides a user service.
 package = Services - services

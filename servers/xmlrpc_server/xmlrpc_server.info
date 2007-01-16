@@ -1,3 +1,4 @@
+; $Id$
 name = XMLRPC Server
 description = Provides an XMLRPC server.
 package = Services - servers

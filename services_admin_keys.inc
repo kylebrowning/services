@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 function services_admin_keys_list() {
   $keys = services_get_keys();
@@ -84,20 +85,20 @@ function services_admin_keys_form_submit($form_id, $form_values) {
 function services_admin_keys_save($key) {
   $is_existing = FALSE;
   $key['kid'] = !empty($key['kid']) ? $key['kid'] : md5(uniqid(mt_rand(), true));
-  $is_existing = db_num_rows(db_query("SELECT * FROM {api_keys} WHERE kid = '%s'", $key['kid']));
+  $is_existing = db_num_rows(db_query("SELECT * FROM {services_keys} WHERE kid = '%s'", $key['kid']));
   
   if (!$is_existing) {
-    db_query("INSERT INTO {api_keys} (kid, title, domain) VALUES ('%s', '%s', '%s')", $key['kid'], $key['title'], $key['domain']);
+    db_query("INSERT INTO {services_keys} (kid, title, domain) VALUES ('%s', '%s', '%s')", $key['kid'], $key['title'], $key['domain']);
     return SAVED_NEW;
   }
   else {
-    db_query("UPDATE {api_keys} SET title = '%s', domain = '%s' WHERE kid = '%s'", $key['title'], $key['domain'], $key['kid']);
+    db_query("UPDATE {services_keys} SET title = '%s', domain = '%s' WHERE kid = '%s'", $key['title'], $key['domain'], $key['kid']);
     return SAVED_UPDATED;
   }
 }
 
 function services_admin_keys_delete($kid) {
-  db_query("DELETE FROM {api_keys} WHERE kid = '%s'", $kid);
+  db_query("DELETE FROM {services_keys} WHERE kid = '%s'", $kid);
 }
 
 function services_admin_keys_delete_confirm($key) {

@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 /**
  * @file
  * services.module
@@ -28,7 +30,7 @@ function services_help($section) {
  * Implementation of hook_perm()
  */
 function services_perm() { 
-  return array('browse services', 'test methods'); 
+  return array('access services', 'administer services'); 
 }
 
 /**
@@ -48,22 +50,25 @@ function services_settings() {
  */
 function services_menu($may_cache) {
   $items = array();
-
+  $access = user_access('access services');
+  $admin_access = user_access('administer services');
+  $path = drupal_get_path('module', 'services');
+  
   if ($may_cache) {
-    
+    // admin
     $items[] = array(
       'path' => 'admin/build/services', 
       'title' => t('Services'),
-      'access' => user_access('browse services'),
+      'access' => $admin_access,
       'callback' => 'services_admin_browse_index',
       'description' => t('Allows external applications to communicate with Drupal.'),
     );
     
-    // Browse
+    // browse
     $items[] = array(
       'path' => 'admin/build/services/browse', 
       'title' => t('Browse'),
-      'access' => user_access('browse services'),
+      'access' => $admin_access,
       'callback' => 'services_admin_browse_index',
       'description' => t('Browse and test available remote services.'),
       'type' => MENU_DEFAULT_LOCAL_TASK
@@ -74,7 +79,7 @@ function services_menu($may_cache) {
       $items[] = array(
         'path' => 'admin/build/services/keys', 
         'title' => t('Keys'),
-        'access' => true,
+        'access' => $admin_access,
         'callback' => 'services_admin_keys_list',
         'description' => t('Manage application access to site services.'),
         'type' => MENU_LOCAL_TASK,
@@ -82,14 +87,14 @@ function services_menu($may_cache) {
       $items[] = array(
         'path' => 'admin/build/services/keys/list', 
         'title' => t('List'),
-        'access' => true,
+        'access' => $admin_access,
         'type' => MENU_DEFAULT_LOCAL_TASK,
         'weight' => -10,
       );
       $items[] = array(
         'path' => 'admin/build/services/keys/add', 
         'title' => t('Create key'),
-        'access' => true,
+        'access' => $admin_access,
         'callback' => 'drupal_get_form',
         'callback arguments' => array('services_admin_keys_form'),
         'type' => MENU_LOCAL_TASK,
@@ -100,7 +105,7 @@ function services_menu($may_cache) {
     $items[] = array(
       'path' => 'admin/build/services/settings', 
       'title' => t('Settings'),
-      'access' => true,
+      'access' => $admin_access,
       'callback' => 'drupal_get_form',
       'callback arguments' => 'services_admin_settings',
       'description' => t('Configure service settings.'),
@@ -109,7 +114,7 @@ function services_menu($may_cache) {
     $items[] = array(
       'path' => 'admin/build/services/settings/general', 
       'title' => t('General'),
-      'access' => true,
+      'access' => $admin_access,
       'callback' => 'drupal_get_form',
       'callback arguments' => 'services_admin_settings',
       'description' => t('Configure service settings.'),
@@ -120,7 +125,7 @@ function services_menu($may_cache) {
     // crossdomain.xml
     $items[] = array(
       'path' => 'crossdomain.xml',
-      'access' => true,
+      'access' => $access,
       'callback' => 'services_crossdomain_xml',
       'type' => MENU_CALLBACK,
     );
@@ -128,15 +133,14 @@ function services_menu($may_cache) {
   else {
     
     if (arg(0) == 'services') {
+      // server
       foreach (module_implements('server_info') as $module) {
         $info = module_invoke($module, 'server_info');
-        
         if ($info['#path'] == arg(1)) {
-          // server callback
           $items[] = array(
             'path' => 'services/' . $info['#path'], 
             'title' => t('Services'),
-            'access' => true,
+            'access' => $access,
             'callback' => 'services_server',
             'callback arguments' => array($module),
             'type' => MENU_CALLBACK,
@@ -152,42 +156,41 @@ function services_menu($may_cache) {
       // browse
       if (arg(3) == 'browse' || !arg(3)) {
         
-        require_once drupal_get_path('module', 'services') . '/services_admin_browse.inc';
+        require_once "$path/services_admin_browse.inc";
         
-        $base = drupal_get_path('module', 'services');
         if (arg(4)) {
           $items[] = array(
             'path' => 'admin/build/services/browse/' . arg(4), 
             'title' => arg(4),
-            'access' => user_access('browse services'),
+            'access' => $admin_access,
             'callback' => 'services_admin_browse_method',
             'type' => MENU_LOCAL_TASK
           );
         }
 
-        drupal_add_css($base .'/services.css', 'module');
+        drupal_add_css("$path/services.css", 'module');
       }
       
       // keys
       if (arg(3) == 'keys' && variable_get('services_use_key', TRUE)) {
         
-        require_once drupal_get_path('module', 'services') . '/services_admin_keys.inc';
+        require_once "$path/services_admin_keys.inc";
 
-        if (arg(4) != NULL) {
-          $kid = arg(4);
-          $key = services_get_key($kid);
+        if ($key = services_get_key(arg(4))) {
 
           if (!empty($key)) {
             $items[] = array(
               'path' => 'admin/build/services/keys/'. $key->kid,
-              //'title' => t('Edit key'),
+              'title' => t('Edit key'),
+              'access' => $admin_access,
               'callback' => 'drupal_get_form',
               'callback arguments' => array('services_admin_keys_form', $key),
-              'type' => MENU_LOCAL_TASK,
+              'type' => MENU_CALLBACK,
             );
             $items[] = array(
               'path' => 'admin/build/services/keys/'. $key->kid . '/delete',
               'title' => t($type->name),
+              'access' => $admin_access,
               'callback' => 'drupal_get_form',
               'callback arguments' => array('services_admin_keys_delete_confirm', $key),
               'type' => MENU_CALLBACK,
@@ -314,6 +317,11 @@ function services_error($message) {
  */
 function services_method_call($method_name, $args = array()) {
   $method = services_method_get($method_name);
+  
+  // check that method exists
+  if (empty($method)) {
+    return services_error(t('Method does not exist.'));
+  }
   
   // check for missing args
   foreach ($method['#args'] as $key => $arg) {

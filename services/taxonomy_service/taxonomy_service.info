@@ -1,3 +1,4 @@
+; $Id$
 name = Taxonomy Service
 description = Provides a taxonomy service.
 package = Services - services
