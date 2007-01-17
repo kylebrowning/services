@@ -6,5 +6,3 @@ Goals
   different server formats.  
 - Provide an API browser to the public domain, with access control.
 - Allow distribution of API keys for developer access.
-
-test
