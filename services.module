@@ -34,18 +34,6 @@ function services_perm() {
 }
 
 /**
- * Implementation of hook_settings().
- */
-function services_settings() {
-  $form['services_apikey'] = array(
-    '#type' => 'textfield', '#title' => t('API Key'), '#default_value' => variable_get('services_apikey', '0123456789'),
-    '#description' => t('This is the application key used to allow access only to xmlrpc calls which pass this key.')
-  );
-
-  return $form;
-}
-
-/**
  * Implementation of hook_menu
  */
 function services_menu($may_cache) {
