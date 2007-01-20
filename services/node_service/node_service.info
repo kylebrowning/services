@@ -3,3 +3,4 @@ name = Node Service
 description = Provides a node service.
 package = Services - services
 dependencies = services node
+version = "$Name$"

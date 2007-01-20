@@ -3,3 +3,4 @@ name = Views Service
 description = Provides a views service.
 package = Services - services
 dependencies = services views
+version = "$Name$"

@@ -3,3 +3,4 @@ name = System Service
 description = Provides system services.
 package = Services - services
 dependencies = services
+version = "$Name$"
