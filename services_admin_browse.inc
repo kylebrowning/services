@@ -8,15 +8,23 @@ function services_admin_browse_index() {
   $methods = services_get_all();
   
   // show enable server modules
+  $servers = module_implements('server_info');
   $output.= '<h2>' . t('Servers') . '</h2>';
-  $output.= '<ul>';
-  foreach (module_implements('server_info') as $module) {
-    $info = module_invoke($module, 'server_info');
-    $name = $info['#name'];
-    $path = 'services/' . $info['#path'];
-    $output .= '<li class="leaf">' . l($name . " - /$path", $path) . '</li>';
+  
+  if (!empty($servers)) {
+    $output.= '<ul>';
+    foreach ($servers as $module) {
+      $info = module_invoke($module, 'server_info');
+      $name = $info['#name'];
+      $path = 'services/' . $info['#path'];
+      $output .= '<li class="leaf">' . l($name . " - /$path", $path) . '</li>';
+    }
+    $output.= '</ul>';
   }
-  $output.= '</ul>';
+  else {
+    $output.= '<p>' . t('You must enable at least one server module to be able to connect remotely. Visit the <a href="@url">modules</a> page to enable server modules.', array('@url' => url('admin/build/modules'))) . '</p>';
+  }
+  
   
   $output.= '<h2>' . t('Services') . '</h2>';
   
