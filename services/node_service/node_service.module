@@ -39,12 +39,12 @@ function node_service_service() {
     // node.save
     array(
       '#method'   => 'node.save',
-      '#callback' => 'node_save',
+      '#callback' => 'node_service_save',
       '#args'     => array(
         array(
           '#name'         => 'node',
           '#type'         => 'struct',
-          '#description'  => t('A node object.'))),
+          '#description'  => t('A node object. Upon creation, node object must include "type". Upon update, node object must include "nid" and "changed".'))),
       '#return'   => 'struct',
       '#help'     => t('Save a node object into the database.')),
     
@@ -74,6 +74,19 @@ function node_service_load($nid, $fields = array()) {
   return $node;
 }
 
+function node_service_save($edit) {
+  
+  // validate node  
+  node_validate($edit);
+  if ($errors = form_get_errors()) {
+    return services_error(implode("\n", $errors));
+  }
+
+  $node = node_submit($edit);
+  node_save($node);
+  watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
+}
+
 /**
  * Make any changes we might want to make to node
  */
@@ -84,7 +97,10 @@ function node_service_format($node, $fields = array()) {
   
   
   // apply filters to fields
-  $node->body = check_markup($node->body, $node->filter, FALSE);
+  $body = $node->body;
+  $node->body = new StdClass();
+  $node->body_value = $body;
+  $node->body = check_markup($body, $node->filter, FALSE);
 
   // loop through and get only requested fields
   if (count($fields) > 0) {
