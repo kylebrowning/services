@@ -7,6 +7,19 @@
 function services_admin_browse_index() {
   $methods = services_get_all();
   
+  // show enable server modules
+  $output.= '<h2>' . t('Servers') . '</h2>';
+  $output.= '<ul>';
+  foreach (module_implements('server_info') as $module) {
+    $info = module_invoke($module, 'server_info');
+    $name = $info['#name'];
+    $path = 'services/' . $info['#path'];
+    $output .= '<li class="leaf">' . l($name . " - /$path", $path) . '</li>';
+  }
+  $output.= '</ul>';
+  
+  $output.= '<h2>' . t('Services') . '</h2>';
+  
   // group namespaces
   $services = array();
   foreach ($methods as $method) {
