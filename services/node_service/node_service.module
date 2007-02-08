@@ -65,7 +65,7 @@ function node_service_service() {
  * Returns a specified node.
  */
 function node_service_load($nid, $fields = array()) {
-  $node = node_service_format(node_load(array('nid' => $nid)), $fields);
+  $node = services_node_load(node_load(array('nid' => $nid)), $fields);
   
   if (!$node) {
     return services_error(t("Could not find the node."));
@@ -87,29 +87,3 @@ function node_service_save($edit) {
   watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
 }
 
-/**
- * Make any changes we might want to make to node
- */
-function node_service_format($node, $fields = array()) {
-  if (!$node->nid) {
-    return null;
-  }
-  
-  
-  // apply filters to fields
-  $body = $node->body;
-  $node->body = new StdClass();
-  $node->body_value = $body;
-  $node->body = check_markup($body, $node->filter, FALSE);
-
-  // loop through and get only requested fields
-  if (count($fields) > 0) {
-    foreach($fields as $field) {
-      $val->{$field} = $node->{$field};
-    }
-  } else {
-    $val = $node;
-  }
-
-  return $val;
-}

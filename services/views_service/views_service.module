@@ -56,7 +56,7 @@ function views_service_get_view($view_name, $fields = array(), $args = array()) 
   
   $result = views_build_view('result', $view, $args);
   while ($node = db_fetch_object($result['result'])) {
-    $nodes[] = node_service_format(node_load(array('nid' => $node->nid)), $fields);
+    $nodes[] = services_node_load(node_load(array('nid' => $node->nid)), $fields);
   }
   
   return $nodes;

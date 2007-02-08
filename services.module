@@ -452,6 +452,33 @@ function services_get_keys() {
 }
 
 /**
+ * Make any changes we might want to make to node
+ */
+function services_node_load($node, $fields = array()) {
+  if (!$node->nid) {
+    return null;
+  }
+  
+  
+  // apply filters to fields
+  $body = $node->body;
+  $node->body = new StdClass();
+  $node->body_value = $body;
+  $node->body = check_markup($body, $node->filter, FALSE);
+
+  // loop through and get only requested fields
+  if (count($fields) > 0) {
+    foreach($fields as $field) {
+      $val->{$field} = $node->{$field};
+    }
+  } else {
+    $val = $node;
+  }
+
+  return $val;
+}
+
+/**
  * destroy session and setup services session
  */
 function services_session_restart($sessid) {
