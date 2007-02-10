@@ -16,7 +16,7 @@ function xmlrpc_server_server() {
 
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-  foreach (service_get_all() as $method) {
+  foreach (services_get_all() as $method) {
     $args = array();
     foreach ($method['#args'] as $arg) {
       if (!is_array($arg)) {
@@ -39,6 +39,6 @@ function xmlrpc_server_call_wrapper() {
   $xmlrpc_server = xmlrpc_server_get();
   $method_name = $xmlrpc_server->message->methodname;
   $args = func_get_args();
-  return service_method_call($method_name, $args);
+  return services_method_call($method_name, $args);
 }
 
