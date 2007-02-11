@@ -12,11 +12,11 @@
 function services_help($section) {
   switch ($section) {
     case 'admin/help#services':
-      return '<p>' . t('Allows external applications to communicate with Drupal.') . '</p>';
+      return '<p>' . t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) . '</p>';
     
     case 'admin/build/services':
     case 'admin/build/services/browse':
-      $output = '<p>' . t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules.') . '</p>';
+      $output = '<p>' . t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) . '</p>';
       $output.= '<p>' . t('All enabled services and methods are shown. Click on any method to view information or test.') . '</p>';
       return $output;
       
