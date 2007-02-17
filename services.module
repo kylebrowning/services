@@ -247,24 +247,32 @@ function services_server($module = null) {
  */
 function services_crossdomain_xml() {
   global $base_url;
-  $output = '<?xml version="1.0"?>';
-  $output.= '<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">';
-  $output.= '<cross-domain-policy>';
-  $output.= '<allow-access-from domain="' . $_SERVER['HTTP_HOST'] . '" />';
-  $output.= '<allow-access-from domain="*.' . $_SERVER['HTTP_HOST'] . '" />';
+  $output = '<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">' . "\n";
+  $output.= '<cross-domain-policy>' . "\n";
+  $output.= '  <allow-access-from domain="' . $_SERVER['HTTP_HOST'] . '" />' . "\n";
+  $output.= '  <allow-access-from domain="*.' . $_SERVER['HTTP_HOST'] . '" />' . "\n";
   
   $keys = services_get_keys();
   
   foreach ($keys as $key) {
     if (!empty($key->domain)) {
-      $output.= '<allow-access-from domain="' . $key->domain . '" />';
-      $output.= '<allow-access-from domain="*.' . $key->domain . '" />';
+      $output.= '<allow-access-from domain="' . $key->domain . '" />' . "\n";
+      $output.= '<allow-access-from domain="*.' . $key->domain . '" />' . "\n";
     }
   }
   
   $output.= '</cross-domain-policy>';
   
-  print $output;
+  services_xml_output($output);
+}
+
+function services_xml_output($xml) {
+  $xml = '<?xml version="1.0"?>'."\n". $xml;
+  header('Connection: close');
+  header('Content-Length: '. strlen($xml));
+  header('Content-Type: text/xml');
+  header('Date: '.date('r'));
+  echo $xml;
   exit;
 }
 
