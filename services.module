@@ -256,8 +256,8 @@ function services_crossdomain_xml() {
   
   foreach ($keys as $key) {
     if (!empty($key->domain)) {
-      $output.= '<allow-access-from domain="' . $key->domain . '" />' . "\n";
-      $output.= '<allow-access-from domain="*.' . $key->domain . '" />' . "\n";
+      $output.= '  <allow-access-from domain="' . $key->domain . '" />' . "\n";
+      $output.= '  <allow-access-from domain="*.' . $key->domain . '" />' . "\n";
     }
   }
   
