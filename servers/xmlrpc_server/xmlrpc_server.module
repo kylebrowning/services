@@ -32,7 +32,7 @@ function xmlrpc_server_xmlrpc() {
       array_merge(array($method['#return']), $args),
       $method['#help']);
   }
-  return array_merge($defaults, $callbacks);
+  return $callbacks;
 }
 
 function xmlrpc_server_call_wrapper() {
