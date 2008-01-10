@@ -5,8 +5,8 @@
  * Implementation of hook_help().
  */
 
-function views_service_help($section) {
-  switch ($section) {
+function views_service_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#services_views':
       return t('<p>Provides view methods to services applications. Requires services.module.</p>');
     case 'admin/modules#description':

@@ -9,8 +9,8 @@
 /**
  * Implementation of hook_help().
  */
-function services_help($section) {
-  switch ($section) {
+function services_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#services':
       return '<p>' . t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) . '</p>';
     
@@ -27,219 +27,183 @@ function services_help($section) {
 }
 
 /**
- * Implementation of hook_perm()
+ * Implementation of hook_perm().
  */
 function services_perm() { 
   return array('access services', 'administer services'); 
 }
 
 /**
- * Implementation of hook_menu
+ * Implementation of hook_menu().
  */
-function services_menu($may_cache) {
+function services_menu() {
   $items = array();
-  $access = user_access('access services');
-  $admin_access = user_access('administer services');
-  $path = drupal_get_path('module', 'services');
   
-  if ($may_cache) {
-    // admin
-    $items[] = array(
-      'path' => 'admin/build/services', 
-      'title' => t('Services'),
-      'access' => $admin_access,
-      'callback' => 'services_admin_browse_index',
-      'description' => t('Allows external applications to communicate with Drupal.'),
-    );
+  // admin
+  $items['admin/build/services'] = array(
+    'title' => 'Services',
+    'description' => 'Allows external applications to communicate with Drupal.',
+    'access arguments' => array('administer services'),
+    'page callback' => 'services_admin_browse_index',
+    'file' => 'services_admin_browse.inc',
+  );
+  
+  // browse
+  $items['admin/build/services/browse'] = array( 
+    'title' => 'Browse',
+    'description' => 'Browse and test available remote services.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  
+  // API Keys
+  $items['admin/build/services/keys'] = array(
+    'title' => 'Keys',
+    'description' => 'Manage application access to site services.',
+    'page callback' => 'services_admin_keys_list',
+    'access callback' => 'variable_get',
+    'access arguments' => array('services_use_key', TRUE),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'services_admin_keys.inc',
+  );
+  $items['admin/build/services/keys/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/build/services/keys/add'] = array(
+    'title' => 'Create key',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('services_admin_keys_form'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'services_admin_keys.inc',
+  );
+  
+  // Settings
+  $items['admin/build/services/settings'] = array(
+    'title' => 'Settings',
+    'description' => 'Configure service settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('services_admin_settings'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'services_admin_browse.inc',    
+  );
+  $items['admin/build/services/settings/general'] = array(
+    'title' => 'General',
+    'description' => 'Configure service settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('services_admin_settings'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  ); 
+  
+  // method
+  $items['admin/build/services/browse/%'] = array(
+    'title' => 'Services',
+  	'description' => 'Calls a Services method.',
+    'page callback' => 'services_admin_browse_method',
+    'page arguments' => array(1),
+  	'access arguments' => array('administer services'),
+    'type' => MENU_CALLBACK,
+    'file' => 'services_admin_browse.inc',
+  );
+  
+  // crossdomain.xml
+  $items['crossdomain.xml'] = array(
+    'access arguments' => array('access services'),
+    'page callback' => 'services_crossdomain_xml',
+    'type' => MENU_CALLBACK,
+  );
+  
+  // server
+  $items['services/%'] = array(
+    'title' => 'Services',
+    'access arguments' => array('access services'),
+    'page callback' => 'services_server',
+  	'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+  // admin
+  /*if (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'services') {
     
     // browse
-    $items[] = array(
-      'path' => 'admin/build/services/browse', 
-      'title' => t('Browse'),
-      'access' => $admin_access,
-      'callback' => 'services_admin_browse_index',
-      'description' => t('Browse and test available remote services.'),
-      'type' => MENU_DEFAULT_LOCAL_TASK
-    );
-    
-    // API Keys
-    if (variable_get('services_use_key', TRUE)) {
-      $items[] = array(
-        'path' => 'admin/build/services/keys', 
-        'title' => t('Keys'),
-        'access' => $admin_access,
-        'callback' => 'services_admin_keys_list',
-        'description' => t('Manage application access to site services.'),
-        'type' => MENU_LOCAL_TASK,
-      );
-      $items[] = array(
-        'path' => 'admin/build/services/keys/list', 
-        'title' => t('List'),
-        'access' => $admin_access,
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'weight' => -10,
-      );
-      $items[] = array(
-        'path' => 'admin/build/services/keys/add', 
-        'title' => t('Create key'),
-        'access' => $admin_access,
-        'callback' => 'drupal_get_form',
-        'callback arguments' => array('services_admin_keys_form'),
-        'type' => MENU_LOCAL_TASK,
-      );
+    if (arg(3) == 'browse' || !arg(3)) {
+      
+      require_once "$path/services_admin_browse.inc";
+      
+      if (arg(4)) {
+        $items[] = array(
+          'path' => 'admin/build/services/browse/' . arg(4), 
+          'title' => arg(4),
+          'access' => $admin_access,
+          'callback' => 'services_admin_browse_method',
+          'type' => MENU_LOCAL_TASK
+        );
+      }
+
+      drupal_add_css("$path/services.css", 'module');
     }
     
-    // Settings
-    $items[] = array(
-      'path' => 'admin/build/services/settings', 
-      'title' => t('Settings'),
-      'access' => $admin_access,
-      'callback' => 'drupal_get_form',
-      'callback arguments' => 'services_admin_settings',
-      'description' => t('Configure service settings.'),
-      'type' => MENU_LOCAL_TASK,
-    );
-    $items[] = array(
-      'path' => 'admin/build/services/settings/general', 
-      'title' => t('General'),
-      'access' => $admin_access,
-      'callback' => 'drupal_get_form',
-      'callback arguments' => 'services_admin_settings',
-      'description' => t('Configure service settings.'),
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -10,
-    );
-    
-    // crossdomain.xml
-    $items[] = array(
-      'path' => 'crossdomain.xml',
-      'access' => $access,
-      'callback' => 'services_crossdomain_xml',
-      'type' => MENU_CALLBACK,
-    );
-  }
-  else {
-    
-    if (arg(0) == 'services') {
-      // server
-      foreach (module_implements('server_info') as $module) {
-        $info = module_invoke($module, 'server_info');
-        if ($info['#path'] == arg(1)) {
+    // keys
+    if (arg(3) == 'keys' && variable_get('services_use_key', TRUE)) {
+      
+      require_once "$path/services_admin_keys.inc";
+
+      if ($key = services_get_key(arg(4))) {
+
+        if (!empty($key)) {
           $items[] = array(
-            'path' => 'services/' . $info['#path'], 
-            'title' => t('Services'),
-            'access' => $access,
-            'callback' => 'services_server',
-            'callback arguments' => array($module),
+            'path' => 'admin/build/services/keys/'. $key->kid,
+            'title' => t('Edit key'),
+            'access' => $admin_access,
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array('services_admin_keys_form', $key),
+            'type' => MENU_CALLBACK,
+          );
+          $items[] = array(
+            'path' => 'admin/build/services/keys/'. $key->kid . '/delete',
+            'title' => t($type->name),
+            'access' => $admin_access,
+            'callback' => 'drupal_get_form',
+            'callback arguments' => array('services_admin_keys_delete_confirm', $key),
             'type' => MENU_CALLBACK,
           );
         }
       }
     }
-    
-    
-    // admin
-    if (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'services') {
-      
-      // browse
-      if (arg(3) == 'browse' || !arg(3)) {
-        
-        require_once "$path/services_admin_browse.inc";
-        
-        if (arg(4)) {
-          $items[] = array(
-            'path' => 'admin/build/services/browse/' . arg(4), 
-            'title' => arg(4),
-            'access' => $admin_access,
-            'callback' => 'services_admin_browse_method',
-            'type' => MENU_LOCAL_TASK
-          );
-        }
-
-        drupal_add_css("$path/services.css", 'module');
-      }
-      
-      // keys
-      if (arg(3) == 'keys' && variable_get('services_use_key', TRUE)) {
-        
-        require_once "$path/services_admin_keys.inc";
-
-        if ($key = services_get_key(arg(4))) {
-
-          if (!empty($key)) {
-            $items[] = array(
-              'path' => 'admin/build/services/keys/'. $key->kid,
-              'title' => t('Edit key'),
-              'access' => $admin_access,
-              'callback' => 'drupal_get_form',
-              'callback arguments' => array('services_admin_keys_form', $key),
-              'type' => MENU_CALLBACK,
-            );
-            $items[] = array(
-              'path' => 'admin/build/services/keys/'. $key->kid . '/delete',
-              'title' => t($type->name),
-              'access' => $admin_access,
-              'callback' => 'drupal_get_form',
-              'callback arguments' => array('services_admin_keys_delete_confirm', $key),
-              'type' => MENU_CALLBACK,
-            );
-          }
-        }
-      }
-    }
-  }
+  }*/
   
   return $items;
 }
 
-/*
- * callback for admin page
- */
-function services_admin_settings() {
-  $node_types = node_get_types('names');
-  $defaults = isset($node_types['blog']) ? array('blog' => 1) : array();
-  $form['security'] = array(
-    '#title' => t('Security'),
-    '#type' => 'fieldset',
-    '#description' => t('Changing security settings will require you to adjust all method calls. This will affect all applications using site services.'),
+function services_theme() {
+  return array(
+    'services_admin_browse_test' => array(
+      'arguments' => array('form' => NULL),
+    ),
   );
-  $form['security']['services_use_key'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use keys'),
-    '#default_value' => variable_get('services_use_key', TRUE),
-    '#description' => t('When enabled, all method calls must include a valid key.')
-  );
-  $form['security']['services_use_sessid'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use sessid'),
-    '#default_value' => variable_get('services_use_sessid', TRUE),
-    '#description' => t('When enabled, all method calls must include a valid sessid. Only disable this setting if the application will user browser-based cookies.')
-  );
-  
-  $form['debug'] = array(
-    '#title' => t('Debugging'),
-    '#type' => 'fieldset',
-  );
-  $form['debug']['services_debug'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable debug mode'),
-    '#default_value' => variable_get('services_debug', TRUE),
-    '#description' => t('When enabled, debugging features will be enabled.')
-  );
-  
-
-  return system_settings_form($form);
 }
+
 
 /**
  * callback for server endpoint
  */
-function services_server($module = null) {
-  services_set_server_info($module);
-  print module_invoke($module, 'server');
-  
-  // do not let this output
-  exit;
+function services_server($server_path = null) {
+  // find which module the server is part of
+  foreach (module_implements('server_info') as $module) {
+    $info = module_invoke($module, 'server_info');
+    if ($info['#path'] == $server_path) {
+      
+      // call the server
+      services_set_server_info($module);
+      print module_invoke($module, 'server');
+      
+      // do not let this output
+      exit;
+    }
+  }
+  // return 404 if the service doesn't exist
+  drupal_not_found();
 }
 
 /*
@@ -472,7 +436,7 @@ function services_node_load($node, $fields = array()) {
   $body = $node->body;
   $node->body = new StdClass();
   $node->body_value = $body;
-  $node->body = check_markup($body, $node->filter, FALSE);
+  $node->body = check_markup($body, $node->format, FALSE);
 
   // loop through and get only requested fields
   if (count($fields) > 0) {

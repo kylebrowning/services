@@ -43,7 +43,7 @@ function services_admin_keys_form($key = NULL) {
     '#default_value' => $key->kid,
   );
   
-  if ($key) {
+  if ($key->kid) {
     $form['key'] = array(
       '#type' => 'markup',
       '#title' => t('Key'),
@@ -72,28 +72,26 @@ function services_admin_keys_form($key = NULL) {
   return $form;
 }
 
-function services_admin_keys_form_validate() {
+function services_admin_keys_form_submit($form, $form_state) {
   
-}
-
-function services_admin_keys_form_submit($form_id, $form_values) {
-  services_admin_keys_save($form_values);
+  services_admin_keys_save($form_state['values']);
   
   return 'admin/build/services/keys';
 }
 
 function services_admin_keys_save($key) {
+
   $is_existing = FALSE;
   $key['kid'] = !empty($key['kid']) ? $key['kid'] : md5(uniqid(mt_rand(), true));
-  $is_existing = db_num_rows(db_query("SELECT * FROM {services_keys} WHERE kid = '%s'", $key['kid']));
-  
-  if (!$is_existing) {
-    db_query("INSERT INTO {services_keys} (kid, title, domain) VALUES ('%s', '%s', '%s')", $key['kid'], $key['title'], $key['domain']);
-    return SAVED_NEW;
-  }
-  else {
+  $is_existing =  db_result(db_query("SELECT count(*) FROM {services_keys} WHERE kid = '%s'", $key['kid']));
+
+  if ($is_existing) {
     db_query("UPDATE {services_keys} SET title = '%s', domain = '%s' WHERE kid = '%s'", $key['title'], $key['domain'], $key['kid']);
     return SAVED_UPDATED;
+  }
+  else {
+    db_query("INSERT INTO {services_keys} (kid, title, domain) VALUES ('%s', '%s', '%s')", $key['kid'], $key['title'], $key['domain']);
+    return SAVED_NEW;
   }
 }
 

@@ -4,8 +4,8 @@
 /**
  * Implementation of hook_help().
  */
-function node_service_help($section) {
-  switch ($section) {
+function node_service_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#services_node':
       return t('<p>Provides node methods to services applications. Requires services.module.</p>');
     case 'admin/modules#description':
@@ -86,4 +86,3 @@ function node_service_save($edit) {
   node_save($node);
   watchdog('content', t('@type: updated %title.', array('@type' => t($node->type), '%title' => $node->title)), WATCHDOG_NOTICE, l(t('view'), 'node/'. $node->nid));
 }
-

@@ -9,7 +9,7 @@ function services_admin_browse_index() {
   
   // show enable server modules
   $servers = module_implements('server_info');
-  $output.= '<h2>' . t('Servers') . '</h2>';
+  $output = '<h2>' . t('Servers') . '</h2>';
   
   if (!empty($servers)) {
     $output.= '<ul>';
@@ -55,13 +55,14 @@ function services_admin_browse_index() {
 function services_admin_browse_method() {
   global $services_admin_browse_test_submit_result;
   
-  if ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && user_access('test methods')) {
+  $output = '';
+  /*if ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && user_access('test methods')) {
     drupal_get_form('services_admin_browse_test');
     $output.= '<h3>' . t('Result') . '</h3>';
     $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
     print $output;
     exit; 
-  }
+  }*/
   
   $method = services_method_get(arg(4));
   
@@ -90,18 +91,13 @@ function services_admin_browse_method() {
   $output.= '<h3>' . t('Call method') . '</h3>';
   $output.= drupal_get_form('services_admin_browse_test');
   
-  
-  
   // display results
-  if (user_access('test methods')) {
+  if ($services_admin_browse_test_submit_result) {
     $output.= '<div id="output">';
-    if ($services_admin_browse_test_submit_result) {
-      $output.= '<h3>' . t('Result') . '</h3>';
-      $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
-    }
+    $output.= '<h3>' . t('Result') . '</h3>';
+    $output.= '<code>' . $services_admin_browse_test_submit_result . '</code>';
     $output.= '</div>';
   }
-  
 
   return $output;
 }
@@ -145,17 +141,17 @@ function services_admin_browse_get_first_key() {
   }
 }
 
-function services_admin_browse_test_submit($form_id, $form_values) {
+function services_admin_browse_test_submit($form_id, $form_state) {
   global $services_admin_browse_test_submit_result;
   $method = services_method_get(arg(4));
-  $args = services_admin_browse_test_unserialize_args($form_values['arg']);
+  $args = services_admin_browse_test_unserialize_args($form_state['values']['arg']);
   $result = services_method_call($method['#method'], $args);
   $services_admin_browse_test_submit_result = check_markup(print_r($result, true), 1);
 }
 
 function services_admin_browse_test_unserialize_args($values) {
   $method = services_method_get(arg(4));
-  
+  $noskip = FALSE;
   // convert args
   for ($c = count($method['#args']) - 1; $c >= 0; $c--) {
     $arg = $method['#args'][$c];
@@ -163,8 +159,10 @@ function services_admin_browse_test_unserialize_args($values) {
     
     // remove empty values from end of array
     // once we find a value, we can no longer skip
-    if (empty($value) && !$noskip) continue;
-    $noskip = true;
+    if (empty($value) && !$noskip) {
+      continue;
+    }
+    $noskip = TRUE;
     
     switch ($arg['#type']) {
       case 'array' :
@@ -209,4 +207,42 @@ function theme_services_admin_browse_test($form) {
   $output.= drupal_render($form);
   
   return $output;
+}
+
+/*
+ * callback for admin page
+ */
+function services_admin_settings() {
+  $node_types = node_get_types('names');
+  $defaults = isset($node_types['blog']) ? array('blog' => 1) : array();
+  $form['security'] = array(
+    '#title' => t('Security'),
+    '#type' => 'fieldset',
+    '#description' => t('Changing security settings will require you to adjust all method calls. This will affect all applications using site services.'),
+  );
+  $form['security']['services_use_key'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use keys'),
+    '#default_value' => variable_get('services_use_key', TRUE),
+    '#description' => t('When enabled, all method calls must include a valid key.')
+  );
+  $form['security']['services_use_sessid'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use sessid'),
+    '#default_value' => variable_get('services_use_sessid', TRUE),
+    '#description' => t('When enabled, all method calls must include a valid sessid. Only disable this setting if the application will user browser-based cookies.')
+  );
+  
+  $form['debug'] = array(
+    '#title' => t('Debugging'),
+    '#type' => 'fieldset',
+  );
+  $form['debug']['services_debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable debug mode'),
+    '#default_value' => variable_get('services_debug', TRUE),
+    '#description' => t('When enabled, debugging features will be enabled.')
+  );
+
+  return system_settings_form($form);
 }

@@ -4,8 +4,8 @@
 /**
  * Implementation of hook_help().
  */
-function system_service_help($section) {
-  switch ($section) {
+function system_service_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#services_node':
       return t('<p>Provides node methods to services applications. Requires services.module.</p>');
     case 'admin/modules#description':

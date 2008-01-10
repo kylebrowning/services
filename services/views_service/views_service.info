@@ -2,5 +2,6 @@
 name = Views Service
 description = Provides a views service.
 package = Services - services
-dependencies = services views
-
+dependencies[] = services
+dependencies[] = views
+core = 6.x

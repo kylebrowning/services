@@ -5,8 +5,8 @@
  * Implementation of hook_help().
  */
 
-function taxonomy_service_help($section) {
-  switch ($section) {
+function taxonomy_service_help($path, $arg) {
+  switch ($path) {
     case 'admin/help#services_taxonomy':
       return t('<p>Provides taxonomy methods to services applications.  Requires services.module.</p>');
     case 'admin/modules#description':
