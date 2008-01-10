@@ -1,7 +1,0 @@
-; $Id$
-name = Views Service
-description = Provides a views service.
-package = Services - services
-dependencies[] = services
-dependencies[] = views
-core = 6.x

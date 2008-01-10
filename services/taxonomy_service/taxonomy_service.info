@@ -1,7 +1,0 @@
-; $Id$
-name = Taxonomy Service
-description = Provides a taxonomy service.
-package = Services - services
-dependencies[] = services
-dependencies[] = taxonomy
-core = 6.x

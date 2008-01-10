@@ -1,6 +1,0 @@
-; $Id$
-name = System Service
-description = Provides system services.
-package = Services - services
-dependencies[] = services
-core = 6.x

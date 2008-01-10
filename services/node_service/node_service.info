@@ -1,7 +1,0 @@
-; $Id$
-name = Node Service
-description = Provides a node service.
-package = Services - services
-dependencies[] = services
-dependencies[] = node
-core = 6.x

@@ -1,5 +1,0 @@
-; $Id$
-name = Services
-description = Provide an API for creating web services.
-package = Services
-core = 6.x

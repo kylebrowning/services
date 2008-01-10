@@ -1,7 +1,0 @@
-; $Id$
-name = User Service
-description = Provides a user service.
-package = Services - services
-dependencies[] = services
-dependencies[] = user
-core = 6.x
