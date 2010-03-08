@@ -1,0 +1,6 @@
+; $Id$
+name = Node Resource
+description = Provides a resource oriented service interface to nodes.
+package = Services - services
+core = 6.x
+php = 5.x

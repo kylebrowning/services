@@ -1,0 +1,5 @@
+/* $Id$ */
+
+#services-list-endpoint tr.services-endpoint-disabled {
+  color: #999;
+}

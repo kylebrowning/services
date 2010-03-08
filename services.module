@@ -1,0 +1,493 @@
+<?php
+// $Id$
+
+/**
+ * @author Services Dev Team
+ * @file
+ *  Provides a generic but powerful API for web services.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function services_help($path, $arg) {
+  $output = NULL;
+
+  switch ($path) {
+    case 'admin/help#services':
+      $output = '<p>'. t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
+      break;
+    case 'admin/build/services':
+      $output = '<p>'. t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
+      $output .= '<p>'. t('All enabled services and methods are shown. Click on any method to view information or test.') .'</p>';
+      break;
+  }
+
+  return $output;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function services_perm() {
+  return array('administer services');
+}
+
+/**
+ * Implementation of hook_hook_info().
+ */
+function services_hook_info() {
+  $hooks['services_resources'] = array(
+    'group' => 'services',
+  );
+  return $hooks;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function services_menu() {
+  $base = array(
+    'access arguments' => array('administer services'),
+    'file'             => 'services.admin.inc',
+  );
+
+  $items['admin/build/services'] = array(
+    'title'          => 'Services',
+    'description'    => 'Manage how external applications communicates with Drupal.',
+    'page callback'  => 'services_list_endpoint',
+  ) + $base;
+  $items['admin/build/services/list'] = array(
+    'title'          => 'List',
+    'page callback'  => 'services_list_endpoint',
+    'type'           => MENU_DEFAULT_LOCAL_TASK,
+    'weight'         => -10,
+  ) + $base;
+  $items['admin/build/services/add'] = array(
+    'title'          => 'Add endpoint',
+    'page callback'  => 'services_add_endpoint',
+    'type'           => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/edit'] = array(
+    'title'          => 'Edit endpoint',
+    'page callback'  => 'services_edit_endpoint',
+    'page arguments' => array(3),
+    'type'           => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/authentication'] = array(
+    'title'          => 'Authentication',
+    'page callback'  => 'services_edit_endpoint_authentication',
+    'page arguments' => array(3),
+    'type'           => MENU_LOCAL_TASK,
+    'weight'         => 5,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/resources'] = array(
+    'title'          => 'Resources',
+    'page callback'  => 'services_edit_endpoint_resources',
+    'page arguments' => array(3),
+    'type'           => MENU_LOCAL_TASK,
+    'weight'         => 10,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/export'] = array(
+    'title'          => 'Export endpoint',
+    'page callback'  => 'drupal_get_form',
+    'page arguments' => array('services_export_endpoint', 3),
+    'type'           => MENU_LOCAL_TASK,
+    'weight'         => 20,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/delete'] = array(
+    'title'          => 'Delete endpoint',
+    'page callback'  => 'drupal_get_form',
+    'page arguments' => array('services_delete_confirm_endpoint', 3),
+    'type'           => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/disable'] = array(
+    'page callback'  => 'services_disable_endpoint',
+    'page arguments' => array(3),
+    'type'           => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/enable'] = array(
+    'page callback'  => 'services_enable_endpoint',
+    'page arguments' => array(3),
+    'type'           => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/build/services/ahah/security-options'] = array(
+    'page callback' => '_services_ahah_security_options',
+    'type'          => MENU_CALLBACK,
+  ) + $base;
+
+  $items['crossdomain.xml'] = array(
+    'access callback'   => 'services_access_menu',
+    'page callback'     => 'services_crossdomain_xml',
+    'type'              => MENU_CALLBACK,
+  );
+
+  // Add menu items for the different endpoints
+  $endpoints = services_endpoint_load_all();
+  foreach ($endpoints as $endpoint) {
+    if (!$endpoint->disabled) {
+      $items[$endpoint->path] = array(
+        'title'             => 'Services endpoint',
+        'access callback'   => 'services_access_menu',
+        'page callback'     => 'services_endpoint_callback',
+        'page arguments'    => array($endpoint->name),
+        'type'              => MENU_CALLBACK,
+      );
+    }
+  }
+
+  return $items;
+}
+
+/**
+ * Access callback that always returns TRUE.
+ */
+function services_access_menu() {
+  return TRUE;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function services_theme() {
+  return array(
+    'services_endpoint_index' => array(
+      'template'  => 'services_endpoint_index',
+      'arguments' => array('endpoints' => NULL),
+    ),
+  );
+}
+
+/**
+ * Returns information about the installed server modules on the system.
+ *
+ * @return array
+ *  An associative array keyed after module name containing information about
+ *  the installed server implementations.
+ */
+function services_get_servers() {
+  static $servers;
+
+  if (!$servers) {
+    $servers = array();
+    foreach (module_implements('server_info') as $module) {
+      $servers[$module] = call_user_func($module . '_server_info');
+    }
+  }
+
+  return $servers;
+}
+
+/**
+ * Menu system page callback for server endpoints.
+ *
+ * @param string $endpoint
+ *  The endpoint name.
+ * @return void
+ */
+function services_endpoint_callback($endpoint_name) {
+  module_load_include('runtime.inc', 'services');
+
+  $endpoint = services_endpoint_load($endpoint_name);
+  $server = $endpoint->server;
+
+  if (function_exists($server . '_server')) {
+    // call the server
+    services_set_server_info_from_array(array(
+      'module'        => $server,
+      'endpoint'      => $endpoint_name,
+      'endpoint_path' => $endpoint->path,
+      'drupal_path'   => getcwd(),
+    ));
+
+    print call_user_func($server . '_server');
+
+    // Do not let this output
+    module_invoke_all('exit');
+    exit;
+  }
+  // return 404 if the server doesn't exist
+  drupal_not_found();
+}
+
+/**
+ * Callback for crossdomain.xml
+ */
+function services_crossdomain_xml() {
+  $output = '<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">' . "\n";
+  $output .= '<cross-domain-policy>' . "\n";
+
+  $domains = module_invoke_all('services_crossdomain_domain_policy');
+  drupal_alter('services_crossdomain_domain_policy', $domains);
+
+  foreach ($domains as $domain => $info) {
+    $output .= '  <allow-access-from domain="' . check_plain($domain) . '" />' . "\n";
+    if ($info['subdomain_wildcard']) {
+      $output .= '  <allow-access-from domain="*.' . check_plain($domain) . '" />' . "\n";
+    }
+  }
+
+  $output .= '</cross-domain-policy>';
+
+  services_xml_output($output);
+}
+
+/**
+ * Implementation of hook_services_crossdomain_domain_policy().
+ */
+function services_services_crossdomain_domain_policy() {
+  // Allow our own domain and it's subdomains
+  return array(
+    $_SERVER['HTTP_HOST'] => array(
+      'subdomain_wildcard' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Helper function for services_crossdomain_xml().
+ * Outputs the necessary http headers and xml processing instruction then exits.
+ *
+ * @param string $xml
+ *  The xml document to print.
+ * @return void
+ *  This function never returns, it always exits.
+ */
+function services_xml_output($xml) {
+  $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . $xml;
+  header('Connection: close');
+  header('Content-Length: ' . strlen($xml));
+  header('Content-Type: text/xml');
+  header('Date: ' . date('r'));
+  echo $xml;
+  exit;
+}
+
+/**
+ * Create a new endpoint with defaults appropriately set from schema.
+ *
+ * @return stdClass
+ *  An endpoint initialized with the default values.
+ */
+function services_endpoint_new() {
+  ctools_include('export');
+  return ctools_export_new_object('services_endpoint');
+}
+
+/**
+ * Load a single endpoint.
+ *
+ * @param string $name
+ *  The name of the endpoint.
+ * @return stdClass
+ *  The endpoint configuration.
+ */
+function services_endpoint_load($name) {
+  ctools_include('export');
+  $result = ctools_export_load_object('services_endpoint', 'names', array($name));
+  if (isset($result[$name])) {
+    return $result[$name];
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Load all endpoints.
+ *
+ * @return array
+ *  Array of endpoint objects keyed by endpoint names.
+ */
+function services_endpoint_load_all() {
+  ctools_include('export');
+  return ctools_export_load_object('services_endpoint');
+}
+
+/**
+ * Saves an endpoint in the database.
+ *
+ * @return void
+ */
+function services_endpoint_save($endpoint) {
+  $update = (isset($endpoint->eid)) ? array('eid') : array();
+  drupal_write_record('services_endpoint', $endpoint, $update);
+  menu_rebuild();
+  cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
+}
+
+/**
+ * Remove an endpoint.
+ *
+ * @return void
+ */
+function services_endpoint_delete($endpoint) {
+  db_query("DELETE FROM {services_endpoint} WHERE name = '%s' AND eid = %d", $endpoint->name, $endpoint->eid);
+  menu_rebuild();
+  cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
+}
+
+/**
+ * Export an endpoint.
+ *
+ * @return string
+ */
+function services_endpoint_export($endpoint, $indent = '') {
+  ctools_include('export');
+  $output = ctools_export_object('services_endpoint', $endpoint, $indent);
+  return $output;
+}
+
+/**
+ * Lists all available endpoints.
+ *
+ * @return array
+ */
+function services_endpoint_list() {
+  $return = array();
+  $endpoints = services_endpoint_load_all();
+  foreach ($endpoints as $endpoint) {
+    $return[$endpoint->name] = $endpoint->title;
+  }
+  return $return;
+}
+
+/**
+ * Gets all resource definitions.
+ *
+ * @param string $endpoint_name
+ *   Optional. The endpoint endpoint that's being used.
+ * @return array
+ *  An array containing all resources.
+ */
+function services_get_resources($endpoint_name = '') {
+  $cache_key = 'services:' . $endpoint_name . ':resources';
+
+  $resources = array();
+  if (($cache = cache_get($cache_key)) && isset($cache->data)) {
+    $resources = $cache->data;
+  }
+  else {
+    module_load_include('resource_build.inc', 'services');
+    $resources = _services_build_resources($endpoint_name);
+    cache_set($cache_key, $resources);
+  }
+
+  return $resources;
+}
+
+/**
+ * Implementation of hook_services_resources().
+ */
+function services_services_resources() {
+  module_load_include('resource_build.inc', 'services');
+  // Return resources representing legacy services
+  return _services_legacy_services_as_resources();
+}
+
+/**
+ * Returns all the controller names for a endpoint.
+ *
+ * @param string $endpoint
+ *  The endpoint that should be used.
+ * @param array $names
+ *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
+ *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
+ *  and 'targeted actions'=>'set'.
+ * @param bool $key_by_resource
+ *  Optional. Set to TRUE to get controllers separated by resource.
+ * @return array
+ *  Either a non associative array containing all controller names. Or, if
+ *  $key_by_resource was set to TRUE, a associative array where the resource
+ *  name is the key and the value is a non-associative array containing the
+ *  resource's controller names.
+ */
+function services_controllers_list($endpoint, $prefixes = array(), $key_by_resource = FALSE) {
+  $controllers = array();
+  $prefixes   = array_merge(array(
+      'actions'          => 'do',
+      'relationships'    => 'get',
+      'targeted actions' => 'set',
+    ), $prefixes);
+  $resources = services_get_resources($endpoint);
+
+  foreach ($resources as $resource_name => $res) {
+    // Get all basic operations
+    foreach (array('create', 'retrieve', 'update', 'delete', 'index') as $op) {
+      if (isset($res[$op])) {
+        $controllers[] = $resource_name . '.' . $op;
+      }
+    }
+    foreach ($prefixes as $op => $prefix) {
+      if (isset($res[$op])) {
+        foreach ($res['op'] as $name => $def) {
+          // Append prefix if it isn't empty
+          if (!empty($prefix)) {
+            $name = $prefix . '_' . $name;
+          }
+          $controllers[] = $resource_name . '.' . $name;
+        }
+      }
+    }
+  }
+  return $controllers;
+}
+
+/**
+ * Returns the requested controller.
+ *
+ * @param string $name
+ *  The name of the controller in the format: {resource}.{prefix}_{name} or
+ *  {resource}.{operation}. Examples: "node.retrieve", "node.create",
+ *  "node.get_comments" and "node.set_publish".
+ * @param string $endpoint
+ *  The endpoint that should be used.
+ * @param array $names
+ *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
+ *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
+ *  and 'targeted actions'=>'set'.
+ */
+function services_controller_get($name, $endpoint, $prefixes = array()) {
+  list($resource_name, $method) = explode('.', $name);
+  $controller = FALSE;
+
+  $resources = services_get_resources($endpoint);
+
+  if (isset($resources[$resource_name])) {
+    $res = $resources[$resource_name];
+    $qual = explode('_', $method, 2);
+
+    if (count($qual) == 1) {
+      switch ($qual[0]) {
+        case 'create':
+        case 'retrieve':
+        case 'update':
+        case 'delete':
+        case 'index':
+          if (isset($res[$qual[0]])) {
+            $controller = $res[$qual[0]];
+          }
+          break;
+      }
+    }
+    elseif (count($qual) == 2) {
+      // Set up names with default values
+      $prefixes = array_merge(array(
+          'actions'          => 'do',
+          'relationships'    => 'get',
+          'targeted actions' => 'set',
+        ), $prefixes);
+
+      // Find a matching controller
+      foreach ($prefixes as $op => $prefix) {
+        if ($qual[0] == $prefix) {
+          if (isset($res[$op]) && isset($res[$op][$qual[1]])) {
+            $controller = $res[$op][$qual[1]];
+            break;
+          }
+        }
+      }
+    }
+  }
+  return $controller;
+}
