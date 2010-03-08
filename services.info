@@ -2,7 +2,12 @@
 name = Services
 description = Provide an API for creating web services.
 package = Services
-core = 6.x
+core = 7.x
 php = 5.x
 
 dependencies[] = ctools
+
+files[] = services.module
+files[] = services.resource_build.inc
+files[] = services.admin.inc
+files[] = services.runtime.inc

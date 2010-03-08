@@ -17,7 +17,7 @@ function services_help($path, $arg) {
     case 'admin/help#services':
       $output = '<p>'. t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
       break;
-    case 'admin/build/services':
+    case 'admin/config/services/services':
       $output = '<p>'. t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
       $output .= '<p>'. t('All enabled services and methods are shown. Click on any method to view information or test.') .'</p>';
       break;
@@ -27,10 +27,15 @@ function services_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  */
-function services_perm() {
-  return array('administer services');
+function services_permission() {
+  return array(
+    'administer services' => array(
+      'title' => t('Administer services'),
+      'description' => t('Administer services and it\'s endpoints'),
+    ),
+  );
 }
 
 /**
@@ -52,66 +57,67 @@ function services_menu() {
     'file'             => 'services.admin.inc',
   );
 
-  $items['admin/build/services'] = array(
+  $items['admin/config/services/services'] = array(
     'title'          => 'Services',
     'description'    => 'Manage how external applications communicates with Drupal.',
     'page callback'  => 'services_list_endpoint',
+    'type'           => MENU_NORMAL_ITEM,
   ) + $base;
-  $items['admin/build/services/list'] = array(
+  $items['admin/config/services/services/list'] = array(
     'title'          => 'List',
     'page callback'  => 'services_list_endpoint',
     'type'           => MENU_DEFAULT_LOCAL_TASK,
     'weight'         => -10,
   ) + $base;
-  $items['admin/build/services/add'] = array(
+  $items['admin/config/services/services/add'] = array(
     'title'          => 'Add endpoint',
     'page callback'  => 'services_add_endpoint',
     'type'           => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/edit'] = array(
+  $items['admin/config/services/services/%services_endpoint/edit'] = array(
     'title'          => 'Edit endpoint',
     'page callback'  => 'services_edit_endpoint',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type'           => MENU_LOCAL_TASK,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/authentication'] = array(
+  $items['admin/config/services/services/%services_endpoint/authentication'] = array(
     'title'          => 'Authentication',
     'page callback'  => 'services_edit_endpoint_authentication',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type'           => MENU_LOCAL_TASK,
     'weight'         => 5,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/resources'] = array(
+  $items['admin/config/services/services/%services_endpoint/resources'] = array(
     'title'          => 'Resources',
     'page callback'  => 'services_edit_endpoint_resources',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type'           => MENU_LOCAL_TASK,
     'weight'         => 10,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/export'] = array(
+  $items['admin/config/services/services/%services_endpoint/export'] = array(
     'title'          => 'Export endpoint',
     'page callback'  => 'drupal_get_form',
-    'page arguments' => array('services_export_endpoint', 3),
+    'page arguments' => array('services_export_endpoint', 4),
     'type'           => MENU_LOCAL_TASK,
     'weight'         => 20,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/delete'] = array(
+  $items['admin/config/services/services/%services_endpoint/delete'] = array(
     'title'          => 'Delete endpoint',
     'page callback'  => 'drupal_get_form',
-    'page arguments' => array('services_delete_confirm_endpoint', 3),
+    'page arguments' => array('services_delete_confirm_endpoint', 4),
     'type'           => MENU_CALLBACK,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/disable'] = array(
+  $items['admin/config/services/services/%services_endpoint/disable'] = array(
     'page callback'  => 'services_disable_endpoint',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type'           => MENU_CALLBACK,
   ) + $base;
-  $items['admin/build/services/%services_endpoint/enable'] = array(
+  $items['admin/config/services/services/%services_endpoint/enable'] = array(
     'page callback'  => 'services_enable_endpoint',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type'           => MENU_CALLBACK,
   ) + $base;
-  $items['admin/build/services/ahah/security-options'] = array(
+  $items['admin/config/services/services/ahah/security-options'] = array(
     'page callback' => '_services_ahah_security_options',
     'type'          => MENU_CALLBACK,
   ) + $base;
@@ -135,7 +141,6 @@ function services_menu() {
       );
     }
   }
-
   return $items;
 }
 
@@ -322,7 +327,10 @@ function services_endpoint_save($endpoint) {
  * @return void
  */
 function services_endpoint_delete($endpoint) {
-  db_query("DELETE FROM {services_endpoint} WHERE name = '%s' AND eid = %d", $endpoint->name, $endpoint->eid);
+  $num_deleted = db_delete('services_endpoint')
+    ->condition('endpoint', $endpoint->name)
+    ->condition('eid', $endpoint->eid)
+    ->execute();
   menu_rebuild();
   cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
 }
