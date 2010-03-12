@@ -272,12 +272,14 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
   // Set the authentication modules, and preserve the settings for modules
   // that already exist.
   $auth = array();
-  foreach (array_keys($form_state['values']['authentication']) as $module) {
-    if (isset($endpoint->authentication[$module])) {
-      $auth[$module] = $endpoint->authentication[$module];
-    }
-    else {
-      $auth[$module] = array();
+  foreach ($form_state['values']['authentication'] as $module => $enabled) {
+    if (!empty($enabled)) {
+      if (isset($endpoint->authentication[$module])) {
+        $auth[$module] = $endpoint->authentication[$module];
+      }
+      else {
+        $auth[$module] = array();
+      }
     }
   }
   $endpoint->authentication = $auth;
