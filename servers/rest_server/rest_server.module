@@ -1,0 +1,83 @@
+<?php
+// $Id$
+
+function rest_server_server_info() {
+  return array(
+    'name' => 'REST',
+    'path' => 'rest',
+  );
+}
+
+function rest_server_autoload_info() {
+  module_load_include('inc', 'rest_server');
+  return _rest_server_autoload_info();
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function rest_server_enable() {
+  // Flush the autoload caches so that our classes are registered
+  autoload_flush_caches();
+}
+
+function rest_server_server() {
+  $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
+  $canonical_path = trim(substr($_GET['q'], drupal_strlen($endpoint_path)), '/');
+
+  if (empty($canonical_path)) {
+    return '';
+  }
+
+  try {
+    $server = new RESTServer();
+    return $server->handle($canonical_path, $endpoint_path);
+  }
+  catch (Exception $e) {
+    $code = $e->getCode();
+    switch($code) {
+      case 401:
+        drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
+      break;
+      case 404:
+        drupal_set_header('HTTP/1.0 404 Not found: ' . $e->getMessage());
+      break;
+      case 406:
+        drupal_set_header('HTTP/1.0 406 Not Acceptable: ' . $e->getMessage());
+      break;
+      default:
+        if ($code >= 400 && $code < 600) {
+          drupal_set_header('HTTP/1.0 ' . $code . ' ' . $e->getMessage());
+        }
+        else {
+          drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
+        }
+      break;
+    }
+  }
+}
+
+function rest_server_services_resources_alter($resources, $endpoint) {
+  if (isset($resources['node'])) {
+    if (!isset($resources['node']['retrieve']['models'])) {
+      $resources['node']['retrieve']['models'] = array();
+    }
+    $resources['node']['retrieve']['models'] += array(
+      'ResourceFeedModel' => array(
+        'class' => 'NodeResourceFeedModel',
+        'arguments' => array('source' => 'single'),
+      ),
+    );
+    if (!isset($resources['node']['index']['models'])) {
+      $resources['node']['index']['models'] = array();
+    }
+    $resources['node']['index']['models'] += array(
+      'ResourceFeedModel' => array(
+        'class' => 'NodeResourceFeedModel',
+      ),
+      'ResourceTimeFeedModel' => array(
+        'class' => 'NodeResourceFeedModel',
+      ),
+    );
+  }
+}
