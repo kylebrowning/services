@@ -22,6 +22,7 @@ function services_schema() {
       'eid' => array(
         'type'        => 'serial',
         'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'unsigned'    => TRUE,
         'not null'    => TRUE,
         'no export'   => TRUE,
       ),
@@ -180,6 +181,7 @@ function services_update_6300() {
       'eid' => array(
         'type'        => 'serial',
         'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
+        'unsigned'    => TRUE,
         'not null'    => TRUE,
         'no export'   => TRUE,
       ),

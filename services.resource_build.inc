@@ -21,7 +21,6 @@ function _services_build_resources($endpoint_name = '') {
 
   // Get all installed resources
   $resources = module_invoke_all('services_resources');
-  _services_strip_hashes($resources);
 
   // Load the endpoint
   $endpoint = NULL;
@@ -48,7 +47,7 @@ function _services_build_resources($endpoint_name = '') {
       }
     }
     if (!isset($controller['access callback'])) {
-      $controller['access callback'] = 'services_access_menu';
+      $controller['access callback'] = 'user_access';
     }
   }
   drupal_alter('services_resources_controller_post_processing', $controllers, $endpoint);
@@ -80,25 +79,6 @@ function _services_build_resources($endpoint_name = '') {
 }
 
 /**
- * Cleanup function to remove unnecessary hashes from service definitions.
- *
- * @param array $array
- *  The service definitions array.
- * @return array
- */
-function _services_strip_hashes(&$array) {
-  foreach ($array as $key => $value) {
-    if (is_array($value)) {
-      _services_strip_hashes($array[$key]);
-    }
-    if (strpos($key, '#') === 0) {
-      $array[substr($key, 1)] = $array[$key];
-      unset($array[$key]);
-    }
-  }
-}
-
-/**
  * Applies the endpoint to a set of resources. Resources and controllers that
  * aren't supported will be removed (if $strict is set to TRUE) and both
  * resources and controllers will get the 'endpoint' attribute set.
@@ -125,8 +105,8 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
         if (isset($resource[$op])) {
           $cop = isset($cres['operations'][$op]) ? $cres['operations'][$op] : array();
           $resource[$op]['endpoint'] = $cop;
-          if ($strict && empty($cop)) {
-            unset($resource['' . $op]);
+          if ($strict && (empty($cop) || !$cop['enabled'])) {
+            unset($resource[$op]);
           }
         }
       }
@@ -136,9 +116,9 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
         if (!empty($resource[$class])) {
           foreach ($resource[$class] as $op => $def) {
             $cop = isset($cres[$class][$op]) ? $cres[$class][$op] : array();
-            if (empty($cop)) {
+            if (empty($cop) || !$cop['enabled']) {
               if ($strict) {
-                unset($resource['' . $op]);
+                unset($resource[$class][$op]);
               }
             }
             else {
@@ -217,13 +197,37 @@ function _services_process_resource($name, &$resource, &$controllers) {
 }
 
 /**
+ * Supplies the resource definitions for Drupal core data
+ *
+ * @return array
+ */
+function _services_core_resources() {
+  require_once("resources/comment_resource.inc");
+  require_once("resources/file_resource.inc");
+  require_once("resources/node_resource.inc");
+  require_once("resources/system_resource.inc");
+  require_once("resources/taxonomy_resource.inc");
+  require_once("resources/user_resource.inc");
+
+  $resources = array();
+
+  $resources += _comment_resource_definition();
+  $resources += _file_resource_definition();
+  $resources += _node_resource_definition();
+  $resources += _system_resource_definition();
+  $resources += _taxonomy_resource_definition();
+  $resources += _user_resource_definition();
+
+  return $resources;
+}
+
+/**
  * Invokes all hook_service and translates them to actions on resources.
  *
  * @return array
  */
 function _services_legacy_services_as_resources() {
   $services = $methods = module_invoke_all('service');
-  _services_strip_hashes($methods);
   $resources = array();
 
   foreach ($services as $service) {

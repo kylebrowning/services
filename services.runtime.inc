@@ -88,14 +88,15 @@ class ServicesArgumentException extends ServicesException {
  *  An array containing information about the controller
  * @param array $args
  *  The arguments that should be passed to the controller.
+ * @param array $auth_args
+ *  The arguments that should be passed to the authentication module.
  * @param array $options
  *  Options for the execution. Use 'skip_authentication'=>TRUE to skip the
  *  services-specific authentication checks. Access checks will always be
  *  made.
  */
-function services_controller_execute($controller, $args = array(), $options = array()) {
+function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
   // Check for missing arguments.
-  $hash_parameters = array();
   foreach ($controller['args'] as $key => $arg) {
     if (!$arg['optional']) {
       if (!isset($args[$key]) && !is_array($args[$key]) && !is_bool($args[$key])) {
@@ -112,7 +113,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
     $endpoint = services_endpoint_load($endpoint_name);
 
     foreach ($endpoint->authentication as $auth_module => $settings) {
-      if ($auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args)) {
+      if ($auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args, $auth_args)) {
         return services_error($auth_error, 401);
       }
     }
@@ -205,21 +206,30 @@ function services_authentication_info($module) {
  *  Optional. Second argument to pass to the callback.
  * @param string $arg3
  *  Optional. Third argument to pass to the callback.
+ * @param string $arg4
+ *  Optional. Fourth argument to pass to the callback.
  * @return mixed
+ *
+ * Aren't these really the following?
+ *  arg1 = Settings
+ *  arg2 = Method
+ *  arg3 = Controller
+ *  arg4 = Auth args  
+ *
  */
-function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL) {
+function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, $arg4 = NULL) {
   // Get information about the auth module
   $info = services_authentication_info($module);
   $func = $info && !empty($info[$method]) ? $info[$method] : FALSE;
   if ($func) {
-    if (!empty($info['#file'])) {
-      require_once(drupal_get_path('module', $module) . '/' . $info['#file']);
+    if (!empty($info['file'])) {
+      require_once(drupal_get_path('module', $module) . '/' . $info['file']);
     }
 
     if (is_callable($func)) {
       $args = func_get_args();
       // Replace module and method name and arg1 with reference to $arg1 and $arg2.
-      array_splice($args, 0, 4, array(&$arg1, &$arg2, &$arg3));
+      array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3, &$arg4));
       return call_user_func_array($func, $args);
     }
   }
@@ -414,4 +424,100 @@ function services_session_unload($backup) {
   session_decode($user->session);
 
   session_save_session(TRUE);
+}
+
+/**
+ * Access check callback for comment controllers.
+ */
+function _comment_resource_access($op = 'view', $args = array()) {
+  if (user_access('administer comments')) {
+    return TRUE;
+  }
+
+  if ($op=='create') {
+    $comment = (object)$args[0];
+  }
+  else {
+    $comment = _comment_load($args[0]);
+  }
+
+  switch ($op) {
+    case 'view':
+      // Check if the user has access to comments and that the node has comments enabled
+      return $comment->status && user_access('access comments') && _comment_resource_node_access($comment->nid);
+    case 'edit':
+      // Check if the user may edit the comment, and has access to the input format
+      return comment_access('edit', $comment) && filter_access($comment->format);
+    case 'create':
+      // Check if the user may post comments, and has access to the used format and
+      // check if the node has comments enabled, and that the user has access to the node
+      return user_access('post comments') && filter_access($comment->format) &&
+        _comment_resource_node_access($comment->nid, COMMENT_NODE_READ_WRITE);
+    case 'delete':
+      // Check if the user may edit the comment
+      return comment_access('edit', $comment);
+  }
+}
+
+/**
+ * Access check callback for file controllers.
+ */
+function _file_resource_access($op = 'view', $args = array()) {
+  global $user;
+  if (user_access('administer files')) {
+    return TRUE;
+  }
+
+  if ($op=='create') {
+    $file = (object)$args[0];
+  }
+  else {
+    $file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $args[0]));
+  }
+
+  switch ($op) {
+    case 'view':
+      if (user_access('get any binary files')) {
+        return TRUE;
+      }
+      return $file['uid'] == $user->uid && user_access('get own binary files');
+      break;
+    case 'create':
+    case 'delete':
+      return $file['uid'] == $user->uid && user_access('save file information');
+      break;
+  }
+
+  return FALSE;
+}
+
+function _file_resource_node_access($op = 'view', $args = array()) {
+  global $user;
+  if (user_access('get any binary files')) {
+    return TRUE;
+  }
+  elseif ($node = node_load($args[0])) {
+    return $node->uid == $user->uid && user_access('get own binary files');
+  }
+  return FALSE;
+}
+
+function _node_resource_access($op = 'view', $args = array()) {
+  if ($op != 'create' && !empty($args)) {
+    $node = node_load($args[0]);
+  }
+  return node_access($op, $node);
+}
+
+function _taxonomy_resource_access($op = 'view', $args = array()) {
+  if (user_access('administer taxonomy')) {
+    return TRUE;
+  }
+  // TODO - check perms of user to return ability to interact with terms / vocabulary
+}
+
+function _user_resource_update_access($args = array()) {
+  global $user;
+  $args[0] = $account;
+  return ($user->uid == $account->uid || user_access('administer users'));
 }

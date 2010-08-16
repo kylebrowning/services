@@ -71,7 +71,7 @@ function services_list_endpoint($js = NULL) {
     $auth_names = array();
     foreach (array_keys($endpoint->authentication) as $module) {
       $info = services_authentication_info($module);
-      $auth_names[] = $info['#title'];
+      $auth_names[] = $info['title'];
     }
 
     $rows[$endpoint->name] = array(
@@ -161,7 +161,7 @@ function services_edit_form_endpoint(&$form_state, $endpoint) {
     '#maxlength'     => 255,
     '#default_value' => $endpoint->name,
     '#title'         => t('Endpoint name'),
-    '#description'   => t('A unique name used to identify this preset internally. It must be only be alpha characters and underscores. No spaces, numbers or uppercase characters.'),
+    '#description'   => t('A unique name used to identify this preset internally. It may only contain lowercase alpha characters and underscores. No spaces, numbers or uppercase characters.'),
     '#required'      => TRUE,
   );
 
@@ -179,7 +179,7 @@ function services_edit_form_endpoint(&$form_state, $endpoint) {
     '' => t('-- Select a server'),
   );
   foreach ($servers as $server => $info) {
-    $server_opts[$server] = $info['#name'];
+    $server_opts[$server] = $info['name'];
   }
   $form['server'] = array(
     '#type'          => 'select',
@@ -205,7 +205,7 @@ function services_edit_form_endpoint(&$form_state, $endpoint) {
     $auth_options = array();
     foreach ($auth_modules as $module) {
       $info = services_authentication_info($module);
-      $auth_options[$module] = $info['#title'];
+      $auth_options[$module] = $info['title'];
     }
 
     $form['authentication'] = array(
@@ -241,8 +241,8 @@ function services_edit_form_endpoint(&$form_state, $endpoint) {
  */
 function services_edit_form_endpoint_validate($form, &$form_state) {
   // Test uniqueness of name:
-  if (preg_match("/[^A-Za-z0-9_]/", $form_state['values']['endpoint'])) {
-    form_error($form['name'], t('Endpoint name must be alphanumeric or underscores only.'));
+  if (preg_match("/[^a-z_]/", $form_state['values']['name'])) {
+    form_error($form['name'], t('Endpoint name may only contain lowercase alpha characters and underscores.'));
   }
   else {
     $query = "SELECT eid FROM {services_endpoint} WHERE name = '%s'";
@@ -433,10 +433,10 @@ function services_edit_form_endpoint_authentication(&$form_state, $endpoint) {
       if ($info) {
         $form[$module] = array(
           '#type' => 'fieldset',
-          '#title' => $info['#title'],
+          '#title' => $info['title'],
           '#tree' => TRUE,
         ) + services_auth_invoke($module, 'security_settings', $settings);
-      }
+      } 
     }
   }
 
@@ -537,7 +537,7 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
           '#type'        => 'fieldset',
           '#title'       => $title,
           '#collapsible' => TRUE,
-          '#collapsed'   => TRUE,
+          '#collapsed'   => FALSE,
         );
         _services_resource_operation_settings($res_set['operations'][$op], $endpoint, $resource, $op);
       }
@@ -560,7 +560,7 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
             '#type'        => 'fieldset',
             '#title'       => $action,
             '#collapsible' => TRUE,
-            '#collapsed'   => TRUE,
+            '#collapsed'   => FALSE,
           );
           _services_resource_operation_settings($res_set[$element][$action], $endpoint, $resource, $class, $action);
         }
@@ -665,7 +665,7 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
  *  Information about the operation, or NULL if no matching
  *  operation was found.
  */
-function get_resource_operation_info($resource, $class, $name = NULL) {
+function services_get_resource_operation_info($resource, $class, $name = NULL) {
   $op = NULL;
 
   if (isset($resource[$class])) {
@@ -695,7 +695,7 @@ function get_resource_operation_info($resource, $class, $name = NULL) {
 function _services_resource_operation_settings(&$settings, $endpoint, $resource, $class, $name = NULL) {
   module_load_include('runtime.inc', 'services');
 
-  if ($rop = get_resource_operation_info($resource, $class, $name)) {
+  if ($rop = services_get_resource_operation_info($resource, $class, $name)) {
     $settings['enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enabled'),

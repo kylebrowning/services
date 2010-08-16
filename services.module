@@ -30,7 +30,13 @@ function services_help($path, $arg) {
  * Implementation of hook_perm().
  */
 function services_perm() {
-  return array('administer services');
+  return array(
+    'administer services',
+    // File resource permissions
+    'get any binary files',
+    'get own binary files',
+    'save file information',
+  );
 }
 
 /**
@@ -382,7 +388,7 @@ function services_get_resources($endpoint_name = '') {
 function services_services_resources() {
   module_load_include('resource_build.inc', 'services');
   // Return resources representing legacy services
-  return _services_legacy_services_as_resources();
+  return array_merge(_services_core_resources(), _services_legacy_services_as_resources());
 }
 
 /**
