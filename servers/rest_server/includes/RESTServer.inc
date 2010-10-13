@@ -204,8 +204,15 @@ class RESTServer {
             }
           }
           else {
-            if (isset($sources[$info['source']])) {
-              $arguments[$i] = $sources[$info['source']];
+            // When the type is 'array' or 'struct', we assume that it requires
+            // the posted data as one big chunk (as in when posting a new node.)
+            // Otherwise, retrieve each piece of data as individual named 
+            // arguments (as in when posting an action.)
+            if ($info['type'] == 'array' || $info['type'] == 'struct') {
+              $arguments[$i] = $sources[$info['source']];                
+            }
+            else {
+              $arguments[$i] = $sources[$info['source']][$info['name']];
             }
           }
           // Convert arrays to objects and objects to arrays to be more tolerant

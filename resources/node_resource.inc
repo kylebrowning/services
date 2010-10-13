@@ -4,8 +4,8 @@
 function _node_resource_definition() {
   return array(
     'node' => array(
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
       'retrieve' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'callback' => '_node_resource_retrieve',
         'args' => array(
           array(
@@ -21,6 +21,7 @@ function _node_resource_definition() {
         'access arguments append' => TRUE,
       ),
       'create' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'callback' => '_node_resource_create',
         'args' => array(
           array(
@@ -36,8 +37,16 @@ function _node_resource_definition() {
         'access arguments append' => TRUE,
       ),
       'update' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'callback' => '_node_resource_update',
         'args' => array(
+          array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The nid of the node to get',
+          ),
           array(
             'name' => 'node',
             'optional' => FALSE,
@@ -51,6 +60,7 @@ function _node_resource_definition() {
         'access arguments append' => TRUE,
       ),
       'delete' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'callback' => '_node_resource_delete',
         'args' => array(
           array(
@@ -64,6 +74,7 @@ function _node_resource_definition() {
         'access arguments append' => TRUE,
       ),
       'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'callback' => '_node_resource_index',
         'args' => array(
           array(
@@ -88,23 +99,35 @@ function _node_resource_definition() {
             'type' => 'struct',
             'description' => 'Parameters',
             'default value' => NULL,
-            'source' => 'param',
+            'source' => array('param' => 'parameters'),
           ),
         ),
         'access arguments' => array('access content'),
-        'access arguments append' => TRUE,
       ),
     ),
   );
 }
 
+/**
+ * Returns the results of a node_load() for the specified node.
+ *
+ * This returned node may optionally take content_permissions settings into
+ * account, based on a configuration setting. 
+ *
+ * @param $nid
+ *   NID of the node we want to return.
+ * @return
+ *   Node object or FALSE if not found.
+ *
+ * @see node_load()
+ **/
 function _node_resource_retrieve($nid) {
   global $user;
   $node = node_load($nid);
 
   if ($node) {
     // Apply field level content permissions
-    if (module_exists('content')) {
+    if (module_exists('content') && variable_get('services_use_content_permissions', TRUE)) {
       $fields = content_fields(NULL, $node->type);
       foreach ($fields as $field_name => $field_info) {
         if (isset($node->$field_name)) {
@@ -120,6 +143,21 @@ function _node_resource_retrieve($nid) {
   return $node;
 }
 
+/**
+ * Creates a new node based on submitted values.
+ *
+ * Note that this function uses drupal_execute() to create new nodes,
+ * which may require very specific formatting. The full implications of this
+ * are beyond the scope of this comment block. The Googles are your friend.
+ *
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ * @return
+ *   An associative array contained the new node's nid and, if applicable,
+ *   the fully qualified URI to this resource.
+ *
+ * @see drupal_execute()
+ **/
 function _node_resource_create($node) {
   $node = (object)$node;
 
@@ -145,12 +183,30 @@ function _node_resource_create($node) {
     return services_error(implode("\n", $errors), 406);
   }
 
-  return (object)array(
-    'nid' => $nid,
-    'uri' => services_resource_uri(array('node', $nid)),
-  );
+  // Only add the URI for servers that support it.
+  $node = array('nid' => $nid);
+  if ($uri = services_resource_uri(array('node', $nid))) {
+    $node['uri'] = $uri;
+  }
+  return $node;
 }
 
+/**
+ * Updates a new node based on submitted values.
+ *
+ * Note that this function uses drupal_execute() to create new nodes,
+ * which may require very specific formatting. The full implications of this
+ * are beyond the scope of this comment block. The Googles are your friend.
+ *
+ * @param $nid
+ *   Node ID of the node we're editing.
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ * @return
+ *   The node's nid.
+ *
+ * @see drupal_execute()
+ **/
 function _node_resource_update($nid, $node) {
   $node = (object)$node;
   $node->nid = $nid;
@@ -180,40 +236,108 @@ function _node_resource_update($nid, $node) {
   return $node->nid;
 }
 
+/**
+ * Delete a node given its nid.
+ *
+ * @param $nid
+ *   Node ID of the node we're deleting.
+ * @return
+ *   The node's nid.
+ **/
 function _node_resource_delete($nid) {
-  node_delete($nid);
+  return node_delete($nid);
   return TRUE;
 }
 
-function _node_resource_index($page = 0, $fields = array(), $parameters = array()) {
-  $params = array();
+/**
+ * Return an array of optionally paged nids baed on a set of criteria.
+ *
+ * An example request might look like
+ *
+ * http://domain/endpoint/node?fields=nid,vid&parameters[nid]=7&parameters[uid]=1
+ *
+ * This would return an array of objects with only nid and vid defined, where
+ * nid = 7 and uid = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned. 
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
+ * @return
+ *   An array of node objects.
+ *
+ * @todo 
+ *   Evaluate the functionality here in general. Particularly around
+ *     - Do we need fields at all? Should this just return full nodes?
+ *     - Is there an easier syntax we can define which can make the urls
+ *       for index requests more straightforward?
+ **/
+function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
+  $parameters = (array) $parameters;
+  $schema = drupal_get_schema('node');
+  $where = array();
+  $fields = db_escape_string($fields);
 
-  if (module_exists('query_builder')) {
-    $builder = new QueryBuilder();
-    $parameters = (array)$parameters;
 
-    if (isset($parameters['__describe'])) {
-      return $builder->describe();
-    }
-
-    if (is_string($fields) && !empty($fields)) {
-      $fields = preg_split('/,\s?/', $fields);
-    }
-
-    if (!user_access('administer nodes') || !isset($parameters['status'])) {
-      $parameters['status'] = 1;
-    }
-    list($sql, $params) = $builder->query($fields, $parameters);
+  // Limit to published nodes if user doesn't have 'administer nodes'
+  // permissions.
+  if (!user_access('administer nodes')) {	
+    $parameters['status'] = 1;
   }
-  else {
-    $sql = "SELECT * FROM {node} WHERE status = 1 ORDER BY sticky DESC, created DESC";
+  
+  // Build an array of fields with the appropriate placeholders for use in
+  // db_query().
+  foreach ($parameters as $field => $value) {
+    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
   }
-  $res = db_query_range($sql, $params, $page * 20, 20);
 
-  $events = array();
-  while ($event = db_fetch_object($res)) {
-    $event->uri = services_resource_uri(array('node', $event->nid));
-    $events[] = $event;
+  // Now implode that array into an actual WHERE clause.
+  $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
+
+  // Run through db_rewrite_sql to make sure proper access checks are applied.
+  $sql = "SELECT $fields FROM {node} $where ORDER BY sticky DESC, created DESC";
+  $sql = db_rewrite_sql($sql);
+  $result = db_query_range($sql, $parameters, $page * 20, 20);
+
+  // Put together array of matching nodes to return.
+  $nodes = array();
+  while ($node = db_fetch_object($result)) {
+    if ($uri = services_resource_uri(array('node', $node->nid))) {
+      $node->uri = $uri;
+    }
+    $nodes[] = $node;
   }
-  return $events;
+
+  return $nodes;
+}
+
+/**
+ * Determine whether the current user can access a node resource.
+ *
+ * @param $op
+ *   One of view, update, create, delete per node_access().
+ * @param $args
+ *   Resource arguments passed through from the original request.
+ * @return bool
+ *
+ * @see node_access()
+ **/
+function _node_resource_access($op = 'view', $args = array()) {
+  // Make sure we have an object or this all fails, some servers can
+  // mess up the types.
+  if (is_array($args[0])) {
+    $args[0] = (object) $args[0];
+  }
+
+  if ($op != 'create' && !empty($args)) {
+    $node = node_load($args[0]);
+  }
+  else if ($op == 'create') {
+    $node = $args[0]->type;
+  }
+
+  return node_access($op, $node);
 }

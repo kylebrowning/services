@@ -44,7 +44,9 @@
   *     specified, this defaults to 'user_access'.
   *   - access arguments: The arguments to pass to the access callback.
   *   - access arguments append: A boolean indicating whether the resource's
-  *     arguments should be appended to the access arguments. Defaults to TRUE.
+  *     arguments should be appended to the access arguments. This can be useful
+  *     in situations where an access callback is specific to the particular
+  *     item ('edit all nodes' vs 'edit my nodes'). Defaults to FALSE.
   *   - args: an array describing the arguments which should be passed to this
   *     resource when it is called. Each element in the array is an associative
   *     array containing the following keys:

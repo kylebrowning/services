@@ -3,6 +3,12 @@
 /**
  * @file
  *  Enable XML-RPC for services module.
+ *
+ * Most of the work here is converting the REST-style resource definitions
+ * to XMLRPC-style procedure calls. These procedures are renamed as 
+ * <resource>.<method>. So the node resource's retrieve method has an XMLRPC
+ * procedure name of node.retrieve. Actions prepend 'action_' to the procedure
+ * name. So the login action of the user resource becomes user.action_login. 
  */
 
 /**
@@ -11,7 +17,6 @@
 function xmlrpc_server_server_info() {
   return array(
     'name' => 'XMLRPC',
-    'path' => 'xmlrpc'
   );
 }
 
@@ -33,9 +38,17 @@ function xmlrpc_server_server() {
  */
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-  foreach (services_get_all() as $method) {
-    $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
+  
+  $resources = services_get_resources();
+  if (!empty($resources)) {
+    // Translate all resources
+    foreach ($resources as $name => $def) {
+      foreach (_xmlrpc_server_resources_as_procedures($def) as $method) {
+        $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
+      }
+    }
   }
+
   return $callbacks;
 }
 
@@ -49,30 +62,98 @@ function xmlrpc_server_call_wrapper() {
   $xmlrpc_server = xmlrpc_server_get();
   $method_name = $xmlrpc_server->message->methodname;
   $args = func_get_args();
-  return services_method_call($method_name, $args);
+  $endpoint = services_get_server_info('endpoint', '');
+  $controller = services_controller_get($method_name, $endpoint);
+
+  try {
+    return services_controller_execute($controller, $args);  
+  } 
+  catch (Exception $e) {
+    $code = $e->getCode();
+    switch($code) {
+      case 401:
+        drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
+      break;
+      case 404:
+        drupal_set_header('HTTP/1.0 404 Not found: ' . $e->getMessage());
+      break;
+      case 406:
+        drupal_set_header('HTTP/1.0 406 Not Acceptable: ' . $e->getMessage());
+      break;
+      default:
+        if ($code >= 400 && $code < 600) {
+          drupal_set_header('HTTP/1.0 ' . $code . ' ' . $e->getMessage());
+        }
+        else {
+          drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
+        }
+      break;
+    }
+  }
 }
 
 /**
- * Implementation of hook_server_error().
+ * Convert a resource to XMLRPC-style methods.
  *
- * Takes the error message and wraps it into an XMLRPC error object.
+ * @param array $resource
+ *   A resource definition.
  *
- * @see xmlrpc_error() 
+ * @return array
+ *   An array of XMLRPC method definitions
  */
-function xmlrpc_server_server_error($message) {
-  if (!is_array($message)) {
-    $message = (array)$message;
+function _xmlrpc_server_resources_as_procedures($resource) {
+  static $controllers = array(
+    'create' => 'create',
+    'delete' => 'delete',
+    'retrieve' => 'retrieve',
+    'update' => 'update',
+    'index' => 'index',
+  ), $subcontrollers = array(
+    'relationships' => 'related',
+    'targeted actions' => 'targeted_action',
+  );
+
+  $methods = array();
+
+  foreach ($controllers as $attr => $name) {
+    if (isset($resource[$attr])) {
+      $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], $name, $resource[$attr]);
+    }
   }
 
-  $message = implode(' ', $message);
-
-  $matches = array();
-  if (preg_match("/\#(\d+)/", $message, $matches)) {
-    $code = $matches[1];
-  } 
-  else {
-    $code = 1;
+  foreach ($subcontrollers as $attr => $name) {
+    if (isset($resource[$attr])) {
+      foreach ($resource[$attr] as $sc_name => $controller) {
+        $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], $name .'_'. $sc_name, $controller);
+      }
+    }
   }
-  
-  return xmlrpc_error($code, strip_tags($message));
+
+  if (isset($resource['actions'])) {
+    foreach ($resource['actions'] as $sc_name => $controller) {
+      $methods[] = _xmlrpc_server_resource_controller_as_procedure($resource['name'], 'action_'. $sc_name, $controller);
+    }
+  }
+
+  return $methods;
+}
+
+/**
+ * Helper function for _xmlrpc_server_resources_as_procedures() that turns a resource
+ * controller into an XMLRPC method.
+ *
+ * @param $resource
+ *   The resource being converted (node, user, etc.)
+ * @param $name
+ *   The method name (retrieve, create, etc.)
+ * @param $controller
+ *   Associative array defining the method's properties and callbacks.
+ *
+ */
+function _xmlrpc_server_resource_controller_as_procedure($resource, $name, $controller) {
+  $method = array_merge($controller, array(
+    'method' => $resource .'.'. $name,
+  ));
+
+  return $method;
 }

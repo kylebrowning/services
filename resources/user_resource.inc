@@ -1,16 +1,16 @@
 <?php
 // $Id$
 
+
 function _user_resource_definition() {
   return array(
     'user' => array(
-
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-
       'retrieve' => array(
         'help' => 'Retrieves a user',
         'callback' => '_user_resource_retrieve',
-        'access arguments' => array('access user profiles'), // this is probably not enough, doesn't block things like pass and email
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('view'),
         'access arguments append' => TRUE,
         'args' => array(
           array(
@@ -26,8 +26,10 @@ function _user_resource_definition() {
       'create' => array(
         'help' => 'Creates a user',
         'callback' => '_user_resource_create',
-        'access arguments' => array('administer users'),
-        'access arguments append' => TRUE  ,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('create'),
+        'access arguments append' => FALSE,
         'args' => array(
           array(
             'name' => 'account',
@@ -42,9 +44,18 @@ function _user_resource_definition() {
       'update' => array(
         'help' => 'Updates a user',
         'callback' => '_user_resource_update',
-        'access callback' => '_user_resource_update_access',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('update'),
         'access arguments append' => TRUE,
         'args' => array(
+          array(
+            'name' => 'uid',
+            'type' => 'int',
+            'description' => 'Unique identifier for this user',
+            'source' => array('path' => 0),
+            'optional' => FALSE,
+          ),
           array(
             'name' => 'data',
             'type' => 'struct',
@@ -58,8 +69,10 @@ function _user_resource_definition() {
       'delete' => array(
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
-        'access arguments' => array('administer users'),
-        'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+        'access callback' => '_user_resource_access',
+        'access arguments' => array('delete'),
+        'access arguments append' => FALSE,
         'args' => array(
           array(
             'name' => 'nid',
@@ -70,7 +83,38 @@ function _user_resource_definition() {
           ),
         ),
       ),
-
+      'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+        'callback' => '_user_resource_index',
+        'args' => array(
+          array(
+            'name' => 'page',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'The zero-based index of the page to get, defaults to 0.',
+            'default value' => 0,
+            'source' => array('param' => 'page'),
+          ),
+          array(
+            'name' => 'fields',
+            'optional' => TRUE,
+            'type' => 'string',
+            'description' => 'The fields to get.',
+            'default value' => '*',
+            'source' => array('param' => 'fields'),
+          ),
+          array(
+            'name' => 'parameters',
+            'optional' => TRUE,
+            'type' => 'struct',
+            'description' => 'Parameters',
+            'default value' => NULL,
+            'source' => array('param' => 'parameters'),
+          ),
+        ),
+        'access arguments' => array('access user profiles'),
+        'access arguments append' => FALSE,
+      ),
       'actions' => array(
         'login' => array(
           'help' => 'Login a user for a new session',
@@ -80,26 +124,26 @@ function _user_resource_definition() {
               'name' => 'username',
               'type' => 'string',
               'description' => 'A valid username',
-              'source' => array('data'),
+              'source' => array('data' => 'name'),
               'optional' => FALSE,
             ),
             array(
               'name' => 'password',
               'type' => 'string',
               'description' => 'A valid password',
-              'source' => array('data'),
+              'source' => array('data' => 'pass'),
               'optional' => FALSE,
             ),
           ),
+          'access callback' => 'services_access_menu',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         ),
 
         'logout' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
-          'args' => array(
-            array(
-            ),
-          ),
+          'access callback' => 'services_access_menu',
         ),
       ),
     ),
@@ -191,13 +235,17 @@ function _user_resource_create($account) {
  * This function uses drupal_execute() and as such exepects all input to match 
  * the submitting form in question.
  *
+ * @param $uid
+ *   Unique identifier for this user
  * @param $account
- *   A properly formatted user object.
+ *   Fields to modify for this user.
  *
  * @return
  *   The modified user object.
  */
-function _user_resource_update($account) {
+function _user_resource_update($uid, $account) {
+  $account->uid = $uid;
+
   // Load the required includes for saving profile information
   // with drupal_execute().
   module_load_include('inc', 'user', 'user.pages');
@@ -290,6 +338,7 @@ function _user_resource_login($username, $password) {
 
     $return = new stdClass();
     $return->sessid = session_id();
+    $return->session_name = session_name();
     $return->user = $user;
 
     return $return;
@@ -301,7 +350,7 @@ function _user_resource_login($username, $password) {
 /**
  * Logout the current user.
  */
-function user_service_logout() {
+function _user_resource_logout() {
   global $user;
 
   if (!$user->uid) {
@@ -319,4 +368,77 @@ function user_service_logout() {
   $user = drupal_anonymous_user();
 
   return TRUE;
+}
+
+/**
+ * Return an array of optionally paged nids baed on a set of criteria.
+ *
+ * An example request might look like
+ *
+ * http://domain/endpoint/user?fields=uid,name,mail&parameters[uid]=1
+ *
+ * This would return an array of objects with only uid, name and mail defined,
+ * where uid = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned. 
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
+ * @return
+ *   An array of user objects.
+ *
+ * @see _node_resource_index() for more notes
+ **/
+function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
+  $parameters = (array) $parameters;
+  $schema = drupal_get_schema('node');
+  $where = array();
+  $fields = db_escape_string($fields);
+
+  $parameters = (array)$parameters;
+  if (!user_access('administer users')) {
+    $parameters['active'] = 1;
+  }
+ 
+  // Build an array of fields with the appropriate placeholders for use in
+  // db_query().
+  foreach ($parameters as $field => $value) {
+    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
+  }
+
+  // Now implode that array into an actual WHERE clause.
+  $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
+  $sql = "SELECT $fields FROM {users} $where";
+  $result = db_query_range($sql, $parameters, $page * 20, 20);
+
+  // Put together array of matching accounts to return.
+  $accounts = array();
+  while ($account = db_fetch_object($result)) {
+    if ($uri = services_resource_uri(array('user', $account->uid))) {
+      $account->uri = $uri;
+    }
+    $accounts[$account->uid] = $account;
+  }
+  return $accounts;
+}
+
+/**
+ * Access check callback for user resource.
+ */
+function _user_resource_access($op = 'view', $args = array()) {
+  global $user;
+  switch($op) {
+    case 'view':
+      $account = user_load($args[0]);
+      return user_view_access($account);
+    case 'update':
+      $args[0] = $account;
+      return ($user->uid == $account->uid || user_access('administer users'));
+    case 'create':
+    case 'delete':
+      return user_access('administer users');
+  }
 }

@@ -227,6 +227,13 @@ function services_edit_form_endpoint(&$form_state, $endpoint) {
     );
   }
 
+  $form['services_use_content_permissions'] = array(
+    '#type'           => 'checkbox',
+    '#title'          => t('Apply content permissions'),
+    '#default_value'  => variable_get('services_use_content_permissions', TRUE),
+    '#description'    => t('CCK includes the optional Content Permissions module, which allows administrators to restrict access to content at the field level. By default, node services do NOT apply these permissions, causing all fields to be returned in all cases. Checking this box causes content permissions to be applied to node services.'),
+  );
+
   $label = (empty($endpoint->eid) && $endpoint->export_type != EXPORT_IN_CODE) ? t('Save and proceed') : t('Save');
   $form['submit'] = array(
     '#type'  => 'submit',

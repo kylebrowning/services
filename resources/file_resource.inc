@@ -245,3 +245,47 @@ function _file_resource_delete($fid) {
 
   return file_delete($file['filepath']);
 }
+
+/**
+ * Access check callback for file controllers.
+ */
+function _file_resource_access($op = 'view', $args = array()) {
+  global $user;
+  if (user_access('administer files')) {
+    return TRUE;
+  }
+
+  if ($op=='create') {
+    $file = (object)$args[0];
+  }
+  else {
+    $file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $args[0]));
+  }
+
+  switch ($op) {
+    case 'view':
+      if (user_access('get any binary files')) {
+        return TRUE;
+      }
+      return $file['uid'] == $user->uid && user_access('get own binary files');
+      break;
+    case 'create':
+    case 'delete':
+      return $file['uid'] == $user->uid && user_access('save file information');
+      break;
+  }
+
+  return FALSE;
+}
+
+function _file_resource_node_access($op = 'view', $args = array()) {
+  global $user;
+  if (user_access('get any binary files')) {
+    return TRUE;
+  }
+  elseif ($node = node_load($args[0])) {
+    return $node->uid == $user->uid && user_access('get own binary files');
+  }
+  return FALSE;
+}
+

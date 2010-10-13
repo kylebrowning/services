@@ -13,11 +13,6 @@ function services_schema() {
 
   $schema['services_endpoint'] = array(
     'description' => 'Stores endpoint information for services',
-    'export' => array(
-      'identifier'      => 'endpoint',
-      'export callback' => 'services_endpoint_export',
-      'list callback'   => 'services_endpoint_list',
-    ),
     'fields' => array(
       'eid' => array(
         'type'        => 'serial',
@@ -70,6 +65,16 @@ function services_schema() {
     'primary key' => array('eid'),
     'unique keys' => array(
       'name' => array('name'),
+    ),
+    'export' => array(
+      'key' => 'name',
+      'identifier' => 'endpoint',
+      'api' => array(
+        'owner' => 'services',
+        'api' => 'services',
+        'minimum_version' => 3,
+        'current_version' => 3,
+      ),
     ),
   );
 

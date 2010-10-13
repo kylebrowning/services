@@ -2,7 +2,6 @@
 // $Id$
 
 /**
- * @author Services Dev Team
  * @file
  *  Provides a generic but powerful API for web services.
  */
@@ -36,6 +35,9 @@ function services_perm() {
     'get any binary files',
     'get own binary files',
     'save file information',
+    // System resource permissions
+    'get a system variable',
+    'set a system varaible',
   );
 }
 
@@ -146,7 +148,14 @@ function services_menu() {
 }
 
 /**
- * Access callback that always returns TRUE.
+ * Access callback that always returns TRUE. 
+ *
+ * This callback is necessary for services like login and logout that should 
+ * always be wide open and accessible. 
+ *
+ * *** USE THIS WITH GREAT CAUTION ***
+ *
+ * If you think you need it you are almost certainly wrong.
  */
 function services_access_menu() {
   return TRUE;
@@ -396,27 +405,16 @@ function services_services_resources() {
  *
  * @param string $endpoint
  *  The endpoint that should be used.
- * @param array $names
- *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
- *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
- *  and 'targeted actions'=>'set'.
- * @param bool $key_by_resource
- *  Optional. Set to TRUE to get controllers separated by resource.
  * @return array
  *  Either a non associative array containing all controller names. Or, if
  *  $key_by_resource was set to TRUE, a associative array where the resource
  *  name is the key and the value is a non-associative array containing the
  *  resource's controller names.
  */
-function services_controllers_list($endpoint, $prefixes = array(), $key_by_resource = FALSE) {
+function services_controllers_list($endpoint) {
   $controllers = array();
-  $prefixes   = array_merge(array(
-      'actions'          => 'do',
-      'relationships'    => 'get',
-      'targeted actions' => 'set',
-    ), $prefixes);
+  $ops = array('actions', 'relationships', 'targeted actions');
   $resources = services_get_resources($endpoint);
-
   foreach ($resources as $resource_name => $res) {
     // Get all basic operations
     foreach (array('create', 'retrieve', 'update', 'delete', 'index') as $op) {
@@ -424,13 +422,12 @@ function services_controllers_list($endpoint, $prefixes = array(), $key_by_resou
         $controllers[] = $resource_name . '.' . $op;
       }
     }
-    foreach ($prefixes as $op => $prefix) {
+ 
+    // Handle extended operatios
+    foreach ($ops as $op) {
       if (isset($res[$op])) {
-        foreach ($res['op'] as $name => $def) {
+        foreach ($res[$op] as $name => $def) {
           // Append prefix if it isn't empty
-          if (!empty($prefix)) {
-            $name = $prefix . '_' . $name;
-          }
           $controllers[] = $resource_name . '.' . $name;
         }
       }
@@ -443,57 +440,29 @@ function services_controllers_list($endpoint, $prefixes = array(), $key_by_resou
  * Returns the requested controller.
  *
  * @param string $name
- *  The name of the controller in the format: {resource}.{prefix}_{name} or
- *  {resource}.{operation}. Examples: "node.retrieve", "node.create",
- *  "node.get_comments" and "node.set_publish".
+ *  The name of the controller in the format: {resource}.{name} or
+ *  {resource}.{operation}. Examples: "node.retrieve", "system.getVariable".
  * @param string $endpoint
  *  The endpoint that should be used.
- * @param array $names
- *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
- *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
- *  and 'targeted actions'=>'set'.
  */
-function services_controller_get($name, $endpoint, $prefixes = array()) {
+function services_controller_get($name, $endpoint) {
   list($resource_name, $method) = explode('.', $name);
-  $controller = FALSE;
-
+  $ops = array('actions', 'relationships', 'targeted actions');
   $resources = services_get_resources($endpoint);
 
   if (isset($resources[$resource_name])) {
     $res = $resources[$resource_name];
-    $qual = explode('_', $method, 2);
-
-    if (count($qual) == 1) {
-      switch ($qual[0]) {
-        case 'create':
-        case 'retrieve':
-        case 'update':
-        case 'delete':
-        case 'index':
-          if (isset($res[$qual[0]])) {
-            $controller = $res[$qual[0]];
-          }
-          break;
-      }
-    }
-    elseif (count($qual) == 2) {
-      // Set up names with default values
-      $prefixes = array_merge(array(
-          'actions'          => 'do',
-          'relationships'    => 'get',
-          'targeted actions' => 'set',
-        ), $prefixes);
-
-      // Find a matching controller
-      foreach ($prefixes as $op => $prefix) {
-        if ($qual[0] == $prefix) {
-          if (isset($res[$op]) && isset($res[$op][$qual[1]])) {
-            $controller = $res[$op][$qual[1]];
-            break;
-          }
+    
+    if (isset($res[$method])) {
+      return $res[$method];
+    } 
+    else {
+      // Handle extended operatios
+      foreach ($ops as $op) {
+        if (isset($res[$op]) && isset($res[$op][$method])) {
+          return $res[$op][$method];
         }
       }
     }
   }
-  return $controller;
 }
