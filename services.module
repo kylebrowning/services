@@ -37,7 +37,7 @@ function services_perm() {
     'save file information',
     // System resource permissions
     'get a system variable',
-    'set a system varaible',
+    'set a system variable',
   );
 }
 

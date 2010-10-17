@@ -16,7 +16,7 @@
   * ways Services can be seen as an abstraction layer on top of hook_menu().
   *
   * @return
-  *   An associative array which defines available resources. 
+  *   An associative array which defines available resources.
   *
   *   The associative array which defines services has six possible top
   *   level keys:
@@ -30,14 +30,14 @@
   *
   *   The first four (the CRUD functions) define the indvidual service
   *   callbacks for each function. However 'actions' and 'targeted actions'
-  *   can contain multiple callbacks. 
+  *   can contain multiple callbacks.
   *
-  *   For those familiar with Services 2.x, these callbacks are created 
+  *   For those familiar with Services 2.x, these callbacks are created
   *   similarly, but the keys have changed around a bit. The following keys
   *   are used to describe a callback.
   *
   *   - help: Text describing what this callback does.
-  *   - callback: The name of a function to call when this resource is 
+  *   - callback: The name of a function to call when this resource is
   *     requested.
   *   - access callback: The name of a function to call to check whether
   *     the requesting user has permission to access this resource. If not
@@ -56,8 +56,8 @@
   *     - description: Text describing this argument's usage.
   *     - optional: A boolean indicating whether or not this argument is optional.
   *     - source: Where this argument should be retrieved from. This can be
-  *       'data' (indicating the POST data), 'params' (indicating the query 
-  *       string) or 'path' (indicating the url path). In the case of path, 
+  *       'data' (indicating the POST data), 'params' (indicating the query
+  *       string) or 'path' (indicating the url path). In the case of path,
   *       an additional parameter must be passed indicating the index to be used.
   */
 function hook_services_resources() {
@@ -79,6 +79,7 @@ function hook_services_resources() {
           ),
         ),
       ),
+    ),
 
     'actions' => array(
       'login' => array(
