@@ -433,7 +433,12 @@ function _user_resource_access($op = 'view', $args = array()) {
   switch($op) {
     case 'view':
       $account = user_load($args[0]);
-      return user_view_access($account);
+      //Must return True if account is empty to issue correct HTTP Status code
+      if(empty($account)) {
+        return TRUE;
+      } else {
+        return user_view_access($account);
+      }      
     case 'update':
       $args[0] = $account;
       return ($user->uid == $account->uid || user_access('administer users'));

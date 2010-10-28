@@ -139,8 +139,10 @@ function _node_resource_retrieve($nid) {
       }
     }
     $node->uri = services_resource_uri(array('node', $node->nid));
+    return $node;
+  } else {
+    return services_error('Node nid '. $nid .' not found', 404);
   }
-  return $node;
 }
 
 /**
@@ -338,6 +340,8 @@ function _node_resource_access($op = 'view', $args = array()) {
   else if ($op == 'create') {
     $node = $args[0]->type;
   }
-
+  if($node->nid == '') {
+    return TRUE;
+  }
   return node_access($op, $node);
 }
