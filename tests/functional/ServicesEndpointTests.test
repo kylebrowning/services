@@ -1,0 +1,127 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ * Call the endpoint tests when no authentication is being used.
+ *
+ */
+
+
+/**
+ * Run test cases for the endpoint with no authentication turned on.
+ *
+ */
+ class ServicesEndpointTests extends DrupalWebTestCase {
+
+	/**
+    * Implementation of setUp().
+    */
+   public function setUp() {
+     parent::setUp(
+     	'ctools',
+     	'services',
+      'rest_server'
+     );
+   }
+
+   /**
+    * Test adding an endpoint succeeds.
+    */
+   public function testSuccessfulAddEndpoint() {
+     $edit = $this->populateEndpointFAPI() ;
+
+     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->assertResponse('200', t('expected 200'));
+     $this->drupalGet('admin/build/services/list') ;
+     $this->assertResponse('200',t('expected 200'));
+
+     $this->assertText($edit['title'], t('Endpoint path appears')) ;
+     $this->assertText('rest_server', t('Server is rest server')) ;
+     $this->assertText('In database', t('Storage is in database')) ;
+   }
+
+   /**
+    * Test missing path to endpoint causes an error.
+    */
+   public function testMissingPath() {
+     $edit = $this->populateEndpointFAPI() ;
+     unset($edit['path']) ;
+
+     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->assertResponse('200', 'expected 200');
+
+     $this->assertText('Path to endpoint field is required.',
+       t('Endpoint path missing error message.')) ;
+     $this->assertFieldByName('title', $edit['title'],
+       t('Title field remains.')) ;
+     $this->assertFieldByName('server', 'rest_server',
+       t('Server is rest server')) ;
+     $this->assertFieldChecked('edit-services-use-content-permissions',
+       t('Storage use content permission is checked.')) ;
+   }
+
+   /**
+    * Test missing title for endpoint causes an error.
+    */
+   public function testMissingTitle() {
+     $edit = $this->populateEndpointFAPI() ;
+     unset($edit['title']) ;
+
+     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->assertResponse('200', 'expected 200');
+
+     $this->assertText('Endpoint title field is required.',
+       t('Endpoint title missing error message.')) ;
+     $this->assertFieldByName('name', $edit['name'],
+       t('Name field remains.')) ;
+     $this->assertFieldByName('server', 'rest_server',
+       t('Server is rest server')) ;
+     $this->assertFieldChecked('edit-services-use-content-permissions',
+       t('Storage use content permission is checked.')) ;
+   }
+
+   /**
+    * Test missing server for endpoint causes an error.
+    */
+   public function testMissingServer() {
+     $edit = $this->populateEndpointFAPI() ;
+     unset($edit['server']) ;
+
+     $this->drupalPost('admin/build/services/add', $edit,
+       t('Save and proceed')) ;
+     $this->assertResponse('200', 'expected 200');
+
+     $this->assertText('Server field is required.',
+       t('Server missing error message.')) ;
+     $this->assertFieldByName('name', $edit['name'],
+       t('Name field remains.')) ;
+     $this->assertFieldByName('title', $edit['title'],
+       t('Title field remains.')) ;
+     $this->assertFieldChecked('edit-services-use-content-permissions',
+       t('Storage use content permission is checked.')) ;
+   }
+
+   /*
+    ------------------------------------
+    HELPER METHODS
+    ------------------------------------
+   */
+
+   /**
+    * Creates a data array for populating an endpoint creation form.
+    *
+    * @return
+    * An array of fields for fully populating an endpoint creation form.
+    */
+   public function populateEndpointFAPI() {
+     return array(
+       'name'   => 'mchnname',
+       'title'  => $this->randomName(20),
+       'path'   => $this->randomName(10),
+       'server' => 'rest_server',
+       'services_use_content_permissions' => TRUE,
+     ) ;
+   }
+}
