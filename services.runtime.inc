@@ -166,7 +166,7 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
   // Execute the controller callback
   $result = call_user_func_array($controller['callback'], $args);
 
-  if (isset($server_info) && $server_info) {
+  if (isset($server_root) && $server_root) {
     chdir($server_root);
   }
 

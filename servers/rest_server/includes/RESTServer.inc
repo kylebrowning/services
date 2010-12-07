@@ -19,7 +19,7 @@ class RESTServer {
     if ($method=='POST' && $_GET['_method']) {
       $method = $_GET['_method'];
     }
-    $path = split('/', $canonical_path);
+    $path = explode('/', $canonical_path);
     $leaf = array_pop($path);
     $resource_name = array_shift($path);
     // Extract response format info from the path
