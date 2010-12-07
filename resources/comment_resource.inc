@@ -10,6 +10,7 @@ function _comment_resource_definition() {
     'comment' => array(
       'create' => array(
         'help' => 'Creates a comment',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
         'callback' => '_comment_resource_create',
         'access callback' => '_comment_resource_access',
         'access arguments' => array('create'),
@@ -27,6 +28,7 @@ function _comment_resource_definition() {
 
       'retrieve' => array(
         'help' => 'Retrieves a comment',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
         'callback' => '_comment_resource_retrieve',
         'access callback' => '_comment_resource_access',
         'access arguments' => array('view'),
@@ -44,6 +46,7 @@ function _comment_resource_definition() {
 
       'update' => array(
         'help' => 'Updates a comment',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
         'callback' => '_comment_resource_update',
         'access callback' => '_comment_resource_access',
         'access arguments' => array('edit'),
@@ -68,6 +71,7 @@ function _comment_resource_definition() {
 
       'delete' => array(
         'help' => 'Deletes a comment',
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
         'callback' => '_comment_resource_delete',
         'access callback' => '_comment_resource_access',
         'access arguments' => array('edit'),

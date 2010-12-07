@@ -212,6 +212,10 @@ class RESTServer {
               $arguments[$i] = $sources[$info['source']];                
             }
             else {
+              //added so Default values in modules work as expected, otherwise they might 
+              //get set to NULL which is different than 0
+              //IE taxonomy_service_get_tree
+              if(isset($sources[$info['source']][$info['name']]))
               $arguments[$i] = $sources[$info['source']][$info['name']];
             }
           }

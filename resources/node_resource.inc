@@ -332,10 +332,12 @@ function _node_resource_access($op = 'view', $args = array()) {
   // mess up the types.
   if (is_array($args[0])) {
     $args[0] = (object) $args[0];
+  } else if(!is_array($args[0]) && !is_object($args[0])) {  //This is to determine if it is just a string
+    $args[0] = (object)array('nid'=>$args[0]);
   }
 
   if ($op != 'create' && !empty($args)) {
-    $node = node_load($args[0]);
+    $node = node_load($args[0]->nid);
   }
   else if ($op == 'create') {
     $node = $args[0]->type;
