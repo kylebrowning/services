@@ -163,7 +163,7 @@ function _file_resource_create($file) {
   }
 
   return (object)array(
-    'cid' => $file->fid,
+    'fid' => $file->fid,
     'uri' => services_resource_uri(array('file', $fid)),
   );
 }
