@@ -241,10 +241,13 @@ class RESTServer {
         if (!isset($arguments[$i])) {
           if (isset($info['default value'])) {
             $arguments[$i] = $info['default value'];
-          }
+          } 
           else if (!isset($info['optional']) || !$info['optional']) {
             throw new ServicesArgumentException(t('Missing required argument !arg', array(
               '!arg'=>$info['name'])), $info['name'], 406);
+          }
+          else {
+              $arguments[$i] = NULL;
           }
         }
       }
