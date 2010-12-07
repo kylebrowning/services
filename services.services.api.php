@@ -59,6 +59,7 @@
   *       'data' (indicating the POST data), 'params' (indicating the query
   *       string) or 'path' (indicating the url path). In the case of path,
   *       an additional parameter must be passed indicating the index to be used.
+  *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
   */
 function hook_services_resources() {
   return array(
@@ -76,6 +77,7 @@ function hook_services_resources() {
             'description' => 'The uid of the user to retrieve.',
             'source' => array('path' => '0'),
             'optional' => FALSE,
+            'default value' => NULL,
           ),
         ),
       ),
