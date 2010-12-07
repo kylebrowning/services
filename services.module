@@ -19,6 +19,7 @@ function services_help($path, $arg) {
     case 'admin/build/services':
       $output = '<p>'. t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
       $output .= '<p>'. t('All enabled services and methods are shown. Click on any method to view information or test.') .'</p>';
+      $output .= '<div id="services-help-legend"><div class="services-endpoint-enabled">Enabled</div><div class="services-endpoint-debug">Enabled With Debug</div><div class="services-endpoint-disabled">Disabled</div></div>';
       break;
   }
 
@@ -109,6 +110,17 @@ function services_menu() {
     'page arguments' => array('services_delete_confirm_endpoint', 3),
     'type'           => MENU_CALLBACK,
   ) + $base;
+  $items['admin/build/services/%services_endpoint/disabledebug'] = array(
+    'page callback'  => 'services_disable_debug_mode',
+    'page arguments' => array(3),
+    'type'           => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/build/services/%services_endpoint/enabledebug'] = array(
+    'page callback'  => 'services_enable_debug_mode',
+    'page arguments' => array(3),
+    'type'           => MENU_CALLBACK,
+  ) + $base;
+
   $items['admin/build/services/%services_endpoint/disable'] = array(
     'page callback'  => 'services_disable_endpoint',
     'page arguments' => array(3),
@@ -133,7 +145,7 @@ function services_menu() {
   // Add menu items for the different endpoints
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
-    if (!$endpoint->disabled) {
+    if ($endpoint->status) {
       $items[$endpoint->path] = array(
         'title'             => 'Services endpoint',
         'access callback'   => 'services_access_menu',
@@ -205,16 +217,22 @@ function services_endpoint_callback($endpoint_name) {
 
   $endpoint = services_endpoint_load($endpoint_name);
   $server = $endpoint->server;
-
+  
   if (function_exists($server . '_server')) {
     // call the server
+    if($endpoint->debug) {
+     watchdog('services', 'Calling server :'. $server . '_server');
+    }
     services_set_server_info_from_array(array(
       'module'        => $server,
       'endpoint'      => $endpoint_name,
       'endpoint_path' => $endpoint->path,
+      'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
     ));
-
+    if($endpoint->debug) {
+      watchdog('services', 'Server Info Main Object<pre>'. print_r(services_server_info_object(), 1));
+    }
     print call_user_func($server . '_server');
 
     // Do not let this output

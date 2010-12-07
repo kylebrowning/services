@@ -97,6 +97,8 @@ class ServicesArgumentException extends ServicesException {
  */
 function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
   // Check for missing arguments.
+  watchdog('services', '<pre>Controller: '. print_r($controller, 1));
+  watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
   if(is_array($controller['args']))
   foreach ($controller['args'] as $key => $arg) {
     if (!$arg['optional']) {
@@ -164,7 +166,7 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
   // Execute the controller callback
   $result = call_user_func_array($controller['callback'], $args);
 
-  if ($server_info) {
+  if (isset($server_info) && $server_info) {
     chdir($server_root);
   }
 

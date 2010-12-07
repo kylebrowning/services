@@ -61,6 +61,20 @@ function services_schema() {
         'serialize'      => TRUE,
         'object default' => array(),
       ),
+      'debug' => array(
+        'description' => 'Set the endpoint in debug mode.',
+        'type'        => 'int',
+        'length'      => 2,
+        'not null'    => TRUE,
+        'default'     => 0
+      ),
+      'status' => array(
+        'description' => 'Endpoint is enabled.',
+        'type'        => 'int',
+        'length'      => 2,
+        'not null'    => TRUE,
+        'default'     => 1
+      ),
     ),
     'primary key' => array('eid'),
     'unique keys' => array(
@@ -105,7 +119,6 @@ function services_uninstall() {
 
   variable_del('services_use_key');
   variable_del('services_use_sessid');
-  variable_del('services_debug');
   variable_del('services_auth_module');
 }
 
@@ -240,5 +253,15 @@ function services_update_6300() {
   // Remove the auth_module variable as this won't be handled on a global basis anymore
   variable_del('services_auth_module');
 
+  return $ret;
+}
+
+/**
+ * Update 6301 adds debugging to each endopint to facilitate easier development
+ */
+function services_update_6301() {
+  $ret = array();
+  db_add_field($ret, 'services_endpoint', 'debug', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+  db_add_field($ret, 'services_endpoint', 'status', array('type' => 'int', 'not null' => TRUE, 'default' => 1));
   return $ret;
 }
