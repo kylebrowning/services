@@ -182,7 +182,7 @@ class RESTServer {
 
     $defaults = array(
       'path' => $path,
-      'param' => $parameters,
+      'params' => $parameters,
       'data' => $data,
     );
     foreach ($defaults as $key => $data) {

@@ -90,7 +90,7 @@ function _node_resource_definition() {
             'optional' => TRUE,
             'type' => 'string',
             'description' => 'The fields to get.',
-            'default value' => '',
+            'default value' => '*',
             'source' => array('param' => 'fields'),
           ),
           array(
