@@ -99,16 +99,6 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
   // Check for missing arguments.
   watchdog('services', '<pre>Controller: '. print_r($controller, 1));
   watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
-  if(is_array($controller['args']))
-  foreach ($controller['args'] as $key => $arg) {
-    if (!$arg['optional']) {
-      if (!isset($args[$key]) && !is_array($args[$key]) && !is_bool($args[$key])) {
-        return services_error(t('Missing required argument !name.', array(
-          '!name' => $key,
-        )), 406);
-      }
-    }
-  }
 
   // Check authentication
   if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {

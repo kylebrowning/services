@@ -228,6 +228,7 @@ function _taxonomy_resource_definition() {
               'type'         => 'int',
               'description'  => t('The term ID under which to generate the tree. If 0, generate the tree for the entire vocabulary.'),
               'source'       => 'data',
+              'default value'      => 0,
               'optional'     => TRUE,
             ), 
             array(
@@ -236,6 +237,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('The number of levels of the tree to return. Leave NULL to return all levels.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'      => NULL,
             ),
           ),
         ),
