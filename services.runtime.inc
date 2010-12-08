@@ -97,8 +97,11 @@ class ServicesArgumentException extends ServicesException {
  */
 function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
   // Check for missing arguments.
-  watchdog('services', '<pre>Controller: '. print_r($controller, 1));
-  watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
+  $server_info =  services_server_info_object();
+  if($server_info->debug) {
+    watchdog('services', '<pre>Controller: '. print_r($controller, 1));
+    watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
+  }
 
   // Check authentication
   if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
