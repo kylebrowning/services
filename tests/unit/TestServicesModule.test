@@ -135,8 +135,8 @@
     // see how many with no endpoints
     $items = services_menu() ;
 
-    $message = t('There should be 10 menu items') ;
-    $this->assertEqual(count($items), 12, $message) ;
+    $message = t('There should be 14 menu items') ;
+    $this->assertEqual(count($items), 14, $message) ;
 
     $menuItem = 'admin/build/services' ;
     $this->helpMenuItem($menuItem, $items) ;
