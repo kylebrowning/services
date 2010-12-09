@@ -95,7 +95,7 @@ function services_list_endpoint($js = NULL) {
     } else {
       $row_class = 'services-endpoint-disabled';
     }
-    if($endpoint->debug) {
+    if($endpoint->debug && $endpoint->status) {
       $row_class = 'services-endpoint-debug';
     }
     $rows[$endpoint->name] = array(
