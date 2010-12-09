@@ -182,7 +182,7 @@ function _node_resource_create($node) {
   $nid = $form_state['nid'];
 
   if ($errors = form_get_errors()) {
-    return services_error(implode("\n", $errors), 406);
+    return services_error(implode(" ", $errors), 406);
   }
 
   // Only add the URI for servers that support it.
