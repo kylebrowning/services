@@ -341,9 +341,7 @@ function _node_resource_access($op = 'view', $args = array()) {
   }
   else if ($op == 'create') {
     $node = $args[0]->type;
-  }
-  if($node->nid == '') {
-    return TRUE;
+    return node_access($op, $node);
   }
   if($node->nid) {
     return node_access($op, $node);
