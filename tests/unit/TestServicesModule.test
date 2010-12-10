@@ -1,0 +1,355 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ * Unit tests for the functions in the 'services.module' file.
+ */
+
+/**
+ * Run test cases for the functions in the 'services.module' file.
+ */
+ class ServicesModuleTests extends DrupalWebTestCase {
+
+   // Class variables.
+   protected $privilegedUser = NULL ;
+
+   /**
+    * Implementation of getInfo.
+    */
+   public static function getInfo() {
+    return array(
+      'name' => 'Unit tests for services.module file.',
+      'description' => 'These are the unit tests for the services.module file functions.',
+      'group' => 'Services',
+    );
+  }
+
+  /**
+   * Implementation of setUp.
+   */
+  public function setUp() {
+    parent::setUp(
+      'ctools',
+      'services',
+      'rest_server'
+      );
+
+    // Create and logi in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+  }
+
+  /**
+   * Test services_help function.
+   */
+  public function testServicesHelp() {
+
+    $result = services_help('admin/help#services', array()) ;
+    $message = t('There should be a help message returned from services help.') ;
+    $this->assertNotNull($result, $message) ;
+
+    $result = services_help('admin/build/services', array()) ;
+    $message = t('There should be help text when going to the services endpoint administration page.') ;
+    $this->assertNotNull($result, $message) ;
+  }
+
+  /**
+   * Test services_perm results.
+   */
+  public function testServicesPerm() {
+    $resultArray = services_perm () ;
+    $message = t('services_perm should return an array') ;
+    $this->assertTrue(gettype($resultArray)=='array', $message) ;
+
+    $message = t('There should be 6 permission types') ;
+    $this->assertEqual(count($resultArray), 6, $message) ;
+
+    $permission = 'administer services' ;
+    $this->helperPermExists($resultArray, $permission) ;
+
+    $permission = 'get any binary files' ;
+    $this->helperPermExists($resultArray, $permission) ;
+
+    $permission = 'get own binary files' ;
+    $this->helperPermExists($resultArray, $permission) ;
+
+    $permission = 'save file information' ;
+    $this->helperPermExists($resultArray, $permission) ;
+
+    $permission = 'get a system variable' ;
+    $this->helperPermExists($resultArray, $permission) ;
+
+    $permission = 'set a system variable' ;
+    $this->helperPermExists($resultArray, $permission) ;
+  } // function
+
+  /**
+   * Helper function to do the same checks on every permission.
+   *
+   * @param $array_to_search
+   * Usually an array from the hook_perm implementation.
+   *
+   * @param $perm
+   * The permission to verify exists
+   *
+   * @return
+   * Void. The asserts in the code provide feedback via the test harness.__PHP_Incomplete_Class
+   */
+  protected function helperPermExists($arrayToSearch, $perm) {
+    $result = array_search($perm, $arrayToSearch) ;
+    $message = t("There should be a '$perm' permission") ;
+    $this->assertNotIdentical($result, FALSE, $message) ;
+  } // function
+
+  /**
+   * Test hook_hook_info implementation.
+   */
+  public function testHookHookInfo() {
+    $results = services_hook_info() ;
+
+    $message = t('The \'services_resources\' key should be set in the returned array') ;
+    $this->assertTrue(isset($results['services_resources']), $message) ;
+
+    $message = t('hook_hook_info value should be an array') ;
+    $this->assertTrue((gettype($results['services_resources'])=='array'), $message) ;
+
+    $message = t('Should have added one element to the array') ;
+    $this->assertEqual(count($results['services_resources']), 1, $message) ;
+
+    $message = t('Key \'group\' should exist') ;
+    $this->assertTrue(isset($results['services_resources']['group']), $message) ;
+
+    $message = t('Value for key \'group\' should be \'services\'') ;
+    $this->assertEqual($results['services_resources']['group'], 'services',
+      $message) ;
+  } // function
+
+  /**
+   * Test hook_menu implementation.
+   */
+  public function testHookMenu() {
+    // see how many with no endpoints
+    $items = services_menu() ;
+
+    $message = t('There should be 14 menu items') ;
+    $this->assertEqual(count($items), 14, $message) ;
+
+    $menuItem = 'admin/build/services' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/list' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/add' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/edit' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/authentication' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menutItem = 'admin/build/services/%services_endpoint/resources' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/export' ;
+    $this->helpMenuItem($menutItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/delete' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/disable' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/%services_endpoint/enable' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    $menuItem = 'admin/build/services/ahah/security-options' ;
+    $this->helpMenuItem($menuItem, $items) ;
+
+    // cross domain tested separately as it does not share so many settings.
+    $menuItem = 'crossdomain.xml' ;
+
+    $message = t('crossdomain.xml should have an array of 3 values') ;
+    $this->assertEqual(count($items['crossdomain.xml']), 3, $message) ;
+
+    $message = t('crossdomain.xml should have \'access callback\' '
+      . '=> \'services_access_menu\'') ;
+    $this->assertEqual($items['crossdomain.xml']['access callback'],
+      'services_access_menu', $message) ;
+
+    $message = t('crossdomain.xml should have \'page callback\' '
+      . '=> \'services_crossdomain_xml\'') ;
+    $this->assertEqual($items['crossdomain.xml']['page callback'],
+      'services_crossdomain_xml', $message) ;
+
+   $message = t('crossdomain.xml should have \'page callback\' '
+      . '=> \'services_crossdomain_xml\'') ;
+    $this->assertEqual($items['crossdomain.xml']['page callback'],
+      'services_crossdomain_xml', $message) ;
+  } // function
+
+  /**
+   * Test thta adding a menu endpoint creates an menu path for that item.
+   */
+  public function testEndpointMenu() {
+    // Create the endpoint.
+    $endpointSettings = array(
+       'name'   => 'mchnname',
+       'title'  => $this->randomName(20),
+       'path'   => $this->randomName(10),
+       'server' => 'rest_server',
+       'services_use_content_permissions' => TRUE,
+     );
+
+     $this->drupalPost('admin/build/services/add', $endpointSettings,
+       t('Save and proceed'));
+     $this->assertResponse('200', t('Failed to create endpoint.'));
+
+     // Check path.
+     $this->drupalGet($endpointSettings['path']);
+     $this->assertResponse('200', t('Failed to access endpoint menu path.'));
+
+     // Check edit.
+     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+       . '/edit');
+     $this->assertResponse('200', t('Failed to access endpoint edit path.')) ;
+
+     // Check export.
+     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+       . '/export');
+     $this->assertResponse('200', t('Failed to access endpoint export path.')) ;
+
+     // Check delete.
+     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+       . '/delete');
+     $this->assertResponse('200', t('Failed to access endpoint delete path.')) ;
+  }
+
+  /*
+   * Helper function to test the values of a menu item from a hook_menu call.
+   *
+   * Checks only the common menu parameters.
+   *
+   * @param $menu_item
+   * The path to the menu item.
+   *
+   * @param $items
+   * The array from the callback to services_menu (hook_menu).
+   *
+   * @return
+   * Void. Feedback is given through the test harness via assertions.
+   */
+  protected function helpMenuItem($menuItem, $items) {
+    $message = $menuItem . t(' should exist') ;
+    $this->assertTrue(isset($items[$menuItem]), $message) ;
+
+    $message = $menuItem . t(' value should be an array') ;
+    $this->assertTrue(gettype($items[$menuItem]) == 'array', $message) ;
+
+    $message = $menuItem
+      . t(' should have \'access arguments\' set to \'administer services\'') ;
+    $this->assertEqual($items[$menuItem]['access arguments']
+      [0], 'administer services', $message) ;
+
+    $message = $menuItem
+      . t(' should have \'file\' to \'services.admin.inc\'') ;
+    $this->assertEqual($items[$menuItem]['file'], 'services.admin.inc',
+      $message) ;
+
+    $message = $menuItem . t(' should have a \'page callback\'') ;
+    $this->assertTrue(isset($items[$menuItem]['page callback']), $message) ;
+  } // function
+
+  /**
+   * Test that services_access_menu() returns TRUE.
+   */
+  public function testServicesAccessMenu() {
+    $message = t('services_access_menu should return TRUE');
+    $this->assertTrue(services_access_menu(), $message);
+  } // function
+
+  /**
+   * Verify services_get_servers() returs the REST server.
+   */
+  public function testServicesGetServers() {
+    $results = services_get_servers() ;
+
+    $message = t('\'services_get_servers\' should return an array.');
+    $this->assertTrue(gettype($results) == 'array', $message);
+
+    $message = t('There should only be one element in the array.');
+    $this->assertEqual(count($results), 1, $message);
+
+    $message = t('The key to the one element should be \'rest_server\'.');
+    $this->assertTrue(isset($results['rest_server']), $message);
+
+    $message = t('Server name should be \'REST\'.');
+    $this->assertTrue(isset($results['rest_server']['name'])
+      && ($results['rest_server']['name'] == 'REST'), $message);
+
+    $message = t('Server path should be \'rest\'.');
+    $this->assertTrue(isset($results['rest_server']['path'])
+      && ($results['rest_server']['path'] == 'rest'), $message);
+  }
+
+  /**
+   * Test services_services_crossdomain_domain_policy() callback.
+   */
+  public function testServicesCrossdomainDomainPolicy() {
+    $results = services_services_crossdomain_domain_policy();
+
+    $message = t('Should be one result in the array.');
+    $this->assertEqual(count($results), 1, $message);
+
+    $message = t('The key \'$_SERVER[\'HTTP_HOST\']\' should exist.');
+    $this->assertTrue(isset($results[$_SERVER['HTTP_HOST']]), $message);
+
+    $value = $results[$_SERVER['HTTP_HOST']];
+
+    $message = t('Value should be an array.');
+    $this->assertTrue(gettype($value) == 'array', $message);
+
+    $message = t('Value should have a length of one.');
+    $this->assertEqual(count($value), 1, $message);
+
+    $message = t('Key should be \'subdomain_wildcard\'');
+    $this->assertTrue(isset($value['subdomain_wildcard']), $message);
+
+    $message = t('Value should be \'TRUE\'.');
+    $this->assertEqual($value['subdomain_wildcard'], TRUE, $message);
+  }
+
+  /**
+   * Test services_endpoint_new().
+   */
+  public function testServicesEndpointNew() {
+    $results = services_endpoint_new();
+    $results_type = gettype($results);
+    $message = t('services_endpoints_new() should return an object.');
+    $this->assertEqual($results_type, 'object', $message);
+
+    $message = t('New Service object should have property ') ;
+    $this->assertTrue(property_exists($results, 'eid'   ),
+      $message . t('eid.'));
+    $this->assertTrue(property_exists($results, 'name'  ),
+      $message . t('name.'));
+    $this->assertTrue(property_exists($results, 'title' ),
+      $message . t('title.'));
+    $this->assertTrue(property_exists($results, 'server'),
+      $message . t('server.'));
+    $this->assertTrue(property_exists($results, 'path'  ),
+      $message . t('path.'));
+  }
+
+  /**
+   * Test services_controller_get().
+   */
+  public function testServicesControllerGet() {
+
+  }
+ } // class
