@@ -2,7 +2,6 @@
 // $Id$
 
 /**
- * @author Services Dev Team
  * @file
  *  Provides a generic but powerful API for web services.
  */
@@ -20,6 +19,7 @@ function services_help($path, $arg) {
     case 'admin/config/services/services':
       $output = '<p>'. t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
       $output .= '<p>'. t('All enabled services and methods are shown. Click on any method to view information or test.') .'</p>';
+      $output .= '<div id="services-help-legend"><div class="services-endpoint-enabled">Enabled</div><div class="services-endpoint-debug">Enabled With Debug</div><div class="services-endpoint-disabled">Disabled</div></div>';
       break;
   }
 
@@ -27,13 +27,35 @@ function services_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_permission().
+ * Implementation of hook_perm().
  */
 function services_permission() {
   return array(
     'administer services' => array(
-      'title' => t('Administer services'),
-      'description' => t('Administer services and it\'s endpoints'),
+      'title' => t('Administer services'), 
+      'description' => t('Configure and setup services module.'),
+    ),
+    // File resource permissions
+    'get any binary files' => array(
+      'title' => t('Get any binary files'), 
+      'description' => t(''),
+    ),
+    'get own binary files' => array(
+      'title' => t('Get own binary files'), 
+      'description' => t(''),
+    ),
+    'save file information' => array(
+      'title' => t('Save file information'), 
+      'description' => t(''),
+    ),
+    // System resource permissions
+    'get a system variable' => array(
+      'title' => t('Get a system variable'),
+      'description' => t(''),
+    ),
+    'set a system variable' => array(
+      'title' => t('Set a system variable'), 
+      'description' => t(''),
     ),
   );
 }
@@ -61,8 +83,8 @@ function services_menu() {
     'title'          => 'Services',
     'description'    => 'Manage how external applications communicates with Drupal.',
     'page callback'  => 'services_list_endpoint',
-    'type'           => MENU_NORMAL_ITEM,
   ) + $base;
+
   $items['admin/config/services/services/list'] = array(
     'title'          => 'List',
     'page callback'  => 'services_list_endpoint',
@@ -107,6 +129,16 @@ function services_menu() {
     'page arguments' => array('services_delete_confirm_endpoint', 4),
     'type'           => MENU_CALLBACK,
   ) + $base;
+  $items['admin/config/services/services/%services_endpoint/disabledebug'] = array(
+     'page callback'  => 'services_disable_debug_mode',
+     'page arguments' => array(4),
+     'type'           => MENU_CALLBACK,
+   ) + $base;
+   $items['admin/config/services/services/%services_endpoint/enabledebug'] = array(
+     'page callback'  => 'services_enable_debug_mode',
+     'page arguments' => array(4),
+     'type'           => MENU_CALLBACK,
+   ) + $base;
   $items['admin/config/services/services/%services_endpoint/disable'] = array(
     'page callback'  => 'services_disable_endpoint',
     'page arguments' => array(4),
@@ -131,21 +163,36 @@ function services_menu() {
   // Add menu items for the different endpoints
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
-    if (!$endpoint->disabled) {
-      $items[$endpoint->path] = array(
-        'title'             => 'Services endpoint',
-        'access callback'   => 'services_access_menu',
-        'page callback'     => 'services_endpoint_callback',
-        'page arguments'    => array($endpoint->name),
-        'type'              => MENU_CALLBACK,
-      );
+    if (!empty($endpoint->resources) && $endpoint->status) { 
+      foreach ($endpoint->resources as $resource) {
+        if(!empty($resource['operations'])) {
+          foreach($resource['operations'] as $operation) {
+            if ($operation['enabled']) {
+              $items[$endpoint->path] = array(
+                'title'             => 'Services endpoint',
+                'access callback'   => 'services_access_menu',
+                'page callback'     => 'services_endpoint_callback',
+                'page arguments'    => array($endpoint->name),
+                'type'              => MENU_CALLBACK,
+              );
+            }
+          }
+        }
+      }
     }
   }
   return $items;
 }
 
 /**
- * Access callback that always returns TRUE.
+ * Access callback that always returns TRUE. 
+ *
+ * This callback is necessary for services like login and logout that should 
+ * always be wide open and accessible. 
+ *
+ * *** USE THIS WITH GREAT CAUTION ***
+ *
+ * If you think you need it you are almost certainly wrong.
  */
 function services_access_menu() {
   return TRUE;
@@ -202,9 +249,13 @@ function services_endpoint_callback($endpoint_name) {
       'module'        => $server,
       'endpoint'      => $endpoint_name,
       'endpoint_path' => $endpoint->path,
+      'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
     ));
-
+   if($endpoint->debug) {
+     watchdog('services', 'Calling server :'. $server . '_server');
+     watchdog('services', 'Server Info Main Object<pre>'. print_r(services_server_info_object(), 1));
+   }
     print call_user_func($server . '_server');
 
     // Do not let this output
@@ -327,10 +378,8 @@ function services_endpoint_save($endpoint) {
  * @return void
  */
 function services_endpoint_delete($endpoint) {
-  $num_deleted = db_delete('services_endpoint')
-    ->condition('endpoint', $endpoint->name)
-    ->condition('eid', $endpoint->eid)
-    ->execute();
+  $eid = $endpoint->eid;
+  db_delete('services_endpoint')->condition('eid', $eid)->execute();
   menu_rebuild();
   cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
 }
@@ -390,7 +439,7 @@ function services_get_resources($endpoint_name = '') {
 function services_services_resources() {
   module_load_include('resource_build.inc', 'services');
   // Return resources representing legacy services
-  return _services_legacy_services_as_resources();
+  return array_merge(_services_core_resources(), _services_legacy_services_as_resources());
 }
 
 /**
@@ -398,27 +447,16 @@ function services_services_resources() {
  *
  * @param string $endpoint
  *  The endpoint that should be used.
- * @param array $names
- *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
- *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
- *  and 'targeted actions'=>'set'.
- * @param bool $key_by_resource
- *  Optional. Set to TRUE to get controllers separated by resource.
  * @return array
  *  Either a non associative array containing all controller names. Or, if
  *  $key_by_resource was set to TRUE, a associative array where the resource
  *  name is the key and the value is a non-associative array containing the
  *  resource's controller names.
  */
-function services_controllers_list($endpoint, $prefixes = array(), $key_by_resource = FALSE) {
+function services_controllers_list($endpoint) {
   $controllers = array();
-  $prefixes   = array_merge(array(
-      'actions'          => 'do',
-      'relationships'    => 'get',
-      'targeted actions' => 'set',
-    ), $prefixes);
+  $ops = array('actions', 'relationships', 'targeted actions');
   $resources = services_get_resources($endpoint);
-
   foreach ($resources as $resource_name => $res) {
     // Get all basic operations
     foreach (array('create', 'retrieve', 'update', 'delete', 'index') as $op) {
@@ -426,13 +464,12 @@ function services_controllers_list($endpoint, $prefixes = array(), $key_by_resou
         $controllers[] = $resource_name . '.' . $op;
       }
     }
-    foreach ($prefixes as $op => $prefix) {
+ 
+    // Handle extended operatios
+    foreach ($ops as $op) {
       if (isset($res[$op])) {
-        foreach ($res['op'] as $name => $def) {
+        foreach ($res[$op] as $name => $def) {
           // Append prefix if it isn't empty
-          if (!empty($prefix)) {
-            $name = $prefix . '_' . $name;
-          }
           $controllers[] = $resource_name . '.' . $name;
         }
       }
@@ -445,57 +482,29 @@ function services_controllers_list($endpoint, $prefixes = array(), $key_by_resou
  * Returns the requested controller.
  *
  * @param string $name
- *  The name of the controller in the format: {resource}.{prefix}_{name} or
- *  {resource}.{operation}. Examples: "node.retrieve", "node.create",
- *  "node.get_comments" and "node.set_publish".
+ *  The name of the controller in the format: {resource}.{name} or
+ *  {resource}.{operation}. Examples: "node.retrieve", "system.getVariable".
  * @param string $endpoint
  *  The endpoint that should be used.
- * @param array $names
- *  An array of prefixes to use for 'actions', 'relationships' and 'targeted
- *  actions'. The default mapping is 'actions'=>'do', 'relationships'=>'get'
- *  and 'targeted actions'=>'set'.
  */
-function services_controller_get($name, $endpoint, $prefixes = array()) {
+function services_controller_get($name, $endpoint) {
   list($resource_name, $method) = explode('.', $name);
-  $controller = FALSE;
-
+  $ops = array('actions', 'relationships', 'targeted actions');
   $resources = services_get_resources($endpoint);
 
   if (isset($resources[$resource_name])) {
     $res = $resources[$resource_name];
-    $qual = explode('_', $method, 2);
-
-    if (count($qual) == 1) {
-      switch ($qual[0]) {
-        case 'create':
-        case 'retrieve':
-        case 'update':
-        case 'delete':
-        case 'index':
-          if (isset($res[$qual[0]])) {
-            $controller = $res[$qual[0]];
-          }
-          break;
-      }
-    }
-    elseif (count($qual) == 2) {
-      // Set up names with default values
-      $prefixes = array_merge(array(
-          'actions'          => 'do',
-          'relationships'    => 'get',
-          'targeted actions' => 'set',
-        ), $prefixes);
-
-      // Find a matching controller
-      foreach ($prefixes as $op => $prefix) {
-        if ($qual[0] == $prefix) {
-          if (isset($res[$op]) && isset($res[$op][$qual[1]])) {
-            $controller = $res[$op][$qual[1]];
-            break;
-          }
+    
+    if (isset($res[$method])) {
+      return $res[$method];
+    } 
+    else {
+      // Handle extended operatios
+      foreach ($ops as $op) {
+        if (isset($res[$op]) && isset($res[$op][$method])) {
+          return $res[$op][$method];
         }
       }
     }
   }
-  return $controller;
 }

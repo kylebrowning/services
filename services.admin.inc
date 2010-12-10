@@ -21,6 +21,7 @@ function services_list_endpoint($js = NULL) {
     array('data' => t('Server'),         'class' => 'services-endpoint-server'),
     array('data' => t('Authentication'), 'class' => 'services-endpoint-authentication'),
     array('data' => t('Storage'),        'class' => 'services-endpoint-storage'),
+    array('data' => t('Debug'),        'class' => 'services-endpoint-debug'),
     array('data' => t('Operations'),     'class' => 'services-endpoint-operations'),
   );
 
@@ -28,9 +29,25 @@ function services_list_endpoint($js = NULL) {
   $rows = array();
 
   foreach ($endpoints as $endpoint) {
+    $debug = array();
+    if ($endpoint->debug) {
+      $debug[] = array(
+        'title' => t('Turn Off'),
+        'href'  => 'admin/config/services/services/' . $endpoint->name . '/disabledebug',
+        'query' => drupal_get_destination(),
+      );
+    }
+    else {
+      $debug[] = array(
+        'title' => t('Turn On'),
+        'style' => array('color'=> 'green'),
+        'href'  => 'admin/config/services/services/' . $endpoint->name . '/enabledebug',
+        'query' => drupal_get_destination(),
+      );
+    }
     $operations = array();
 
-    if (empty($endpoint->disabled)) {
+    if ($endpoint->status) {
       $operations[] = array(
         'title' => t('Edit'),
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/edit',
@@ -40,20 +57,7 @@ function services_list_endpoint($js = NULL) {
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/export',
       );
     }
-
-    if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
-      $operations[] = array(
-        'title' => t('Revert'),
-        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
-      );
-    }
-    elseif ($endpoint->export_type != EXPORT_IN_CODE) {
-      $operations[] = array(
-        'title' => t('Delete'),
-        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
-      );
-    }
-    elseif (empty($endpoint->disabled)) {
+    if ($endpoint->status) {
       $operations[] = array(
         'title' => t('Disable'),
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/disable',
@@ -67,18 +71,39 @@ function services_list_endpoint($js = NULL) {
         'query' => drupal_get_destination(),
       );
     }
-
-    $row_class = array('services-endpoint-' . $endpoint->name);
-    if (!empty($endpoint->name)) {
-      $row_class[] = 'services-endpoint-disabled';
+    if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
+      $operations[] = array(
+        'title' => t('Revert'),
+        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
+      );
     }
-
+    elseif ($endpoint->export_type != EXPORT_IN_CODE) {
+      $operations[] = array(
+        'title' => t('Delete'),
+        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
+      );
+    }
     $auth_names = array();
     foreach (array_keys($endpoint->authentication) as $module) {
       $info = services_authentication_info($module);
-      $auth_names[] = $info['#title'];
+      $auth_names[] = $info['title'];
+    }
+    $row_class = '';
+    if($endpoint->status) {
+      $row_class = 'services-endpoint-enabled';
+    } else {
+      $row_class = 'services-endpoint-disabled';
+    }
+    if($endpoint->debug && $endpoint->status) {
+      $row_class = 'services-endpoint-debug';
+    }
+    $auth_names = array();
+    foreach (array_keys($endpoint->authentication) as $module) {
+      $info = services_authentication_info($module);
+      $auth_names[] = $info['title'];
     }
 
+    $row_class = array($row_class);
     $rows[$endpoint->name] = array(
       'data' => array(
         'title' => array(
@@ -101,24 +126,30 @@ function services_list_endpoint($js = NULL) {
           'data'  => ($endpoint->export_type == EXPORT_IN_CODE) ? t('In code') : t('In database'),
           'class' => array('services-endpoint-storage'),
         ),
+        'debug' => array(
+          'data'  => array(
+             '#theme' => 'links',
+             '#links' => $debug,
+           ),
+	 	      'class' => array('services-endpoint-debug'),
+        ),
         'operations' => array(
           'data'  => array(
-            '#theme' => 'links',
-            '#links' => $operations,
-          ),
+             '#theme' => 'links',
+             '#links' => $operations,
+           ),
           'class' => array('services-endpoint-operations'),
         ),
       ),
-      'class' => $row_class,
+      'class' =>$row_class,
     );
   }
-
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
-
   return drupal_render($table = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
+    '#attributes' => array('id' => array('services-list-endpoint')),
     '#empty' => t('No endpoints defined'),
   ));
 }
@@ -152,7 +183,6 @@ function services_edit_endpoint($endpoint) {
  */
 function services_edit_form_endpoint(&$form_state, $form_info) {
   list($endpoint) = $form_info['build_info']['args'];
-
   // Loading runtime include as needed by services_auth_info().
   module_load_include('runtime.inc', 'services');
 
@@ -192,7 +222,7 @@ function services_edit_form_endpoint(&$form_state, $form_info) {
     '' => t('-- Select a server'),
   );
   foreach ($servers as $server => $info) {
-    $server_opts[$server] = $info['#name'];
+    $server_opts[$server] = $info['name'];
   }
   $form['server'] = array(
     '#type'          => 'select',
@@ -254,7 +284,7 @@ function services_edit_form_endpoint(&$form_state, $form_info) {
  */
 function services_edit_form_endpoint_validate($form, &$form_state) {
   // Test uniqueness of name:
-  if (preg_match("/[^A-Za-z0-9_]/", $form_state['values']['endpoint'])) {
+  if (preg_match("/[^A-Za-z0-9_]/", $form_state['values']['name'])) {
     form_error($form['name'], t('Endpoint name must be alphanumeric or underscores only.'));
   }
   else {
@@ -288,12 +318,14 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
   // Set the authentication modules, and preserve the settings for modules
   // that already exist.
   $auth = array();
-  foreach (array_keys($form_state['values']['authentication']) as $module) {
-    if (isset($endpoint->authentication[$module])) {
-      $auth[$module] = $endpoint->authentication[$module];
-    }
-    else {
-      $auth[$module] = array();
+  if (isset($form_state['values']['authentication'])) {
+    foreach (array_keys($form_state['values']['authentication']) as $module) {
+      if (isset($endpoint->authentication[$module])) {
+        $auth[$module] = $endpoint->authentication[$module];
+      }
+      else {
+        $auth[$module] = array();
+      }
     }
   }
   $endpoint->authentication = $auth;
@@ -302,12 +334,12 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
     drupal_set_message(t('Your new endpoint %title has been saved.', array('%title' => $endpoint->title)));
     services_endpoint_save($endpoint);
     $form_state['values']['eid'] = $endpoint->eid;
-    $form_state['redirect'] = 'admin/build/services/' . $endpoint->name . '/authentication';
+    $form_state['redirect'] = 'admin/config/services/services/' . $endpoint->name . '/authentication';
   }
   else {
     drupal_set_message(t('Your changes have been saved.'));
     services_endpoint_save($endpoint);
-    $form_state['redirect'] = 'admin/build/services';
+    $form_state['redirect'] = 'admin/config/services/services';
   }
 }
 
@@ -341,7 +373,6 @@ function services_delete_confirm_endpoint(&$form_state, $form_info) {
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
-
   if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
     $title  = t('Are you sure you want to revert the endpoint "@title"?', array('@title' => $endpoint->title));
     $submit = t('Revert');
@@ -376,14 +407,40 @@ function services_delete_confirm_endpoint_submit($form, &$form_state) {
 }
 
 /**
+ * Enable debug mode on an endpoint.
+ */
+function services_enable_debug_mode($endpoint) {
+  if (!is_object($endpoint)) {
+    $endpoint = services_endpoint_load($endpoint);
+  }
+  $endpoint->debug = 1;
+  services_endpoint_save($endpoint);
+  drupal_goto();
+}
+
+/**
+ * Disable debug mode on an endpoint.
+ */
+function services_disable_debug_mode($endpoint) {
+  if (!is_object($endpoint)) {
+    $endpoint = services_endpoint_load($endpoint);
+  }
+  $endpoint->debug = 0;
+  services_endpoint_save($endpoint);
+  drupal_goto();
+}
+
+/**
  * Enable a default endpoint.
  */
 function services_enable_endpoint($endpoint) {
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
-  ctools_include('export');
-  ctools_export_set_status('services_endpoint', $endpoint->name, FALSE);
+  $endpoint->status = 1;
+  services_endpoint_save($endpoint);
+ cache_clear_all(NULL, 'cache_menu');
+  menu_rebuild();
   drupal_goto();
 }
 
@@ -394,10 +451,13 @@ function services_disable_endpoint($endpoint) {
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
-  ctools_include('export');
-  ctools_export_set_status('services_endpoint', $endpoint->name, TRUE);
+  $endpoint->status = 0;
+  services_endpoint_save($endpoint);
+ cache_clear_all(NULL, 'cache_menu');
+  menu_rebuild();
   drupal_goto();
 }
+
 
 /**
  * Configure authentication for a endpoint.
@@ -450,10 +510,10 @@ function services_edit_form_endpoint_authentication(&$form_state, $endpoint) {
       if ($info) {
         $form[$module] = array(
           '#type' => 'fieldset',
-          '#title' => $info['#title'],
+          '#title' => $info['title'],
           '#tree' => TRUE,
         ) + services_auth_invoke($module, 'security_settings', $settings);
-      }
+      } 
     }
   }
 
@@ -555,7 +615,7 @@ function services_edit_form_endpoint_resources(&$form_state, $form_info) {
           '#type'        => 'fieldset',
           '#title'       => $title,
           '#collapsible' => TRUE,
-          '#collapsed'   => TRUE,
+          '#collapsed'   => FALSE,
         );
         _services_resource_operation_settings($res_set['operations'][$op], $endpoint, $resource, $op);
       }
@@ -578,7 +638,7 @@ function services_edit_form_endpoint_resources(&$form_state, $form_info) {
             '#type'        => 'fieldset',
             '#title'       => $action,
             '#collapsible' => TRUE,
-            '#collapsed'   => TRUE,
+            '#collapsed'   => FALSE,
           );
           _services_resource_operation_settings($res_set[$element][$action], $endpoint, $resource, $class, $action);
         }
@@ -683,7 +743,7 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
  *  Information about the operation, or NULL if no matching
  *  operation was found.
  */
-function get_resource_operation_info($resource, $class, $name = NULL) {
+function services_get_resource_operation_info($resource, $class, $name = NULL) {
   $op = NULL;
 
   if (isset($resource[$class])) {
@@ -712,15 +772,14 @@ function get_resource_operation_info($resource, $class, $name = NULL) {
  */
 function _services_resource_operation_settings(&$settings, $endpoint, $resource, $class, $name = NULL) {
   module_load_include('runtime.inc', 'services');
-
-  if ($rop = get_resource_operation_info($resource, $class, $name)) {
+  if ($rop = services_get_resource_operation_info($resource, $class, $name)) {
     $settings['enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enabled'),
       '#default_value' => !empty($rop['endpoint']) && $rop['endpoint']['enabled'],
     );
 
-    if ($rop['endpoint']['preprocess']) {
+    if (!empty($rop['endpoint']['preprocess'])) {
       $settings['preprocess'] = array(
         '#type' => 'item',
         '#title' => t('Preprocess function'),
@@ -728,7 +787,7 @@ function _services_resource_operation_settings(&$settings, $endpoint, $resource,
       );
     }
 
-    if ($rop['endpoint']['postprocess']) {
+    if (!empty($rop['endpoint']['postprocess'])) {
       $settings['preprocess'] = array(
         '#type' => 'item',
         '#title' => t('Postprocess function'),

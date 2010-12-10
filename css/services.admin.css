@@ -1,5 +1,38 @@
 /* $Id$ */
-
 #services-list-endpoint tr.services-endpoint-disabled {
-  color: #999;
+  background-color: #fcc;
+  border-color: #ebb;
+}
+#services-list-endpoint tr.services-endpoint-debug {
+  background-color: #ffd;
+  border-color: #eeb;
+}
+#services-list-endpoint tr.services-endpoint-enabled {
+  background-color: #dfd;
+  border-color: #beb;
+}
+#services-help-legend .services-endpoint-disabled {
+  background-color: #fcc;
+  border-color: #ebb;
+  display:inline;
+  padding: 5px;
+}
+#services-help-legend .services-endpoint-debug {
+  background-color: #ffd;
+  border-color: #eeb;
+  display:inline;
+  padding: 5px;
+}
+#services-help-legend .services-endpoint-enabled {
+  background-color: #dfd;
+  border-color: #beb;
+  display:inline;
+  padding: 5px;
+}
+#services-help-legend {
+  position:  relative;
+  display:inline;
+}
+#services-help-legend div{
+  border: 1px solid;
 }

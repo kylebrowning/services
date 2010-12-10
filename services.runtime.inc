@@ -88,31 +88,26 @@ class ServicesArgumentException extends ServicesException {
  *  An array containing information about the controller
  * @param array $args
  *  The arguments that should be passed to the controller.
+ * @param array $auth_args
+ *  The arguments that should be passed to the authentication module.
  * @param array $options
  *  Options for the execution. Use 'skip_authentication'=>TRUE to skip the
  *  services-specific authentication checks. Access checks will always be
  *  made.
  */
-function services_controller_execute($controller, $args = array(), $options = array()) {
-  // Check for missing arguments.
-  $hash_parameters = array();
-  foreach ($controller['args'] as $key => $arg) {
-    if (!$arg['optional']) {
-      if (!isset($args[$key]) && !is_array($args[$key]) && !is_bool($args[$key])) {
-        return services_error(t('Missing required argument !name.', array(
-          '!name' => $key,
-        )), 406);
-      }
-    }
+function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
+  $server_info =  services_server_info_object();
+  if($server_info->debug) {
+    watchdog('services', '<pre>Controller: '. print_r($controller, 1));
+    watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
   }
-
   // Check authentication
   if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
     $endpoint_name = services_get_server_info('endpoint');
     $endpoint = services_endpoint_load($endpoint_name);
 
     foreach ($endpoint->authentication as $auth_module => $settings) {
-      if ($auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args)) {
+      if ($auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args, $auth_args)) {
         return services_error($auth_error, 401);
       }
     }
@@ -148,15 +143,28 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // then change it back to server module root to handle return.
   $server_root = getcwd();
   $drupal_path = services_get_server_info('drupal_path');
-  if ($drupal_path) {
+  if (isset($drupal_path) && $drupal_path) {
     chdir($drupal_path);
   }
 
+  // Check if the arguments should be preprocessed
+  if (!empty($controller['endpoint']['preprocess'])) {
+    foreach ($controller['endpoint']['preprocess'] as $callable) {
+      call_user_func_array($callable, array(&$args, &$controller));
+    }
+  }
+
   // Execute the controller callback
+  if($server_info->debug) {
+    watchdog('services', '<pre>clled arguments: '. print_r($args, 1));
+  }
   $result = call_user_func_array($controller['callback'], $args);
 
-  if ($server_info) {
-    chdir($server_root);
+  // Check if the result should be post-processed
+  if (!empty($controller['endpoint']['postprocess'])) {
+    foreach ($controller['endpoint']['postprocess'] as $callable) {
+      call_user_func_array($callable, array(&$args, $controller));
+    }
   }
 
   return $result;
@@ -191,21 +199,30 @@ function services_authentication_info($module) {
  *  Optional. Second argument to pass to the callback.
  * @param string $arg3
  *  Optional. Third argument to pass to the callback.
+ * @param string $arg4
+ *  Optional. Fourth argument to pass to the callback.
  * @return mixed
+ *
+ * Aren't these really the following?
+ *  arg1 = Settings
+ *  arg2 = Method
+ *  arg3 = Controller
+ *  arg4 = Auth args  
+ *
  */
-function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL) {
+function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, $arg4 = NULL) {
   // Get information about the auth module
   $info = services_authentication_info($module);
   $func = $info && !empty($info[$method]) ? $info[$method] : FALSE;
   if ($func) {
-    if (!empty($info['#file'])) {
-      require_once(drupal_get_path('module', $module) . '/' . $info['#file']);
+    if (!empty($info['file'])) {
+      require_once(drupal_get_path('module', $module) . '/' . $info['file']);
     }
 
     if (is_callable($func)) {
       $args = func_get_args();
       // Replace module and method name and arg1 with reference to $arg1 and $arg2.
-      array_splice($args, 0, 4, array(&$arg1, &$arg2, &$arg3));
+      array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3, &$arg4));
       return call_user_func_array($func, $args);
     }
   }

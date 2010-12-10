@@ -5,9 +5,13 @@ package = Services
 core = 7.x
 php = 5.x
 
-dependencies[] = ctools
-
 files[] = services.module
-files[] = services.resource_build.inc
 files[] = services.admin.inc
+files[] = services.authentication.api.php
+files[] = services.install
+files[] = services.resource_build.inc
 files[] = services.runtime.inc
+files[] = services.servers.api.php
+files[] = serviers.services.api.php
+
+dependencies[] = ctools
