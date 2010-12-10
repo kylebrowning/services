@@ -181,12 +181,10 @@ function services_edit_endpoint($endpoint) {
 /**
  * Form to edit the settings of an endpoint.
  */
-function services_edit_form_endpoint(&$form_state, $form_info) {
-  list($endpoint) = $form_info['build_info']['args'];
+function services_edit_form_endpoint($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
   // Loading runtime include as needed by services_auth_info().
   module_load_include('runtime.inc', 'services');
-
-  $form = array();
 
   $form['eid'] = array(
     '#type'  => 'value',
@@ -346,8 +344,8 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
 /**
  * Page callback to export an endpoint to PHP code.
  */
-function services_export_endpoint(&$form_state, $form_info) {
-  list($endpoint) = $form_info['build_info']['args'];
+function services_export_endpoint($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
@@ -368,8 +366,8 @@ function services_export_endpoint(&$form_state, $form_info) {
 /**
  * Provide a form to confirm deletion of an endpoint.
  */
-function services_delete_confirm_endpoint(&$form_state, $form_info) {
-  list($endpoint) = $form_info['build_info']['args'];
+function services_delete_confirm_endpoint($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
@@ -475,11 +473,11 @@ function services_edit_endpoint_authentication($endpoint) {
 /**
  * Endpoint authentication configuration form.
  */
-function services_edit_form_endpoint_authentication(&$form_state, $endpoint) {
+function services_edit_form_endpoint_authentication($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
   // Loading runtime include as needed by services_authentication_info().
   module_load_include('runtime.inc', 'services');
 
-  $form = array();
   $auth_modules = module_implements('services_authentication_info');
 
   $form['endpoint_object'] = array(
@@ -552,11 +550,9 @@ function services_edit_endpoint_resources($endpoint) {
 /**
  * Form to add resources to an endpoint.
  */
-function services_edit_form_endpoint_resources(&$form_state, $form_info) {
-  list($endpoint) = $form_info['build_info']['args'];
+function services_edit_form_endpoint_resources($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
   module_load_include('resource_build.inc', 'services');
-
-  $form = array();
 
   $form['endpoint_object'] = array(
     '#type'  => 'value',
