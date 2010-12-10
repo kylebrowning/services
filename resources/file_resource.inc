@@ -11,7 +11,6 @@ function _file_resource_definition() {
     'file' => array(
 
       'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
-
       'create' => array(
         'help' => 'Creates a file',
         'callback' => '_file_resource_create',
@@ -43,6 +42,14 @@ function _file_resource_definition() {
             'source' => array('path' => '0'),
             'optional' => FALSE,
           ),
+          array(
+            'name'         => 'file_contents',
+            'type'         => 'int',
+            'description'  => t('To return file contents or not.'),
+            'source'       => 'data',
+            'optional'     => FALSE,
+            'default value' => TRUE,
+          ),
         ),
       ),
 
@@ -65,6 +72,7 @@ function _file_resource_definition() {
       'actions' => array(
         'nodeFiles' => array(
           'help'   => t('This method returns the files on a given node.'),
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
           'access callback' => '_file_resource_node_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
@@ -74,8 +82,16 @@ function _file_resource_definition() {
               'name'         => 'nid',
               'type'         => 'int',
               'description'  => t('The node id to load files for.'),
-              'source'       => array('path' => '0'),
+              'source'       => 'data',
               'optional'     => FALSE,
+            ),
+            array(
+              'name'         => 'file_contents',
+              'type'         => 'int',
+              'description'  => t('To return file contents or not.'),
+              'source'       => 'data',
+              'optional'     => FALSE,
+              'default value' => TRUE,
             ),
           ),
         ),
@@ -176,12 +192,14 @@ function _file_resource_create($file) {
  * @return
  *   The file
  */
-function _file_resource_retrieve($fid) {
+function _file_resource_retrieve($fid, $file_include_contents =  TRUE) {
   if ($file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid))) {
-    $filepath = file_create_path($file['filepath']);
-    $binaryfile = fopen($filepath, 'rb');
-    $file['file'] = base64_encode(fread($binaryfile, filesize($filepath)));
-    fclose($binaryfile);
+    if($file_include_contents) {
+      $filepath = file_create_path($file['filepath']);
+      $binaryfile = fopen($filepath, 'rb');
+      $file['file'] = base64_encode(fread($binaryfile, filesize($filepath)));
+      fclose($binaryfile);
+    }    
     return $file;
   }
   else {
@@ -197,7 +215,7 @@ function _file_resource_retrieve($fid) {
  * @return
  *   Array. A list of all files from the given node
  */
-function _file_resource_load_node_files($nid) {
+function _file_resource_load_node_files($nid, $file_include_contents = TRUE) {
   $node = node_load($nid);
   if (isset($node->files)) {
     $files = array();
@@ -211,10 +229,14 @@ function _file_resource_load_node_files($nid) {
       $send = array();
       foreach ($files as $file) {
         $file = array_shift($files);
-        $filepath = file_create_path($file->filepath);
-        $binaryfile = fopen($filepath, 'rb');
+        if($file_include_contents) {
+          $filepath = file_create_path($file->filepath);
+          $binaryfile = fopen($filepath, 'rb');
+          $file = base64_encode(fread($binaryfile, filesize($filepath)));
+          fclose($binaryfile);
+        }
         $send[$file->fid] = array(
-          'file'      => base64_encode(fread($binaryfile, filesize($filepath))),
+          'file'      => $file,
           'filename'  => $file->filename,
           'uid'       => $file->uid,
           'filemime'  => $file->filemime,
@@ -222,7 +244,6 @@ function _file_resource_load_node_files($nid) {
           'status'    => $file->status,
           'timestamp' => $file->timestamp
         );
-        fclose($binaryfile);
       }
     }
     return $send;
