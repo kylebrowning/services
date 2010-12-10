@@ -52,7 +52,7 @@
     $message = t('There should be a help message returned from services help.') ;
     $this->assertNotNull($result, $message) ;
 
-    $result = services_help('admin/build/services', array()) ;
+    $result = services_help('admin/config/services/services', array()) ;
     $message = t('There should be help text when going to the services endpoint administration page.') ;
     $this->assertNotNull($result, $message) ;
   }
@@ -61,7 +61,7 @@
    * Test services_perm results.
    */
   public function testServicesPerm() {
-    $resultArray = services_perm () ;
+    $resultArray = services_permission() ;
     $message = t('services_perm should return an array') ;
     $this->assertTrue(gettype($resultArray)=='array', $message) ;
 
@@ -100,9 +100,14 @@
    * Void. The asserts in the code provide feedback via the test harness.__PHP_Incomplete_Class
    */
   protected function helperPermExists($arrayToSearch, $perm) {
-    $result = array_search($perm, $arrayToSearch) ;
+    $result = array_key_exists($perm, $arrayToSearch);
+
     $message = t("There should be a '$perm' permission") ;
+    $this->assertTrue($result, $message);
+/*
+    $this->fail(print_r($arrayToSearch, 1));
     $this->assertNotIdentical($result, FALSE, $message) ;
+*/
   } // function
 
   /**
@@ -138,37 +143,37 @@
     $message = t('There should be 14 menu items') ;
     $this->assertEqual(count($items), 14, $message) ;
 
-    $menuItem = 'admin/build/services' ;
+    $menuItem = 'admin/config/services/services' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/list' ;
+    $menuItem = 'admin/config/services/services/list' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/add' ;
+    $menuItem = 'admin/config/services/services/add' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/edit' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/edit' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/authentication' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/authentication' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menutItem = 'admin/build/services/%services_endpoint/resources' ;
+    $menutItem = 'admin/config/services/services/%services_endpoint/resources' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/export' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/export' ;
     $this->helpMenuItem($menutItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/delete' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/delete' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/disable' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/disable' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/%services_endpoint/enable' ;
+    $menuItem = 'admin/config/services/services/%services_endpoint/enable' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    $menuItem = 'admin/build/services/ahah/security-options' ;
+    $menuItem = 'admin/config/services/services/ahah/security-options' ;
     $this->helpMenuItem($menuItem, $items) ;
 
     // cross domain tested separately as it does not share so many settings.
@@ -203,10 +208,9 @@
        'title'  => $this->randomName(20),
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
-       'services_use_content_permissions' => TRUE,
      );
 
-     $this->drupalPost('admin/build/services/add', $endpointSettings,
+     $this->drupalPost('admin/config/services/services/add', $endpointSettings,
        t('Save and proceed'));
      $this->assertResponse('200', t('Failed to create endpoint.'));
 
@@ -215,17 +219,17 @@
      $this->assertResponse('200', t('Failed to access endpoint menu path.'));
 
      // Check edit.
-     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
        . '/edit');
      $this->assertResponse('200', t('Failed to access endpoint edit path.')) ;
 
      // Check export.
-     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
        . '/export');
      $this->assertResponse('200', t('Failed to access endpoint export path.')) ;
 
      // Check delete.
-     $this->drupalGet('admin/build/services/' . $endpointSettings['name']
+     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
        . '/delete');
      $this->assertResponse('200', t('Failed to access endpoint delete path.')) ;
   }

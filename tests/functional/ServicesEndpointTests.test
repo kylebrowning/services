@@ -32,9 +32,9 @@
    public function testSuccessfulAddEndpoint() {
      $edit = $this->populateEndpointFAPI() ;
 
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', t('expected 200'));
-     $this->drupalGet('admin/build/services/list') ;
+     $this->drupalGet('admin/config/services/services/list') ;
      $this->assertResponse('200',t('expected 200'));
 
      $this->assertText($edit['title'], t('Endpoint path appears')) ;
@@ -49,7 +49,7 @@
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['path']) ;
 
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
 
      $this->assertText('Path to endpoint field is required.',
@@ -58,8 +58,6 @@
        t('Title field remains.')) ;
      $this->assertFieldByName('server', 'rest_server',
        t('Server is rest server')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
    }
 
    /**
@@ -69,7 +67,7 @@
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['title']) ;
 
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
 
      $this->assertText('Endpoint title field is required.',
@@ -78,8 +76,6 @@
        t('Name field remains.')) ;
      $this->assertFieldByName('server', 'rest_server',
        t('Server is rest server')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
    }
 
    /**
@@ -89,7 +85,7 @@
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['server']) ;
 
-     $this->drupalPost('admin/build/services/add', $edit,
+     $this->drupalPost('admin/config/services/services/add', $edit,
        t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
 
@@ -99,8 +95,6 @@
        t('Name field remains.')) ;
      $this->assertFieldByName('title', $edit['title'],
        t('Title field remains.')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
    }
 
    /*
@@ -121,7 +115,6 @@
        'title'  => $this->randomName(20),
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
-       'services_use_content_permissions' => TRUE,
-     ) ;
+     );
    }
 }

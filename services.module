@@ -159,26 +159,16 @@ function services_menu() {
     'page callback'     => 'services_crossdomain_xml',
     'type'              => MENU_CALLBACK,
   );
-
-  // Add menu items for the different endpoints
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
-    if (!empty($endpoint->resources) && $endpoint->status) { 
-      foreach ($endpoint->resources as $resource) {
-        if(!empty($resource['operations'])) {
-          foreach($resource['operations'] as $operation) {
-            if ($operation['enabled']) {
-              $items[$endpoint->path] = array(
-                'title'             => 'Services endpoint',
-                'access callback'   => 'services_access_menu',
-                'page callback'     => 'services_endpoint_callback',
-                'page arguments'    => array($endpoint->name),
-                'type'              => MENU_CALLBACK,
-              );
-            }
-          }
-        }
-      }
+    if ($endpoint->status) {
+      $items[$endpoint->path] = array(
+        'title'             => 'Services endpoint',
+        'access callback'   => 'services_access_menu',
+        'page callback'     => 'services_endpoint_callback',
+        'page arguments'    => array($endpoint->name),
+        'type'              => MENU_CALLBACK,
+      );
     }
   }
   return $items;

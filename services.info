@@ -13,5 +13,7 @@ files[] = services.resource_build.inc
 files[] = services.runtime.inc
 files[] = services.servers.api.php
 files[] = serviers.services.api.php
-
+files[] = tests/functional/NoAuthEndpointTestRunner.test
+files[] = tests/functional/ServicesEndpointTests.test
+files[] = tests/unit/TestServicesModule.test
 dependencies[] = ctools
