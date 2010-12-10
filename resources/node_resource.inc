@@ -66,6 +66,7 @@ function _node_resource_definition() {
           array(
             'name' => 'nid',
             'optional' => FALSE,
+            'type' => 'nid',
             'source' => array('path' => 0),
           ),
         ),

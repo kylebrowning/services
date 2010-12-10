@@ -29,7 +29,7 @@ function _user_resource_definition() {
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('create'),
-        'access arguments append' => FALSE,
+        'access arguments append' => TRUE,
         'args' => array(
           array(
             'name' => 'account',
@@ -72,7 +72,7 @@ function _user_resource_definition() {
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         'access callback' => '_user_resource_access',
         'access arguments' => array('delete'),
-        'access arguments append' => FALSE,
+        'access arguments append' => TRUE,
         'args' => array(
           array(
             'name' => 'nid',
@@ -432,18 +432,25 @@ function _user_resource_access($op = 'view', $args = array()) {
   global $user;
   switch($op) {
     case 'view':
-      $account = user_load($args[0]);
-      //Must return True if account is empty to issue correct HTTP Status code
-      if(empty($account)) {
-        return TRUE;
-      } else {
-        return user_view_access($account);
-      }      
+        $account = user_load($args[0]);
+        if(!$account->uid) {
+          return services_error('That user ID does not exist', 406);
+        }
+        return user_view_access($account);   
     case 'update':
-      $args[0] = $account;
+        $account = user_load($args[1]->uid);
+        if(!$account->uid) {
+          return services_error('That user ID does not exist', 406);
+        }      
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
+      return user_access('administer users');
     case 'delete':
+      $account = user_load($args[0]);
+      if(!$account->uid) {
+        return services_error('That user ID does not exist', 406);
+      }
       return user_access('administer users');
   }
+
 }

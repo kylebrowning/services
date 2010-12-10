@@ -16,7 +16,7 @@ class RESTServer {
 
     // Determine the request method
     $method = $_SERVER['REQUEST_METHOD'];
-    if ($method=='POST' && $_GET['_method']) {
+    if ($method=='POST' && (isset($_GET['_method']) && $_GET['_method'])) {
       $method = $_GET['_method'];
     }
     $path = explode('/', $canonical_path);
@@ -204,20 +204,9 @@ class RESTServer {
             }
           }
           else {
-            // When the type is 'array' or 'struct', we assume that it requires
-            // the posted data as one big chunk (as in when posting a new node.)
-            // Otherwise, retrieve each piece of data as individual named 
-            // arguments (as in when posting an action.)
-            if ($info['type'] == 'array' || $info['type'] == 'struct') {
-              $arguments[$i] = $sources[$info['source']];                
-            }
-            else {
-              //added so Default values in modules work as expected, otherwise they might 
-              //get set to NULL which is different than 0
-              //IE taxonomy_service_get_tree
-              if(isset($sources[$info['source']][$info['name']]))
-              $arguments[$i] = $sources[$info['source']][$info['name']];
-            }
+              if(isset($sources[$info['source']][$info['name']])) {
+                $arguments[$i] = $sources[$info['source']][$info['name']];
+              }
           }
           // Convert arrays to objects and objects to arrays to be more tolerant
           // towards client. Not all formats and languages handle arrays &
