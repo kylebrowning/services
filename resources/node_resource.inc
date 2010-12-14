@@ -344,7 +344,7 @@ function _node_resource_access($op = 'view', $args = array()) {
     $node = $args[0]->type;
     return node_access($op, $node);
   }
-  if($node->nid) {
+  if(isset($node->nid) && $node->nid) {
     return node_access($op, $node);
   } else {
     return services_error('Node id: '. $args[0]->nid .' could not be found', 404);

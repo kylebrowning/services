@@ -320,10 +320,15 @@ function services_endpoint_load($name) {
   $result = ctools_export_load_object('services_endpoint', 'names', array($name));
   if (isset($result[$name])) {
     return $result[$name];
-  }
+  } 
   else {
-    return FALSE;
+   $result =  db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
+   $matches = array();
+    while ($endpoint = db_fetch_object($result)) {
+      return $endpoint;
+    }
   }
+  return FALSE;
 }
 
 /**
@@ -334,6 +339,14 @@ function services_endpoint_load($name) {
  */
 function services_endpoint_load_all() {
   ctools_include('export');
+  if(!ctools_export_load_object('services_endpoint')) {
+   $result =  db_query("SELECT * FROM {services_endpoint}");
+   $matches = array();
+    while ($endpoint = db_fetch_object($result)) {
+      $matches[] = $endpoint;
+    }
+    return $matches;
+  }
   return ctools_export_load_object('services_endpoint');
 }
 
