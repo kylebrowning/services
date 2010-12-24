@@ -246,7 +246,7 @@ function services_edit_form_endpoint($form, &$form_state) {
     $auth_options = array();
     foreach ($auth_modules as $module) {
       $info = services_authentication_info($module);
-      $auth_options[$module] = $info['#title'];
+      $auth_options[$module] = $info['title'];
     }
 
     $form['authentication'] = array(

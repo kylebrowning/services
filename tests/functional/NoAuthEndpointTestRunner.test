@@ -25,12 +25,6 @@ require_once('ServicesEndpointTests.test') ;
     */
    public function setUp() {
      parent::setUp();
-
-     // Create and log in our privileged user.
-     $this->privilegedUser = $this->drupalCreateUser(array(
-         'administer services',
-        ));
-     $this->drupalLogin($this->privilegedUser);
    }
 
    /**

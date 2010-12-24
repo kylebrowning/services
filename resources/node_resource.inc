@@ -182,14 +182,12 @@ function _node_resource_create($node) {
     return services_error('Node type "'. $node->type .'" does not exist.', 406);
   }
   
-  
-  // Fetch $nid out of $form_state
-  $nid = $form_state['nid'];
 
   if ($errors = form_get_errors()) {
     return services_error(implode("\n", $errors), 406);
   }
-
+  // Fetch $nid out of $form_state
+  $nid = $form_state['nid'];
   // Only add the URI for servers that support it.
   $node = array('nid' => $nid);
   if ($uri = services_resource_uri(array('node', $nid))) {
@@ -253,7 +251,7 @@ function _node_resource_update($nid, $node) {
  **/
 function _node_resource_delete($nid) {
   node_delete($nid);
-  return TRUE;
+  return 1;
 }
 
 /**
@@ -333,7 +331,7 @@ function _node_resource_access($op = 'view', $args = array()) {
     $node = $args[0]->type;
     return node_access($op, $node);
   }
-  if($node->nid) {
+  if(isset($node->nid) && $node->nid) {
     return node_access($op, $node);
   } else {
     return services_error('Node id: '. $args[0]->nid .' could not be found', 404);

@@ -335,8 +335,13 @@ function services_endpoint_load($name) {
     return $result[$name];
   }
   else {
-    return FALSE;
+    $result =  db_query("SELECT * FROM {services_endpoint} WHERE name = :name", array(':name'=>$name));
+ 	  $matches = array();
+    foreach ($result as $endpoint) {
+      return $endpoint;
+    }
   }
+  return FALSE;
 }
 
 /**
@@ -347,7 +352,16 @@ function services_endpoint_load($name) {
  */
 function services_endpoint_load_all() {
   ctools_include('export');
-  return ctools_export_load_object('services_endpoint');
+  $matches = ctools_export_load_object('services_endpoint');
+  if(!$matches) {
+    $result =  db_query("SELECT * FROM {services_endpoint}");
+ 	  $matches = array();
+    foreach ($result as $endpoint) {
+      $matches[] = $endpoint;
+    }
+    return $matches;
+  }
+  return $matches;
 }
 
 /**

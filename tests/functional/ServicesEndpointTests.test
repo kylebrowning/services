@@ -7,13 +7,13 @@
  * Call the endpoint tests when no authentication is being used.
  *
  */
-
+require_once('ServicesWebTestCase.php') ;
 
 /**
  * Run test cases for the endpoint with no authentication turned on.
  *
  */
- class ServicesEndpointTests extends DrupalWebTestCase {
+ class ServicesEndpointTests extends ServicesWebTestCase {
 
 	/**
     * Implementation of setUp().
@@ -22,16 +22,34 @@
      parent::setUp(
      	'ctools',
      	'services',
-      'rest_server'
+      'rest_server',
+      'services_sessauth',
+      'inputstream'
      );
    }
-
+/**
+    * Test adding an endpoint succeeds.
+    */
+   public function testEndpointForm() {
+     $edit = $this->populateEndpointFAPI();
+     // Create and log in our privileged user.
+     $this->privilegedUser = $this->drupalCreateUser(array(
+         'administer services',
+     ));
+     $this->drupalLogin($this->privilegedUser);
+     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+     $this->drupalGet($edit['path']);
+   }
    /**
     * Test adding an endpoint succeeds.
     */
    public function testSuccessfulAddEndpoint() {
      $edit = $this->populateEndpointFAPI() ;
-
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer content types',
+    ));
+    $this->drupalLogin($this->privilegedUser);
      $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', t('expected 200'));
      $this->drupalGet('admin/config/services/services/list') ;
@@ -48,7 +66,11 @@
    public function testMissingPath() {
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['path']) ;
-
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer content types',
+    ));
+    $this->drupalLogin($this->privilegedUser);
      $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
 
@@ -66,7 +88,11 @@
    public function testMissingTitle() {
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['title']) ;
-
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer content types',
+    ));
+    $this->drupalLogin($this->privilegedUser);
      $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
 
@@ -84,7 +110,11 @@
    public function testMissingServer() {
      $edit = $this->populateEndpointFAPI() ;
      unset($edit['server']) ;
-
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer content types',
+    ));
+    $this->drupalLogin($this->privilegedUser);
      $this->drupalPost('admin/config/services/services/add', $edit,
        t('Save and proceed')) ;
      $this->assertResponse('200', 'expected 200');
@@ -95,26 +125,5 @@
        t('Name field remains.')) ;
      $this->assertFieldByName('title', $edit['title'],
        t('Title field remains.')) ;
-   }
-
-   /*
-    ------------------------------------
-    HELPER METHODS
-    ------------------------------------
-   */
-
-   /**
-    * Creates a data array for populating an endpoint creation form.
-    *
-    * @return
-    * An array of fields for fully populating an endpoint creation form.
-    */
-   public function populateEndpointFAPI() {
-     return array(
-       'name'   => 'mchnname',
-       'title'  => $this->randomName(20),
-       'path'   => $this->randomName(10),
-       'server' => 'rest_server',
-     );
    }
 }

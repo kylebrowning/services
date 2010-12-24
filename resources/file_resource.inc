@@ -42,6 +42,14 @@ function _file_resource_definition() {
             'source' => array('path' => '0'),
             'optional' => FALSE,
           ),
+          array(
+            'name'         => 'file_contents',
+            'type'         => 'int',
+            'description'  => t('To return file contents or not.'),
+            'source'       => 'data',
+            'optional'     => FALSE,
+            'default value' => TRUE,
+          ),
         ),
       ),
 
@@ -128,7 +136,6 @@ function _file_resource_create($file) {
     return services_error("Could not create destination directory for file.", 500);
   }
 
-      watchdog('services', '<pre>'. print_r($file, 1));
   $file->filemime = file_get_mimetype($file->filename);
 
   // Rename potentially executable files, to help prevent exploits.
