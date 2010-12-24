@@ -1,0 +1,303 @@
+<?php
+ /**
+ * @file
+ * Call the endpoint tests when no authentication is being used.
+ *
+ */
+
+require_once('ServicesWebTestCase.php') ;
+/**
+ * Run test cases for the endpoint with no authentication turned on.
+ *
+ */
+ class ServicesResourceNodeTests extends ServicesWebTestCase {
+ // Class variables
+  protected $privilegedUser = NULL ;
+
+   /**
+    * Implementation of setUp().
+    */
+   public function setUp() {
+     parent::setUp(
+      'autoload',
+     	'ctools',
+     	'services',
+      'rest_server',
+      'services_sessauth',
+      'inputstream'
+     );
+   }
+
+   /**
+    * Implementation of getInfo().
+    */
+   public static function getInfo() {
+     return array(
+       'name'        => t('Resource Node tests, no auth'),
+       'description' =>
+         t('Test the resource NODE methods and actions.'),
+       'group'       => t('Services'),
+     );
+   }
+/**
+    * testing node_resource Index
+    */
+   public function testNewEndpointResourceNodeIndex() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $responseArray = $this->servicesGet($endpoint->path.'/node');
+    $nodeResourceIndex = json_decode($responseArray['body']);
+    if($node->title == $nodeResourceIndex[0]->title) {
+      $this->pass('Successfully received Node info', 'NodeResource: Index');
+    } else {
+      $this->fail(t('Something went wrong. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Index');
+    }
+   }
+  /**
+    * testing node_resource Get
+    */
+   public function testNewEndpointResourceNodeGet() {
+     // Create and log in our privileged user.
+     $this->privilegedUser = $this->drupalCreateUser(array(
+         'administer services',
+     ));
+     $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $responseArray = $this->servicesGet($endpoint->path.'/node/'. $node->nid);
+    $nodeResourceGet = json_decode($responseArray['body']);
+    if($node->title == $nodeResourceGet->title) {
+      $this->pass('Successfully received Node info', 'NodeResource: Retrieve');
+    } else {
+      $this->fail(t('Something went wrong. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Retrieve');
+    }
+    //Verify node not Found
+    unset($node);
+    $responseArray = $this->servicesGet($endpoint->path.'/node/99');
+    if($responseArray['code'] == '404') {
+      $this->pass('Successfully was rejected to non existent node', 'NodeResource: Retrieve');
+    } else {
+      $this->pass('I didnt get rejected, bad news!', 'NodeResource: Retrieve');
+    }
+   }
+  /**
+    * testing node_resource Create
+    */
+   public function testEndpointResourceNodeCreate() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = array(
+      'node[title]' => 'testing',
+      'node[body]' => 'bodytest',
+      'node[type]' => 'story',
+      'node[name]' => $this->privilegedUser->name,
+    );
+    
+    $data = $this->services_build_postfields($node);
+    $responseArray = $this->servicesPost($endpoint->path.'/node', $data, array('Accept: application/json'));
+    $nodeResourceCreateReturn = json_decode($responseArray['body']);
+    
+    if(isset($nodeResourceCreateReturn->nid)) {
+      $this->pass('Node was successfully created',  'NodeResource: Create');
+      $newNode = node_load($nodeResourceCreateReturn->nid);
+      if($newNode->title = $node['node[title]']) {
+        $this->pass('Title was the same',  'NodeResource: Create');
+      } else {
+        $this->fail('Title was different', 'NodeResource: Create');
+      }
+      if($newNode->body = $node['node[body]']) {
+        $this->pass('Body was the same', 'NodeResource: Create');
+      } else {
+        $this->fail('Body was different', 'NodeResource: Create');
+      }
+    } else {
+      $this->fail(t('Creating the node failed. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Create');
+    }
+  }
+  /**
+    * testing node_resource Created make ure it fails with no perms
+    */
+   public function testEndpointResourceNodeCreateFail() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = array(
+      'node[title]' => 'testing',
+      'node[body]' => 'bodytest',
+      'node[type]' => 'story',
+      'node[name]' => $this->privilegedUser->name,
+    );
+    
+    $data = $this->services_build_postfields($node);
+    $responseArray = $this->servicesPost($endpoint->path.'/node', $data, array('Accept: application/json'));
+    $nodeResourceCreateReturn = json_decode($responseArray['body']);
+    
+    if($responseArray['code'] = 401) {
+      $this->pass('User with permissions cannot create node',  'NodeResource: Create');
+    } else {
+      $this->fail(t('User was able to create nodes without permission. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Create');
+    }
+  }
+  /**
+    * testing node_resource Validate missing Title
+    */
+   public function testEndpointResourceNodeCreateMissingTitle() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $node_update = array(
+      'node[title]' => '',
+      'node[body]' => 'bodytest',
+      'node[name]' => $this->privilegedUser->name,
+      'node[type]' => 'story',
+    );
+    
+    $data = $this->services_build_postfields($node_update);
+    $responseArray = $this->servicesPost($endpoint->path.'/node', $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
+    if(strpos($responseArray['status'], 'Title field is required.')) {
+      $this->pass('Node was not created, no title. ', 'NodeResource: Created');
+    }
+  }
+  /**
+    * testing node_resource Update
+    */
+   public function testEndpointResourceNodeUpdate() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $node_update = array(
+      'node[title]' => 'testing',
+      'node[body]' => 'bodytest',
+      'node[type]' => 'story',
+      'node[name]' => $this->privilegedUser->name,
+    );
+    
+    $data = $this->services_build_postfields($node_update);
+    $responseArray = $this->servicesPut($endpoint->path.'/node/'.$node->nid, $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
+    if(isset($nodeAfterUpdate->nid)) {
+      $this->pass('Node was successfully updated',  'NodeResource: Updated');
+      if($nodeAfterUpdate->title = $node_update['node[title]']) {
+        $this->pass('Title was the same',  'NodeResource: Update');
+      } else {
+        $this->fail('Title was different', 'NodeResource: Update');
+      }
+      if($nodeAfterUpdate->body = $node_update['node[body]']) {
+        $this->pass('Body was the same', 'NodeResource: Update');
+      } else {
+        $this->fail('Body was different', 'NodeResource: Update');
+      }
+    } else {
+      $this->fail(t('Updating the node failed. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Update');
+    }
+  }
+  /**
+    * testing node_resource Update fail with no permissions
+    */
+   public function testEndpointResourceNodeUpdatePermFail() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'create story content',
+       'edit own story content',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode(array('uid' => 1));
+    $node_update = array(
+      'node[title]' => 'testing',
+      'node[body]' => 'bodytest',
+      'node[type]' => 'story',
+    );
+    
+    $data = $this->services_build_postfields($node_update);
+    $responseArray = $this->servicesPut($endpoint->path.'/node/'.$node->nid, $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
+    if(isset($nodeAfterUpdate->nid)) {
+      $this->fail(t('Updating the node failed. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Update');
+    } else {
+      $this->pass(t('Updating the node failed. This is good!'), 'NodeResource: Update');
+    }
+  }
+  /**
+    * testing node_resource Update verify missing title
+    */
+   public function testEndpointResourceNodeUpdateMissingTitle() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $node_update = array(
+      'node[title]' => '',
+      'node[body]' => 'bodytest',
+      'node[name]' => $this->privilegedUser->name,
+    );
+    
+    $data = $this->services_build_postfields($node_update);
+    $responseArray = $this->servicesPut($endpoint->path.'/node/'.$node->nid, $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
+    if(strpos($responseArray['status'], 'Title field is required.')) {
+      $this->pass('Node was not created, no title. ', 'NodeResource: Update');
+    }
+  }
+  /**
+    * testing node_resource Delete
+    */
+   public function testEndpointResourceNodeDelete() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+       'administer services',
+       'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $endpoint =  $this->saveNewEndpoint();
+    $node = $this->drupalCreateNode();
+    $data = '';
+    $responseArray = $this->servicesDelete($endpoint->path.'/node/'.$node->nid, $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    if($responseArray['code'] == 200) {
+      $this->pass('Node was deleted.', 'NodeResource: Deleted');
+    } else {
+      $this->fail(t('Deleting the node failed. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Delete');
+    }
+    $responseArray = $this->servicesDelete($endpoint->path.'/node/'.$node->nid, $data, array('Accept: application/json'));
+    $nodeResourceUpdateReturn = json_decode($responseArray['body']);
+    if($responseArray['code'] == 200) {
+      $this->fail('Node was deleted. It shoudlnt have been because it doesnt exist', 'NodeResource: Deleted');
+    } else {
+      $this->pass(t('Was not abled to delete node because it doesnt exist. StatusCode: !status', array('!status' => $responseArray['status'])), 'NodeResource: Delete');
+    }
+  }
+}
