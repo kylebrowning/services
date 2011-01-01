@@ -80,6 +80,7 @@ function hook_services_resources() {
           ),
         ),
       ),
+    ),
 
     'actions' => array(
       'login' => array(
