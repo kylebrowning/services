@@ -107,7 +107,7 @@ function services_list_endpoint($js = NULL) {
     $rows[$endpoint->name] = array(
       'data' => array(
         'title' => array(
-          'data'  => $endpoint->title,
+          'data'  => check_plain($endpoint->title),
           'class' => array('services-endpoint-title'),
         ),
         'path' => array(
