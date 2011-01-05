@@ -185,7 +185,7 @@ class RESTServer {
 
     $defaults = array(
       'path' => $path,
-      'params' => $parameters,
+      'param' => $parameters,
       'data' => $data,
     );
     foreach ($defaults as $key => $data) {
@@ -300,7 +300,7 @@ class RESTServer {
             if (substr($value, 0, 1) == '"') {
               $value = stripcslashes(substr($value, 1, mb_strlen($value)-2));
             }
-            $ret_val['params'][$pm[1][$i]] = $value;
+            $ret_val['param'][$pm[1][$i]] = $value;
           }
         }
       }
