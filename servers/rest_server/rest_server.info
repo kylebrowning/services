@@ -14,6 +14,5 @@ files[] = lib/mimeparse.php
 files[] = lib/spyc.php
 
 dependencies[] = services
-dependencies[] = inputstream
 
 core = 7.x
