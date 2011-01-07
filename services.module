@@ -43,16 +43,6 @@ function services_perm() {
 }
 
 /**
- * Implementation of hook_hook_info().
- */
-function services_hook_info() {
-  $hooks['services_resources'] = array(
-    'group' => 'services',
-  );
-  return $hooks;
-}
-
-/**
  * Implementation of hook_menu().
  */
 function services_menu() {
