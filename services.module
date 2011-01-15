@@ -242,10 +242,10 @@ function services_endpoint_callback($endpoint_name) {
       'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
     ));
-   if($endpoint->debug) {
-     watchdog('services', 'Calling server :'. $server . '_server');
-     watchdog('services', 'Server Info Main Object<pre>'. print_r(services_server_info_object(), 1));
-   }
+    if($endpoint->debug) {
+      watchdog('services', 'Calling server: %server', array('%server' => $server . '_server'), WATCHDOG_DEBUG);
+      watchdog('services', 'Server info main object: <pre>@info</pre>', array('@info' => print_r(services_server_info_object(), TRUE)), WATCHDOG_DEBUG);
+    }
     print call_user_func($server . '_server');
 
     // Do not let this output
