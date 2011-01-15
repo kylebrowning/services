@@ -1,6 +1,0 @@
-; $Id$
-name = Session Authentication
-description = Provides session authentication for the services module
-package = Services - authentication
-dependencies[] = services
-core = 7.x

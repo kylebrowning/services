@@ -88,14 +88,12 @@ class ServicesArgumentException extends ServicesException {
  *  An array containing information about the controller
  * @param array $args
  *  The arguments that should be passed to the controller.
- * @param array $auth_args
- *  The arguments that should be passed to the authentication module.
  * @param array $options
  *  Options for the execution. Use 'skip_authentication'=>TRUE to skip the
  *  services-specific authentication checks. Access checks will always be
  *  made.
  */
-function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
+function services_controller_execute($controller, $args = array(), $options = array()) {
   $server_info =  services_server_info_object();
   if($server_info->debug) {
     watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
@@ -199,18 +197,15 @@ function services_authentication_info($module) {
  *  Optional. Second argument to pass to the callback.
  * @param string $arg3
  *  Optional. Third argument to pass to the callback.
- * @param string $arg4
- *  Optional. Fourth argument to pass to the callback.
  * @return mixed
  *
  * Aren't these really the following?
  *  arg1 = Settings
  *  arg2 = Method
  *  arg3 = Controller
- *  arg4 = Auth args  
  *
  */
-function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, $arg4 = NULL) {
+function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL) {
   // Get information about the auth module
   $info = services_authentication_info($module);
   $func = $info && !empty($info[$method]) ? $info[$method] : FALSE;
@@ -222,7 +217,7 @@ function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$
     if (is_callable($func)) {
       $args = func_get_args();
       // Replace module and method name and arg1 with reference to $arg1 and $arg2.
-      array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3, &$arg4));
+      array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3));
       return call_user_func_array($func, $args);
     }
   }
