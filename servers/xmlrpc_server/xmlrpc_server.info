@@ -1,6 +1,10 @@
 ; $Id$
 name = XMLRPC Server
-description = Provides an XMLRPC server.
+description = Provides a XMLRPC server.
 package = Services - servers
+
+files[] = xmlrpc_server.module
+
 dependencies[] = services
-core = 6.x
+
+core = 7.x
