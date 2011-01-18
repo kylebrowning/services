@@ -182,7 +182,7 @@ class RESTServer {
 
     $defaults = array(
       'path' => $path,
-      'params' => $parameters,
+      'param' => $parameters,
       'data' => $data,
     );
     foreach ($defaults as $key => $data) {
@@ -298,7 +298,7 @@ class RESTServer {
             if (substr($value, 0, 1) == '"') {
               $value = stripcslashes(substr($value, 1, mb_strlen($value)-2));
             }
-            $ret_val['params'][$pm[1][$i]] = $value;
+            $ret_val['param'][$pm[1][$i]] = $value;
           }
         }
       }
@@ -321,7 +321,7 @@ class RESTServer {
     $type = RESTServer::parseContentHeader($_SERVER['CONTENT_TYPE']);
     $disposition = RESTServer::parseContentHeader($_SERVER['HTTP_CONTENT_DISPOSITION']);
 
-    $filename = file_munge_filename(trim(basename(($disposition['params']['filename']))));
+    $filename = file_munge_filename(trim(basename(($disposition['param']['filename']))));
 
     // Rename potentially executable files, to help prevent exploits.
     if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $filename) && (substr($filename, -4) != '.txt')) {

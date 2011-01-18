@@ -56,7 +56,7 @@
   *     - description: Text describing this argument's usage.
   *     - optional: A boolean indicating whether or not this argument is optional.
   *     - source: Where this argument should be retrieved from. This can be
-  *       'data' (indicating the POST data), 'params' (indicating the query
+  *       'data' (indicating the POST data), 'param' (indicating the query
   *       string) or 'path' (indicating the url path). In the case of path,
   *       an additional parameter must be passed indicating the index to be used.
   *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
