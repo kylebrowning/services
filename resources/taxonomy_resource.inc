@@ -103,6 +103,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('The fields to retrieve, separated by comma.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> array(),
             ),
             array(
               'name'         => 'operator',
@@ -110,6 +111,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('How to interpret multiple IDs in the array. Can be "or" or "and".'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> 'or',
             ),
             array(
               'name'         => 'depth',
@@ -117,6 +119,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('How many levels deep to traverse the taxonomy tree. Can be a nonnegative integer or "all".'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> 0,
             ),
             array(
               'name'         => 'pager',
@@ -124,6 +127,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> TRUE,
             ),
             array(
               'name'         => 'order',
@@ -131,6 +135,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('The order clause for the query that retrieve the nodes.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> 'n.sticky DESC, n.created DESC',
             ),
           ),
         ),
@@ -230,7 +235,7 @@ function _taxonomy_resource_definition() {
               'source'       => 'data',
               'default value'      => 0,
               'optional'     => TRUE,
-            ), 
+            ),
             array(
               'name'         => 'maxdepth',
               'type'         => 'int',
@@ -412,10 +417,10 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
  *
  * @see
  *   taxonomy_select_nodes().
- * @return 
+ * @return
  *   An array of node objects.
  */
-function taxonomy_service_select_nodes($tids = '', $fields = array(), $operator = 'or', $depth = 0, $pager = TRUE, $order = 'n.sticky DESC, n.created DESC') {
+function taxonomy_service_select_nodes($tids, $fields, $operator, $depth, $pager, $order) {
   if(!is_array($tids)) {
    $tids =  explode(',', $tids);
   }
