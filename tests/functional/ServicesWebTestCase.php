@@ -1,97 +1,158 @@
 <?php
- class ServicesWebTestCase extends DrupalWebTestCase {
-  protected function servicesGet($url, $data = NULL, $parameters = NULL) {
-    $options = array();
-    $url = $this->getAbsoluteUrl($url);
-    $this->pass($url, 'URL');
-    $content = $this->curlExec(array(CURLOPT_HTTPGET => TRUE, CURLOPT_URL => url($url, $options), CURLOPT_NOBODY => FALSE, CURLOPT_RETURNTRANSFER => TRUE, CURLOPT_HEADER => TRUE, CURLOPT_HTTPHEADER => array("Accept: application/json")));
-    $info = curl_getinfo($this->curlHandle);
-    $header = substr($content, 0, $info['header_size']);
-    $status = strtok($header, "\r\n");  
-    $code = $info['http_code'];
-    $body = substr($content, -$info['download_content_length']);  
+// $Id$
+
+class ServicesWebTestCase extends DrupalWebTestCase {
+
+  protected function servicesGet($url, $data = NULL, $headers = array()) {
+    $options = array('query' => $data);
+    $url = url($this->getAbsoluteUrl($url) . '.php', $options);
+    $headers = array();
+    $content = $this->curlExec(array(
+      CURLOPT_HTTPGET => TRUE,
+      CURLOPT_URL => $url,
+      CURLOPT_NOBODY => FALSE,
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_HTTPHEADER => $headers
+    ));
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
     $this->verbose('GET request to: ' . $url .
-                   '<hr />Ending URL: ' . $this->getUrl() .
-                   '<hr />' . $content);
+                   '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
+                   '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
-  protected function servicesPost($url, $data = NULL, $headers = array()) {
+
+  protected function servicesPost($url, $data = array(), $headers = array()) {
     $options = array();
-    $url = $this->getAbsoluteUrl($url);
-    $this->pass($url, 'URL');
-    $content = $this->curlExec(array(CURLOPT_URL => $url, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $data, CURLOPT_HTTPHEADER => $headers, CURLOPT_RETURNTRANSFER => TRUE));
-    $info = curl_getinfo($this->curlHandle);
-    $header = substr($content, 0, $info['header_size']);
-    $status = strtok($header, "\r\n");  
-    $code = $info['http_code'];
-    $body = substr($content, -$info['download_content_length']);  
+    // Add .php to get serialized response.
+    $url = $this->getAbsoluteUrl($url) . '.php';
+
+    // Otherwise Services will reject arguments.
+    $headers = array("Content-type: application/x-www-form-urlencoded");
+    // Prepare arguments.
+    $post = http_build_query($data, '', '&');
+
+    $content = $this->curlExec(array(
+      CURLOPT_URL => $url,
+      CURLOPT_POST => TRUE,
+      CURLOPT_POSTFIELDS => $post,
+      CURLOPT_HTTPHEADER => $headers,
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE
+    ));
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
     $this->verbose('POST request to: ' . $url .
-                    'data: ' . $data .
-                   '<hr />Ending URL: ' . $this->getUrl() .
-                   '<hr />' . $content);
+                   '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
+                   '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
+                   '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
+
   protected function servicesPut($url, $data = NULL, $headers = array()) {
     $options = array();
-    $url = $this->getAbsoluteUrl($url);
-    $this->pass($url, 'URL');
-    $putData = tmpfile();
-    // Write the string to the temporary file
-    fwrite($putData, $data);
+    $url = $this->getAbsoluteUrl($url) . '.php';
+
+    $serialize_args = serialize($data);
+
+    // Set up headers so arguments will be unserialized.
+    $headers = array("Content-type: application/vnd.php.serialized; charset=iso-8859-1");
+
+    // Emulate file.
+    $putData = fopen('php://memory', 'rw+');
+    fwrite($putData, $serialize_args);
     fseek($putData, 0);
-    $content = $this->curlExec(array(CURLOPT_URL => $url,CURLOPT_RETURNTRANSFER => TRUE, CURLOPT_CUSTOMREQUEST => "PUT", CURLOPT_POSTFIELDS => $data, CURLOPT_HTTPHEADER => $headers, CURLOPT_INFILE =>$putData, CURLOPT_INFILESIZE => strlen($data)));
-    $info = curl_getinfo($this->curlHandle);
-    $header = substr($content, 0, $info['header_size']);
-    $status = strtok($header, "\r\n");  
-    $code = $info['http_code'];
-    $body = substr($content, -$info['download_content_length']);  
-    $this->verbose('PUT request to: ' . $url .
-                    'data: ' . $data .
-                   '<hr />Ending URL: ' . $this->getUrl() .
-                   '<hr />' . $content);
+
+    $content = $this->curlExec(array(
+      CURLOPT_URL => $url,
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_PUT => TRUE,
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_HTTPHEADER => $headers,
+      CURLOPT_INFILE => $putData,
+      CURLOPT_INFILESIZE => strlen($serialize_args)
+    ));
     fclose($putData);
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
+    $this->verbose('PUT request to: ' . $url .
+                   '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
+                   '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
+                   '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
+
   protected function servicesDelete($url, $data = NULL, $headers = array()) {
-    $options = array();
-    $url = $this->getAbsoluteUrl($url);
-    $this->pass($url, 'URL');
-    $content = $this->curlExec(array(CURLOPT_URL => $url, CURLOPT_CUSTOMREQUEST => "DELETE", CURLOPT_HTTPHEADER => $headers, CURLOPT_RETURNTRANSFER => TRUE));
+    $options = array('query' => $data);
+    $url = url($this->getAbsoluteUrl($url) . '.php', $options);
+
+    $content = $this->curlExec(array(
+      CURLOPT_URL => $url,
+      CURLOPT_CUSTOMREQUEST => "DELETE",
+      CURLOPT_HTTPHEADER => $headers,
+      CURLOPT_RETURNTRANSFER => TRUE
+    ));
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
+    $this->verbose('DELETE request to: ' . $url .
+                   '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
+                   '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
+                   '<hr />Raw response: ' . $content);
+    return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
+  }
+
+  /*
+  ------------------------------------
+  HELPER METHODS
+  ------------------------------------
+  */
+
+  /**
+   * Parse header.
+   *
+   * @param type $content
+   * @return type
+   */
+  function parseHeader($content) {
     $info = curl_getinfo($this->curlHandle);
     $header = substr($content, 0, $info['header_size']);
-    $status = strtok($header, "\r\n");  
+    $header = str_replace("HTTP/1.1 100 Continue\r\n\r\n", '', $header);
+    $status = strtok($header, "\r\n");
     $code = $info['http_code'];
-    $body = substr($content, -$info['download_content_length']);  
-    $this->verbose('DELETE request to: ' . $url .
-                    'data: ' . $data .
-                   '<hr />Ending URL: ' . $this->getUrl() .
-                   '<hr />' . $content);
-    return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
+    $body = unserialize(substr($content, $info['header_size'], strlen($content) - $info['header_size']));
+    return array($info, $header, $status, $code, $body);
   }
 
-   /*
-    ------------------------------------
-    HELPER METHODS
-    ------------------------------------
+  /**
+   * Creates a data array for populating an endpoint creation form.
+   *
+   * @return
+   * An array of fields for fully populating an endpoint creation form.
    */
+  public function populateEndpointFAPI() {
+    return array(
+      'name'   => 'machinename',
+      'title'  => $this->randomName(20),
+      'path'   => $this->randomName(10),
+      'server' => 'rest_server',
+      'services_use_content_permissions' => TRUE,
+    );
+  }
 
-   /**
-    * Creates a data array for populating an endpoint creation form.
-    *
-    * @return
-    * An array of fields for fully populating an endpoint creation form.
-    */
-   public function populateEndpointFAPI() {
-     return array(
-       'name'   => 'mchnname',
-       'title'  => $this->randomName(20),
-       'path'   => $this->randomName(10),
-       'server' => 'rest_server',
-       'services_use_content_permissions' => TRUE,
-     ) ;
-   }
-
-   public function saveNewEndpoint() {
+  public function saveNewEndpoint() {
     $edit = $this->populateEndpointFAPI() ;
     $endpoint = new stdClass;
     $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
@@ -270,38 +331,63 @@
     $endpoint->status = 1;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
-    if($endpoint->name == $edit['name']) {
-      $this->pass('Endpoint successfully created');  
-    } else {
-       $this->fail('Endpoint creation failed');  
-    }
-     $this->servicesGet($endpoint->path);
-     return $endpoint;
-   }
- /**
- * Builds out our post fields
- *
- */
-  public function services_build_postfields($data = array()) {
-    $post_data = '';  
-    if (is_array($data) && !empty($data)) {
-      array_walk($data, array($this, 'services_flatten_fields'));
-      $post_data = implode('&', $data);
-    }
-    if(is_object($data) && !empty($data)) {
-      array_walk(get_object_vars($data), array($this, 'services_flatten_fields'));
-      $post_data = implode('&', $data);
-    }
-    return $post_data;
+    $this->assertTrue($endpoint->name == $edit['name'], t('Endpoint successfully created'));
+    return $endpoint;
   }
-/**
- * Modifies our array data so we can turn it into a querystring
- * 
- * @param string $item - array value
- * @param string $key  - key of the array element
- */
-  public function services_flatten_fields(&$item, $key) {
-    $item = $key .'='. $item;
+
+  /**
+   * Performs a cURL exec with the specified options after calling curlConnect().
+   *
+   * @param $curl_options
+   *   Custom cURL options.
+   * @return
+   *   Content returned from the exec.
+   */
+  protected function curlExec($curl_options) {
+    $this->curlInitialize();
+    $url = empty($curl_options[CURLOPT_URL]) ? curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL) : $curl_options[CURLOPT_URL];
+    if (!empty($curl_options[CURLOPT_POST])) {
+      // This is a fix for the Curl library to prevent Expect: 100-continue
+      // headers in POST requests, that may cause unexpected HTTP response
+      // codes from some webservers (like lighttpd that returns a 417 error
+      // code). It is done by setting an empty "Expect" header field that is
+      // not overwritten by Curl.
+      $curl_options[CURLOPT_HTTPHEADER][] = 'Expect:';
+    }
+    curl_setopt_array($this->curlHandle, $this->additionalCurlOptions + $curl_options);
+
+    // Reset headers and the session ID.
+    $this->session_id = NULL;
+    $this->headers = array();
+
+    $this->drupalSetContent(curl_exec($this->curlHandle), curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL));
+
+    // Analyze the method for log message.
+    $method = '';
+    if (!empty($curl_options[CURLOPT_NOBODY])) {
+      $method = 'HEAD';
+    }
+
+    if (empty($method) && !empty($curl_options[CURLOPT_PUT])) {
+      $method = 'PUT';
+    }
+
+    if (empty($method) && !empty($curl_options[CURLOPT_CUSTOMREQUEST])) {
+      $method = $curl_options[CURLOPT_CUSTOMREQUEST];
+    }
+
+    if (empty($method)) {
+      $method = empty($curl_options[CURLOPT_POSTFIELDS]) ? 'GET' : 'POST';
+    }
+
+    $message_vars = array(
+      '!method' => $method,
+      '@url'    => $url,
+      '@status' => curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE),
+      '!length' => format_size(strlen($this->content))
+    );
+    $message = t('!method @url returned @status (!length).', $message_vars);
+    $this->assertTrue($this->content !== FALSE, $message, t('Browser'));
+    return $this->drupalGetContent();
   }
 }
-?>

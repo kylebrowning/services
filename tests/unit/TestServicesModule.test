@@ -105,28 +105,6 @@
     $this->assertNotIdentical($result, FALSE, $message) ;
   } // function
 
-  /**
-   * Test hook_hook_info implementation.
-   */
-  public function testHookHookInfo() {
-    $results = services_hook_info() ;
-
-    $message = t('The \'services_resources\' key should be set in the returned array') ;
-    $this->assertTrue(isset($results['services_resources']), $message) ;
-
-    $message = t('hook_hook_info value should be an array') ;
-    $this->assertTrue((gettype($results['services_resources'])=='array'), $message) ;
-
-    $message = t('Should have added one element to the array') ;
-    $this->assertEqual(count($results['services_resources']), 1, $message) ;
-
-    $message = t('Key \'group\' should exist') ;
-    $this->assertTrue(isset($results['services_resources']['group']), $message) ;
-
-    $message = t('Value for key \'group\' should be \'services\'') ;
-    $this->assertEqual($results['services_resources']['group'], 'services',
-      $message) ;
-  } // function
 
   /**
    * Test hook_menu implementation.

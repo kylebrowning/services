@@ -331,7 +331,7 @@ function _user_resource_login($username, $password) {
 
   $user = user_authenticate(array('name' => $username, 'pass' => $password));
 
-  if ($user->uid) {
+  if (isset($user->uid) && $user->uid) {
     // Regenerate the session ID to prevent against session fixation attacks.
     sess_regenerate();
     module_invoke_all('user', 'login', NULL, $user);
@@ -394,7 +394,7 @@ function _user_resource_logout() {
  **/
 function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   $parameters = (array) $parameters;
-  $schema = drupal_get_schema('node');
+  $schema = drupal_get_schema('users');
   $where = array();
   $fields = db_escape_string($fields);
 
@@ -402,7 +402,7 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   if (!user_access('administer users')) {
     $parameters['active'] = 1;
   }
- 
+
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
   foreach ($parameters as $field => $value) {
@@ -410,7 +410,7 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   }
 
   // Now implode that array into an actual WHERE clause.
-  $where = !empty($where) ? ' WHERE '. db_escape_string(implode(' AND ', $where)) : '';
+  $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
   $sql = "SELECT $fields FROM {users} $where";
   $result = db_query_range($sql, $parameters, $page * 20, 20);
 
