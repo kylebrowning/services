@@ -211,7 +211,7 @@ function services_endpoint_callback($endpoint_name) {
   if (function_exists($server . '_server')) {
     // call the server
     if($endpoint->debug) {
-     watchdog('services', 'Calling server :'. $server . '_server');
+      watchdog('services', 'Calling server: %server', array('%server' => $server . '_server'), WATCHDOG_DEBUG);
     }
     services_set_server_info_from_array(array(
       'module'        => $server,
@@ -221,7 +221,7 @@ function services_endpoint_callback($endpoint_name) {
       'drupal_path'   => getcwd(),
     ));
     if($endpoint->debug) {
-      watchdog('services', 'Server Info Main Object<pre>'. print_r(services_server_info_object(), 1));
+      watchdog('services', 'Server info main object: <pre>@info</pre>', array('@info' => print_r(services_server_info_object(), TRUE)), WATCHDOG_DEBUG);
     }
     print call_user_func($server . '_server');
 

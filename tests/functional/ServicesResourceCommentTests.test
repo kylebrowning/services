@@ -1,0 +1,274 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Call the endpoint tests when no authentication is being used.
+ *
+ */
+
+require_once('ServicesWebTestCase.php') ;
+
+/**
+ * Run test cases for the endpoint with no authentication turned on.
+ *
+ */
+class ServicesResourceCommentTests extends ServicesWebtestCase {
+  // Class variables
+  protected $privileged_user = NULL ;
+  // Endpoint details.
+  protected $endpoint = NULL;
+
+  /**
+   * Implementation of setUp().
+   */
+  public function setUp() {
+    parent::setUp(
+      'comment',
+      'autoload',
+      'ctools',
+      'services',
+      'rest_server',
+      'services_sessauth',
+      'inputstream'
+    );
+    // Set up endpoint.
+    $this->endpoint =  $this->saveNewEndpoint();
+    // Set up privileged user and login.
+    $this->privileged_user = $this->drupalCreateUser(array('administer nodes', 'administer comments'));
+    $this->drupalLogin($this->privileged_user);
+
+  }
+
+  /**
+   * Implementation of getInfo().
+   */
+  public static function getInfo() {
+   return array(
+     'name'        => t('Resource Comment'),
+     'description' => t('Test the resource Comment methods and actions.'),
+     'group'       => t('Services'),
+   );
+  }
+
+  /**
+   * Test create method.
+   */
+  function testCommentCreate() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+    $response = $this->servicesPost($path . '/comment', array('comment' => $comment));
+
+    $cid = $response['body']->cid;
+    $comment['cid'] = $cid;
+
+    $comment_load = (array)_comment_load($cid);
+    $comment_intersect = array_intersect_assoc($comment_load, $comment);
+
+    $this->assertEqual($comment, $comment_intersect, t('Comment created properly.'), 'CommentResource: Create');
+  }
+
+  /**
+   * Test retrieve method.
+   */
+  function testCommentRetrieve() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+
+    $cid = comment_save((array) $comment);
+    $comment['cid'] = $cid;
+
+    $response = $this->servicesGet($path . '/comment/' . $cid);
+
+    $comment_retrieve = (array)$response['body'];
+
+    $comment_intersect = array_intersect_assoc($comment_retrieve, $comment);
+
+    $this->assertEqual($comment, $comment_intersect, t('Comment retrieved properly.'), 'CommentResource: Retrieve');
+  }
+
+  /**
+   * Test update method.
+   */
+  function testCommentUpdate() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+
+    $cid = comment_save((array) $comment);
+    $comment['cid'] = $cid;
+
+    $comment_update = $comment;
+    $comment_update['subject'] = $this->randomString();
+    $comment_update['comment'] = $this->randomString();
+
+    $response = $this->servicesPut($path . '/comment/' . $cid, array('data' => $comment_update));
+
+    $comment_load = (array)_comment_load($cid);
+
+    $comment_intersect = array_intersect_assoc($comment_load, $comment_update);
+
+    $this->assertEqual($comment_update, $comment_intersect, t('Comment updated properly.'), 'CommentResource: Update');
+  }
+
+  /**
+   * Test delete method.
+   */
+  function testCommentDelete() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+
+    $cid = comment_save((array) $comment);
+    $comment['cid'] = $cid;
+
+    $response = $this->servicesDelete($path . '/comment/' . $cid);
+
+    $comment_load = _comment_load($cid);
+
+    $this->assertTrue(empty($comment_load), t('Comment deleted properly.'), 'CommentResource: Delete');
+  }
+
+  /**
+   * Test loadNodeComments method.
+   */
+  function testCommentLoadNodeComments() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+    $nid = $node->nid;
+
+    // Generate 15 comments for node.
+    $comments = array();
+    for ($i = 0; $i < 15; $i++) {
+      $comment = array(
+        'uid' => $this->privileged_user->uid,
+        'nid' => $nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+
+      $cid = comment_save((array) $comment);
+
+      $comments[] = _comment_load($cid);
+    }
+    $comments = array_reverse($comments);
+
+    // Generate some comments for another node.
+    $settings = array('comment' => 1);
+    $node2 = $this->drupalCreateNode($settings);
+    for ($i = 0; $i < 5; $i++) {
+      $comment = array(
+        'uid' => $this->privileged_user->uid,
+        'nid' => $node2->nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+
+      $cid = comment_save((array) $comment);
+    }
+
+    // Load all comments of the first node.
+   $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
+    $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
+
+    // Load only 5 comments of the first node.
+    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5));
+    $this->assertEqual(array_slice($comments, 0, 5), $response['body'], t('Received last 5 comments.'), 'CommentResource: loadNodeComments');
+
+    // Load only 5 comments of the first node starting from fifth comment.
+    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5, 'start' => 5));
+    $this->assertEqual(array_slice($comments, 5, 5), $response['body'], t('Received 5 comments starting from fifth comment.'), 'CommentResource: loadNodeComments');
+  }
+
+  /**
+   * Test countAll method.
+   */
+  function testCommentCountAll() {
+    $path = $this->endpoint->path;
+    // Generate comments.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+    for ($i = 0; $i < 5; $i++) {
+      $comment = array(
+        'uid' => $this->privileged_user->uid,
+        'nid' => $node->nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+      $cid = comment_save((array) $comment);
+    }
+
+    $response = $this->servicesPost($path . '/comment/countAll', array('nid' => $node->nid));
+    $this->assertEqual($response['body'], 5, t('Counted number of comments properly.'), 'CommentResource: countAll');
+  }
+
+  /**
+   * Test countNew method.
+   */
+  function testCommentCountNew() {
+    $path = $this->endpoint->path;
+    // Generate comments.
+    $settings = array('comment' => 1);
+    $node = $this->drupalCreateNode($settings);
+    for ($i = 0; $i < 5; $i++) {
+      $comment = array(
+        'uid' => $this->privileged_user->uid,
+        'nid' => $node->nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+      $cid = comment_save((array) $comment);
+      $comments[] = _comment_load($cid);
+      sleep(1);
+    }
+
+    $response = $this->servicesPost($path . '/comment/countNew', array('nid' => $node->nid));
+    $this->assertEqual($response['body'], 5, t('Received number of all new comments.'), 'CommentResource: countNew');
+
+    $since = $comments[2]->timestamp;
+
+    $response = $this->servicesPost($path . '/comment/countNew', array('nid' => $node->nid, 'since' => $since));
+    $this->assertEqual($response['body'], 2, t('Received number of new comments.'), 'CommentResource: countNew');
+  }
+}

@@ -99,8 +99,8 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
   // Check for missing arguments.
   $server_info =  services_server_info_object();
   if($server_info->debug) {
-    watchdog('services', '<pre>Controller: '. print_r($controller, 1));
-    watchdog('services', '<pre>Passed arguments: '. print_r($args, 1));
+    watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
+    watchdog('services', 'Passed arguments: <pre>@arguments</pre>', array('@arguments' => print_r($args, TRUE)), WATCHDOG_DEBUG);
   }
 
   // Check authentication
