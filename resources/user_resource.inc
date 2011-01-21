@@ -352,6 +352,7 @@ function _user_resource_login($username, $password) {
     return $return;
   }
   session_destroy();
+  watchdog('user', 'Invalid login attempt.', array('%name' => theme('placeholder', $user->name)));
   return services_error(t('Wrong username or password.'), 401);
 }
 

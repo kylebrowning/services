@@ -32,20 +32,20 @@ function services_help($path, $arg) {
 function services_permission() {
   return array(
     'administer services' => array(
-      'title' => t('Administer services'), 
+      'title' => t('Administer services'),
       'description' => t('Configure and setup services module.'),
     ),
     // File resource permissions
     'get any binary files' => array(
-      'title' => t('Get any binary files'), 
+      'title' => t('Get any binary files'),
       'description' => t(''),
     ),
     'get own binary files' => array(
-      'title' => t('Get own binary files'), 
+      'title' => t('Get own binary files'),
       'description' => t(''),
     ),
     'save file information' => array(
-      'title' => t('Save file information'), 
+      'title' => t('Save file information'),
       'description' => t(''),
     ),
     // System resource permissions
@@ -54,7 +54,7 @@ function services_permission() {
       'description' => t(''),
     ),
     'set a system variable' => array(
-      'title' => t('Set a system variable'), 
+      'title' => t('Set a system variable'),
       'description' => t(''),
     ),
   );
@@ -175,10 +175,10 @@ function services_menu() {
 }
 
 /**
- * Access callback that always returns TRUE. 
+ * Access callback that always returns TRUE.
  *
- * This callback is necessary for services like login and logout that should 
- * always be wide open and accessible. 
+ * This callback is necessary for services like login and logout that should
+ * always be wide open and accessible.
  *
  * *** USE THIS WITH GREAT CAUTION ***
  *
@@ -468,7 +468,7 @@ function services_controllers_list($endpoint) {
         $controllers[] = $resource_name . '.' . $op;
       }
     }
- 
+
     // Handle extended operatios
     foreach ($ops as $op) {
       if (isset($res[$op])) {
@@ -498,10 +498,10 @@ function services_controller_get($name, $endpoint) {
 
   if (isset($resources[$resource_name])) {
     $res = $resources[$resource_name];
-    
+
     if (isset($res[$method])) {
       return $res[$method];
-    } 
+    }
     else {
       // Handle extended operatios
       foreach ($ops as $op) {

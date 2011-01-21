@@ -145,13 +145,16 @@ function services_list_endpoint($js = NULL) {
     );
   }
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
-  return drupal_render($table = array(
+
+  $build['table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('id' => array('services-list-endpoint')),
     '#empty' => t('No endpoints defined'),
-  ));
+  );
+
+  return $build;
 }
 
 /**
@@ -511,7 +514,7 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
           '#title' => $info['title'],
           '#tree' => TRUE,
         ) + services_auth_invoke($module, 'security_settings', $settings);
-      } 
+      }
     }
   }
 
