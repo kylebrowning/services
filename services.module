@@ -150,10 +150,10 @@ function services_menu() {
 }
 
 /**
- * Access callback that always returns TRUE. 
+ * Access callback that always returns TRUE.
  *
- * This callback is necessary for services like login and logout that should 
- * always be wide open and accessible. 
+ * This callback is necessary for services like login and logout that should
+ * always be wide open and accessible.
  *
  * *** USE THIS WITH GREAT CAUTION ***
  *
@@ -443,7 +443,7 @@ function services_controllers_list($endpoint) {
         $controllers[] = $resource_name . '.' . $op;
       }
     }
- 
+
     // Handle extended operatios
     foreach ($ops as $op) {
       if (isset($res[$op])) {
@@ -473,10 +473,10 @@ function services_controller_get($name, $endpoint) {
 
   if (isset($resources[$resource_name])) {
     $res = $resources[$resource_name];
-    
+
     if (isset($res[$method])) {
       return $res[$method];
-    } 
+    }
     else {
       // Handle extended operatios
       foreach ($ops as $op) {

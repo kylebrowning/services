@@ -189,20 +189,6 @@ function _comment_resource_create($comment) {
     return services_error(t("No node specified."));
   }
 
-  // If a cid is present then the user is trying to edit an existing comment.
-  if (isset($comment->cid) && ($comment->cid != 0)) {
-    $initial_comment = _comment_load($comment->cid);
-    $admin = user_access("administer comments");
-
-    if ($initial_comment->uid == 0 && !$admin) {
-      return services_error(t("Anonymous comments can't be edited"));
-    }
-
-    if (($initial_comment->uid != $comment->uid || comment_num_replies($comment->cid) != 0) && !$admin) {
-      return services_error(t("User does not have permission to edit this comment"));
-    }
-  }
-
   // Can I just make a note here about how stupid it is that comment_load returns
   // an object but comment_save expects an array?
   $cid = comment_save((array) $comment);

@@ -496,7 +496,7 @@ function services_edit_form_endpoint_authentication(&$form_state, $endpoint) {
           '#title' => $info['title'],
           '#tree' => TRUE,
         ) + services_auth_invoke($module, 'security_settings', $settings);
-      } 
+      }
     }
   }
 
