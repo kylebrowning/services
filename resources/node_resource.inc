@@ -112,7 +112,7 @@ function _node_resource_definition() {
  * Returns the results of a node_load() for the specified node.
  *
  * This returned node may optionally take content_permissions settings into
- * account, based on a configuration setting. 
+ * account, based on a configuration setting.
  *
  * @param $nid
  *   NID of the node we want to return.
@@ -160,7 +160,7 @@ function _node_resource_create($node) {
   $values = (array)$node;
   $form_state = array();
   $form_state['values'] = $values;
-  $form_state['values']['op'] = t('Save');  
+  $form_state['values']['op'] = t('Save');
 
   //Wanted to return a gracefull error instead of a blank nid, this should allow for that.
   $types = node_type_get_types();
@@ -169,7 +169,7 @@ function _node_resource_create($node) {
   } else {
     return services_error('Node type "'. $node->type .'" does not exist.', 406);
   }
-  
+
 
   if ($errors = form_get_errors()) {
     return services_error(implode("\n", $errors), 406);
@@ -205,6 +205,7 @@ function _node_resource_update($nid, $node) {
   $node->nid = $nid;
 
   $old_node = node_load($node->nid);
+  node_object_prepare($old_node);
   if ($old_node->nid) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
@@ -255,14 +256,14 @@ function _node_resource_delete($nid) {
  * @param $page
  *   Page number of results to return (in pages of 20).
  * @param $fields
- *   The fields you want returned. 
+ *   The fields you want returned.
  * @param $parameters
  *   An array of fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of node objects.
  *
- * @todo 
+ * @todo
  *   Evaluate the functionality here in general. Particularly around
  *     - Do we need fields at all? Should this just return full nodes?
  *     - Is there an easier syntax we can define which can make the urls
@@ -270,20 +271,20 @@ function _node_resource_delete($nid) {
  **/
 function _node_resource_index($page = 1, $fields = '*', $parameters = array()) {
   $node_select = db_select('node', 'n')->extend('PagerDefault');
-  if($fields == '*') { 
-    $node_select->fields('n');  
+  if($fields == '*') {
+    $node_select->fields('n');
   } else {
     $fields = explode(',', $fields);
     $node_select->fields('n', $fields);
   }
   $node_select->orderBy('sticky', 'DESC');
   $node_select->orderBy('created', 'DESC');
-  if (!user_access('administer nodes')) {	
-      $node_select->condition('status', 1);    
+  if (!user_access('administer nodes')) {
+      $node_select->condition('status', 1);
   }
   $node_select->limit($page * 20);
   $result = $node_select->execute();
-  foreach($result as $node) {  
+  foreach($result as $node) {
     if ($uri = services_resource_uri(array('node', $node->nid))) {
       $node->uri = $uri;
     }
