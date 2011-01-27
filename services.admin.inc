@@ -303,7 +303,7 @@ function services_edit_form_endpoint_submit($form, &$form_state) {
   $endpoint->title          = $form_state['values']['title'];
   $endpoint->server         = $form_state['values']['server'];
   $endpoint->path           = $form_state['values']['path'];
-
+  variable_set('services_use_content_permissions', $form_state['values']['services_use_content_permissions']);
   // Set the authentication modules, and preserve the settings for modules
   // that already exist.
   $auth = array();
