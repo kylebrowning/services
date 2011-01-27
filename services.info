@@ -15,6 +15,7 @@ files[] = services.servers.api.php
 files[] = serviers.services.api.php
 files[] = tests/functional/NoAuthEndpointTestRunner.test
 files[] = tests/functional/ServicesResourceNodeTests.test
+files[] = tests/functional/ServicesResourceUserTests.test
 files[] = tests/functional/ServicesEndpointTests.test
 files[] = tests/unit/TestServicesModule.test
 dependencies[] = ctools
