@@ -316,8 +316,12 @@ function _node_resource_access($op = 'view', $args = array()) {
     $node = node_load($args[0]->nid);
   }
   else if ($op == 'create') {
-    $node = $args[0]->type;
-    return node_access($op, $node);
+    if(isset($args[0]->type)) {
+      $node = $args[0]->type;
+      return node_access($op, $node);
+    } else {
+      return services_error('Node type is required', 406);
+    }
   }
   if(isset($node->nid) && $node->nid) {
     return node_access($op, $node);
@@ -325,3 +329,4 @@ function _node_resource_access($op = 'view', $args = array()) {
     return services_error('Node id: '. $args[0]->nid .' could not be found', 404);
   }
 }
+
