@@ -140,8 +140,8 @@
     // see how many with no endpoints
     $items = services_menu() ;
 
-    $message = t('There should be 14 menu items') ;
-    $this->assertEqual(count($items), 14, $message) ;
+    $message = t('There should be 13 menu items') ;
+    $this->assertEqual(count($items), 13, $message) ;
 
     $menuItem = 'admin/config/services/services' ;
     $this->helpMenuItem($menuItem, $items) ;
@@ -175,27 +175,6 @@
 
     $menuItem = 'admin/config/services/services/ahah/security-options' ;
     $this->helpMenuItem($menuItem, $items) ;
-
-    // cross domain tested separately as it does not share so many settings.
-    $menuItem = 'crossdomain.xml' ;
-
-    $message = t('crossdomain.xml should have an array of 3 values') ;
-    $this->assertEqual(count($items['crossdomain.xml']), 3, $message) ;
-
-    $message = t('crossdomain.xml should have \'access callback\' '
-      . '=> \'services_access_menu\'') ;
-    $this->assertEqual($items['crossdomain.xml']['access callback'],
-      'services_access_menu', $message) ;
-
-    $message = t('crossdomain.xml should have \'page callback\' '
-      . '=> \'services_crossdomain_xml\'') ;
-    $this->assertEqual($items['crossdomain.xml']['page callback'],
-      'services_crossdomain_xml', $message) ;
-
-   $message = t('crossdomain.xml should have \'page callback\' '
-      . '=> \'services_crossdomain_xml\'') ;
-    $this->assertEqual($items['crossdomain.xml']['page callback'],
-      'services_crossdomain_xml', $message) ;
   } // function
 
   /**
