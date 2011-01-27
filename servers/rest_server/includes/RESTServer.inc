@@ -523,27 +523,26 @@ class RESTServer {
 
   private function resolveController($resource, $method, $path) {
     $pc = count($path);
+    $action_mapping = array(
+      'GET' => 'retrieve',
+      'POST' => 'create',
+      'PUT' => 'update',
+      'DELETE' => 'delete',
+    );
     // Use the index handler for all empty path request, except on POST
     if (!$pc && $method!='POST') {
       return isset($resource['index']) ? $resource['index'] : NULL;
     }
     // Detect the standard crud operations
     else if (
-        ($pc==1 && ($method=='GET' || $method=='PUT' || $method=='DELETE')) ||
-        ($pc==0 && $method='POST')) {
-      $action_mapping = array(
-        'GET' => 'retrieve',
-        'POST' => 'create',
-        'PUT' => 'update',
-        'DELETE' => 'delete',
-      );
-      if (isset($resource[$action_mapping[$method]])) {
-        $controller = $resource[$action_mapping[$method]];
-        if (isset($resource['file'])) {
-          $controller['file'] = $resource['file'];
-        }
-        return $controller;
+         (($pc==1 && ($method=='GET' || $method=='PUT' || $method=='DELETE')) ||
+          ($pc==0 && $method='POST'))
+      && (isset($resource[$action_mapping[$method]]))) {
+      $controller = $resource[$action_mapping[$method]];
+      if (isset($resource['file'])) {
+        $controller['file'] = $resource['file'];
       }
+      return $controller;
     }
     // Detect relationship requests
     else if ($pc>=2 && $method=='GET') {
@@ -553,7 +552,7 @@ class RESTServer {
       }
     }
     // Detect action requests
-    else if ($pc==1 && $method=='POST') {
+    else if ($pc==1 && isset($resource['actions'][$path[0]])) {
       return $resource['actions'][$path[0]];
     }
     // Detect action requests targeted at specific resources
