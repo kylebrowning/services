@@ -148,7 +148,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       'title'  => $this->randomName(20),
       'path'   => $this->randomName(10),
       'server' => 'rest_server',
-      'services_use_content_permissions' => TRUE,
     );
   }
 
