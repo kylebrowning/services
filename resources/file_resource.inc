@@ -154,7 +154,10 @@ function _file_resource_create($file) {
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
     return services_error("Could not write file to destination", 500);
   }
-
+  
+  //Required to be able to reference this file.
+  file_usage_add($file, 'services', 'files', $file->fid);
+  
   // hook_file_insert() requires an object
   if (empty($update)) {
     foreach (module_implements('file_insert') as $module) {
@@ -236,7 +239,7 @@ function _file_resource_load_node_files($nid, $include_file_contents = TRUE) {
  */
 function _file_resource_delete($fid) {
   $file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
-
+  file_usage_delete($file, 'services', 'files', $file['fid']);
   return file_delete($file['filepath']);
 }
 
