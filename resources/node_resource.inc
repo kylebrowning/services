@@ -272,6 +272,7 @@ function _node_resource_delete($nid) {
  **/
 function _node_resource_index($page = 1, $fields = '*', $parameters = array()) {
   $node_select = db_select('node', 'n')->extend('PagerDefault');
+  $node_select->addTag('node_access');
   if($fields == '*') {
     $node_select->fields('n');
   } else {
