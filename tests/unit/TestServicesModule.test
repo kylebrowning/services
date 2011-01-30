@@ -281,33 +281,6 @@
   }
 
   /**
-   * Test services_services_crossdomain_domain_policy() callback.
-   */
-  public function testServicesCrossdomainDomainPolicy() {
-    $results = services_services_crossdomain_domain_policy();
-
-    $message = t('Should be one result in the array.');
-    $this->assertEqual(count($results), 1, $message);
-
-    $message = t('The key \'$_SERVER[\'HTTP_HOST\']\' should exist.');
-    $this->assertTrue(isset($results[$_SERVER['HTTP_HOST']]), $message);
-
-    $value = $results[$_SERVER['HTTP_HOST']];
-
-    $message = t('Value should be an array.');
-    $this->assertTrue(gettype($value) == 'array', $message);
-
-    $message = t('Value should have a length of one.');
-    $this->assertEqual(count($value), 1, $message);
-
-    $message = t('Key should be \'subdomain_wildcard\'');
-    $this->assertTrue(isset($value['subdomain_wildcard']), $message);
-
-    $message = t('Value should be \'TRUE\'.');
-    $this->assertEqual($value['subdomain_wildcard'], TRUE, $message);
-  }
-
-  /**
    * Test services_endpoint_new().
    */
   public function testServicesEndpointNew() {
