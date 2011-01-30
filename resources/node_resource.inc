@@ -271,27 +271,33 @@ function _node_resource_delete($nid) {
  *       for index requests more straightforward?
  **/
 function _node_resource_index($page = 1, $fields = '*', $parameters = array()) {
-  $node_select = db_select('node', 'n')->extend('PagerDefault');
-  $node_select->addTag('node_access');
-  if($fields == '*') {
+  $node_select = db_select('node', 'n')
+    ->extend('PagerDefault')
+    ->addTag('node_access')
+    ->orderBy('sticky', 'DESC')
+    ->orderBy('created', 'DESC')
+    ->limit($page * 20);
+    
+  if ($fields == '*') {
     $node_select->fields('n');
   } else {
     $fields = explode(',', $fields);
     $node_select->fields('n', $fields);
   }
-  $node_select->orderBy('sticky', 'DESC');
-  $node_select->orderBy('created', 'DESC');
+  
   if (!user_access('administer nodes')) {
-      $node_select->condition('status', 1);
+    $node_select->condition('status', 1);
   }
-  $node_select->limit($page * 20);
+
   $result = $node_select->execute();
+  
   foreach($result as $node) {
     if ($uri = services_resource_uri(array('node', $node->nid))) {
       $node->uri = $uri;
     }
     $nodes[] = $node;
   }
+
   return $nodes;
 }
 
