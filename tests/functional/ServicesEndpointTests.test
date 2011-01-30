@@ -23,8 +23,6 @@ require_once('ServicesWebTestCase.php') ;
      	'ctools',
      	'services',
       'rest_server',
-      'services_sessauth',
-      'inputstream'
      );
    }
 /**
