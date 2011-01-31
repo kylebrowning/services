@@ -22,7 +22,7 @@ require_once('ServicesWebTestCase.php') ;
      parent::setUp(
      	'ctools',
      	'services',
-      'rest_server',
+      'rest_server'
      );
    }
 /**
