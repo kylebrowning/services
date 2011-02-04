@@ -3,6 +3,21 @@
 
 class ServicesWebTestCase extends DrupalWebTestCase {
 
+  public function setUp() {
+    $args = func_get_args();
+  
+    $modules = array();
+    if (isset($args[0]) && is_array($args[0])) {
+      $modules = $args[0];
+    }
+  
+    // Add the required module dependencies.
+    array_unshift($modules, 'ctools', 'services', 'rest_server');
+  
+    parent::setUp($modules);
+  }
+  
+
   protected function servicesGet($url, $data = NULL, $headers = array()) {
     $options = array('query' => $data);
     $url = url($this->getAbsoluteUrl($url) . '.php', $options);

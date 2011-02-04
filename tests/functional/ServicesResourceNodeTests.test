@@ -7,8 +7,6 @@
  *
  */
 
-require_once('ServicesWebTestCase.php') ;
-
 /**
  * Run test cases for the endpoint with no authentication turned on.
  *

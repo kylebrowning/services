@@ -18,4 +18,6 @@ files[] = tests/functional/ServicesResourceNodeTests.test
 files[] = tests/functional/ServicesResourceUserTests.test
 files[] = tests/functional/ServicesEndpointTests.test
 files[] = tests/unit/TestServicesModule.test
+files[] = tests/services.test
+
 dependencies[] = ctools

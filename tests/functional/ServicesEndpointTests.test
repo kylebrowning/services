@@ -7,7 +7,6 @@
  * Call the endpoint tests when no authentication is being used.
  *
  */
-require_once('ServicesWebTestCase.php') ;
 
 /**
  * Run test cases for the endpoint with no authentication turned on.
@@ -15,16 +14,6 @@ require_once('ServicesWebTestCase.php') ;
  */
  class ServicesEndpointTests extends ServicesWebTestCase {
 
-	/**
-    * Implementation of setUp().
-    */
-   public function setUp() {
-     parent::setUp(
-     	'ctools',
-     	'services',
-      'rest_server'
-     );
-   }
 /**
     * Test adding an endpoint succeeds.
     */

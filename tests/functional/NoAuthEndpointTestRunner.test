@@ -9,9 +9,6 @@
  *
  */
 
-// Parent class holds the actual tests
-require_once('ServicesEndpointTests.test') ;
-
 /**
  * Sets conditions for a no-authentication set of endpoint test runs.
  */
@@ -19,13 +16,6 @@ require_once('ServicesEndpointTests.test') ;
 
   // Class variables
   protected $privilegedUser = NULL ;
-
-   /**
-    * Implementation of setUp().
-    */
-   public function setUp() {
-     parent::setUp();
-   }
 
    /**
     * Implementation of getInfo().
