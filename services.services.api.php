@@ -18,19 +18,38 @@
   * @return
   *   An associative array which defines available resources. 
   *
-  *   The associative array which defines services has six possible top
+  *   The associative array which defines services has eight possible top
   *   level keys:
   *
   *     - create
   *     - retrieve
   *     - update
   *     - delete
+  *     - index
   *     - actions
   *     - targeted actions
+  *     - relationships
   *
-  *   The first four (the CRUD functions) define the indvidual service
-  *   callbacks for each function. However 'actions' and 'targeted actions'
-  *   can contain multiple callbacks. 
+  *   The CRUD functions are pretty self-explanatory. Index is an extra CRUD-
+  *   type function that allows you to create pageable lists.
+  *
+  *   Actions are performed directly on the resource type, not a individual 
+  *   resource. The following example is hypothetical (but plausible). Say
+  *   that you want to expose a API for the apachesolr module. One of the 
+  *   things that could be exposed is the functionality to reindex the whole 
+  *   site at apachesolr/reindex.
+  *
+  *   Targeted actions acts on a individual resource. A good, but again - 
+  *   hypothetical, example would be the publishing and unpublishing of nodes
+  *   at node/123/publish.
+  *
+  *   Relationship requests are convenience methods (sugar) to get something 
+  *   thats related to a individual resource. A real example would be the
+  *   ability to get the files for a node at node/123/files.  
+  *
+  *   The first five (the CRUD functions + index) define the indvidual service
+  *   callbacks for each function. However 'actions', 'targeted actions',
+  *   and 'relationships' can contain multiple callbacks. 
   *
   *   For those familiar with Services 2.x, these callbacks are created 
   *   similarly, but the keys have changed around a bit. The following keys
@@ -59,59 +78,145 @@
   *       'data' (indicating the POST data), 'param' (indicating the query 
   *       string) or 'path' (indicating the url path). In the case of path, 
   *       an additional parameter must be passed indicating the index to be used.
-  *      - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
+  *     - default value: this is a value that will be passed to the method for 
+  *       this particular argument if no argument value is passed
+  *
+  *   A detailed example of creating a new resource can be found at
+  *   http://drupal.org/node/783460 and more information about how
+  *   REST resources are managed can be found at http://drupal.org/node/783254.
   */
 function hook_services_resources() {
   return array(
-    'user' => array(
-      'file' => array('type' => 'inc', 'module' => 'user_resource'),
+    'node' => array(
       'retrieve' => array(
-        'help' => 'Retrieves a user',
-        'callback' => '_user_resource_retrieve',
-        'access arguments' => array('access user profiles'), // this is probably not enough, doesn't block things like pass and email
-        'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_retrieve',
         'args' => array(
           array(
-            'name' => 'uid',
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
             'type' => 'int',
-            'description' => 'The uid of the user to retrieve.',
-            'source' => array('path' => '0'),
-            'optional' => FALSE,
+            'description' => 'The nid of the node to get',
           ),
         ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
       ),
-    ),
-
-    'actions' => array(
-      'login' => array(
-        'help' => 'Login a user for a new session',
-        'callback' => '_user_resource_login',
+      'create' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_create',
         'args' => array(
           array(
-            'name' => 'username',
-            'type' => 'string',
-            'description' => 'A valid username',
-            'source' => array('data'),
+            'name' => 'node',
             'optional' => FALSE,
-          ),
-          array(
-            'name' => 'password',
-            'type' => 'string',
-            'description' => 'A valid password',
-            'source' => array('data'),
-            'optional' => FALSE,
+            'source' => 'data',
+            'description' => 'The node object to create',
+            'type' => 'struct',
           ),
         ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('create'),
+        'access arguments append' => TRUE,
       ),
-
-      'logout' => array(
-        'help' => 'Logout a user session',
-        'callback' => '_user_resource_logout',
+      'update' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_update',
         'args' => array(
           array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The nid of the node to get',
+          ),
+          array(
+            'name' => 'node',
+            'optional' => FALSE,
+            'source' => 'data',
+            'description' => 'The node data to update',
+            'type' => 'struct',
+          ),
+        ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('update'),
+        'access arguments append' => TRUE,
+      ),
+      'delete' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_delete',
+        'args' => array(
+          array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+          ),
+        ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('delete'),
+        'access arguments append' => TRUE,
+      ),
+      'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_index',
+        'args' => array(
+          array(
+            'name' => 'page',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'The zero-based index of the page to get, defaults to 0.',
+            'default value' => 1,
+            'source' => array('param' => 'page'),
+          ),
+          array(
+            'name' => 'fields',
+            'optional' => TRUE,
+            'type' => 'string',
+            'description' => 'The fields to get.',
+            'default value' => '*',
+            'source' => array('param' => 'fields'),
+          ),
+          array(
+            'name' => 'parameters',
+            'optional' => TRUE,
+            'type' => 'struct',
+            'description' => 'Parameters',
+            'default value' => NULL,
+            'source' => array('param' => 'parameters'),
+          ),
+        ),
+        'access arguments' => array('access content'),
+      ),
+      'relationships' => array(
+        'files' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'help'   => t('This method returns files associated with a node.'),
+          'access callback' => '_node_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'callback' => '_node_resource_load_node_files',
+          'args'     => array(
+            array(
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node whose files we are getting',
+            ),
+            array(
+              'name' => 'file_contents',
+              'type' => 'int',
+              'description'  => t('To return file contents or not.'),
+              'source' => array('path' => 2),
+              'optional' => FALSE,
+              'default value' => TRUE,
+            ),
           ),
         ),
       ),
     ),
   );
+
 }
