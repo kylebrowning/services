@@ -35,7 +35,7 @@ class RESTServer {
     }
 
     // Return the leaf to the path array if it's not the resource name
-    if ($leaf) {
+    if (isset($leaf)) {
       if (!$resource_name) {
         $resource_name = $leaf;
       }
