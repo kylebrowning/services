@@ -105,6 +105,33 @@ function _node_resource_definition() {
         ),
         'access arguments' => array('access content'),
       ),
+      'relationships' => array(
+        'files' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'help'   => t('This method returns files associated with a node.'),
+          'access callback' => '_node_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'callback' => '_node_resource_load_node_files',
+          'args'     => array(
+            array(
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node whose files we are getting',
+            ),
+            array(
+              'name' => 'file_contents',
+              'type' => 'int',
+              'description'  => t('To return file contents or not.'),
+              'source' => array('path' => 2),
+              'optional' => TRUE,
+              'default value' => TRUE,
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }
@@ -337,5 +364,44 @@ function _node_resource_access($op = 'view', $args = array()) {
   } else {
     return services_error('Node id: '. $args[0]->nid .' could not be found', 404);
   }
+}
+
+/**
+ * Generates an array of base64 encoded files attached to a node
+ *
+ * @param $nid
+ *   Number. Node ID
+ * @param $include_file_contents
+ *   Bool Whether or not to include the base64_encoded version of the file.
+ * @return
+ *   Array. A list of all files from the given node
+ */
+function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
+  module_load_include('inc', 'services', 'resources/file_resource');
+  $node = node_load($nid);
+
+  // Hopefully theres another way to get a nodes fields that are a file, but this was the only way I could do it.
+  $fields = field_info_fields();
+  $files = array();
+
+  // Loop through all of the fields on the site
+  foreach ($fields as $key => $field) {
+    //if we are a field type of file 
+    if ($field['type'] == 'image' || $field['type'] == 'file') {
+      // If this field exists on our current node..
+      if (isset($node->{$field['field_name']})) {
+        // If there are items in the field...
+        if (isset($node->{$field['field_name']}[LANGUAGE_NONE])) {
+          // Grab the items given and attach them to the array.
+          $node_file_field_items = $node->{$field['field_name']}[LANGUAGE_NONE];
+          foreach ($node_file_field_items as $file) { 
+            $files[] = _file_resource_retrieve($file['fid'], $include_file_contents);
+          }
+        }
+      }
+    }
+  }
+
+  return $files;
 }
 
