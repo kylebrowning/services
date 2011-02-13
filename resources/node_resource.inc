@@ -131,6 +131,37 @@ function _node_resource_definition() {
             ),
           ),
         ),
+        'comments' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'help'   => t('This method returns the number of new comments on a given node.'),
+          'access callback' => 'user_access',
+          'access arguments' => array('access comments'),
+          'access arguments append' => FALSE,
+          'callback' => '_node_resource_load_node_comments',
+          'args'     => array(
+            array(
+              'name'         => 'nid',
+              'type'         => 'int',
+              'description'  => t('The node id to load comments for.'),
+              'source' => array('path' => 0),
+              'optional'     => FALSE,
+            ),
+            array(
+              'name'         => 'count',
+              'type'         => 'int',
+              'description'  => t('Number of comments to load.'),
+              'source' => array('path' => 2),
+              'optional'     => TRUE,
+            ),
+            array(
+              'name'         => 'start',
+              'type'         => 'int',
+              'description'  => t('If count is set to non-zero value, you can pass also non-zero value for start. For example to get comments from 5 to 15, pass count=10 and start=5.'),
+              'source' => array('path' => 3),
+              'optional'     => TRUE,
+            ),
+          ),
+        ),
       ),
     ),
   );
