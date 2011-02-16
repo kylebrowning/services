@@ -70,13 +70,6 @@ function services_list_endpoint($js = NULL) {
         'href'  => 'admin/build/services/' . $endpoint->name . '/delete',
       );
     }
-    if (empty($endpoint->disabled)) {
-      $operations[] = array(
-        'title' => t('Disable'),
-        'href'  => 'admin/config/services/services/' . $endpoint->name . '/disable',
-        'query' => drupal_get_destination(),
-      );
-    }
     else {
       $operations[] = array(
         'title' => t('Enable'),
