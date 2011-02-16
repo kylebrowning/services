@@ -47,7 +47,7 @@ function services_list_endpoint($js = NULL) {
     }
     $operations = array();
 
-    if ($endpoint->status) {
+    if (empty($endpoint->disabled)) {
       $operations[] = array(
         'title' => t('Edit'),
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/edit',
@@ -57,7 +57,20 @@ function services_list_endpoint($js = NULL) {
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/export',
       );
     }
-    if ($endpoint->status) {
+
+    if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
+      $operations[] = array(
+        'title' => t('Revert'),
+        'href'  => 'admin/build/services/' . $endpoint->name . '/delete',
+      );
+    }
+    elseif ($endpoint->export_type != EXPORT_IN_CODE) {
+      $operations[] = array(
+        'title' => t('Delete'),
+        'href'  => 'admin/build/services/' . $endpoint->name . '/delete',
+      );
+    }
+    if (empty($endpoint->disabled)) {
       $operations[] = array(
         'title' => t('Disable'),
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/disable',
@@ -71,31 +84,22 @@ function services_list_endpoint($js = NULL) {
         'query' => drupal_get_destination(),
       );
     }
-    if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
-      $operations[] = array(
-        'title' => t('Revert'),
-        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
-      );
-    }
-    elseif ($endpoint->export_type != EXPORT_IN_CODE) {
-      $operations[] = array(
-        'title' => t('Delete'),
-        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
-      );
-    }
+
     $auth_names = array();
     foreach (array_keys($endpoint->authentication) as $module) {
       $info = services_authentication_info($module);
       $auth_names[] = $info['title'];
     }
     $row_class = '';
-    if($endpoint->status) {
-      $row_class = 'services-endpoint-enabled';
+    if (empty($endpoint->disabled)) {
+      if ($endpoint->debug) {
+        $row_class = 'services-endpoint-debug';
+      }
+      else {
+        $row_class = 'services-endpoint-enabled';
+      }
     } else {
       $row_class = 'services-endpoint-disabled';
-    }
-    if($endpoint->debug && $endpoint->status) {
-      $row_class = 'services-endpoint-debug';
     }
     $auth_names = array();
     foreach (array_keys($endpoint->authentication) as $module) {
@@ -438,9 +442,9 @@ function services_enable_endpoint($endpoint) {
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
-  $endpoint->status = 1;
-  services_endpoint_save($endpoint);
- cache_clear_all(NULL, 'cache_menu');
+  ctools_include('export');
+  ctools_export_set_status('services_endpoint', $endpoint->name, FALSE);
+  cache_clear_all(NULL, 'cache_menu');
   menu_rebuild();
   drupal_goto();
 }
@@ -452,9 +456,9 @@ function services_disable_endpoint($endpoint) {
   if (!is_object($endpoint)) {
     $endpoint = services_endpoint_load($endpoint);
   }
-  $endpoint->status = 0;
-  services_endpoint_save($endpoint);
- cache_clear_all(NULL, 'cache_menu');
+  ctools_include('export');
+  ctools_export_set_status('services_endpoint', $endpoint->name, TRUE);
+  cache_clear_all(NULL, 'cache_menu');
   menu_rebuild();
   drupal_goto();
 }

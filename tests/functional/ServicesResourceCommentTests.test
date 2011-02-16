@@ -1,0 +1,87 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Call the endpoint tests when no authentication is being used.
+ *
+ */
+
+/**
+ * Run test cases for the endpoint with no authentication turned on.
+ *
+ */
+class ServicesResourceCommentTests extends ServicesWebTestCase {
+  // Class variables
+  protected $privilegedUser = NULL ;
+  // Endpoint details.
+  protected $endpoint = NULL;
+
+  /**
+   * Implementation of setUp().
+   */
+  public function setUp() {
+    parent::setUp(
+      'ctools',
+      'services',
+      'rest_server'
+    );
+    // Set up endpoint.
+    $this->endpoint =  $this->saveNewEndpoint();
+  }
+
+  /**
+   * Implementation of getInfo().
+   */
+  public static function getInfo() {
+   return array(
+     'name'        => t('Resource Comment'),
+     'description' => t('test the resource comment methods and actions.'),
+     'group'       => t('Services'),
+   );
+  }
+
+  public function drupalCreateComment() {
+    $node = $this->drupalCreateNode();
+    $comment->nid = $node->nid;
+    $comment->subject = 'Testing';
+    $comment->comment_body = array(LANGUAGE_NONE => array(array('value' => $this->randomString())));
+    $comment->filter = 'plain_text';
+    $comment->language = LANGUAGE_NONE;
+    $comment->uid = $this->privilegedUser->uid;
+    //Created so simpletest has no exceptions
+    $comment->cid = NULL;
+    $comment->pid = NULL;
+    
+    comment_save($comment);
+    $this->assertTrue($comment->cid == 1, t('Successfully created comment'), 'Simpletest Comment Create');
+  }
+  /**
+   * testing node_resource Index
+   */
+  public function testCreateComment() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $node = $this->drupalCreateNode();
+    $comment = array(
+      'subject' => 'testing',
+      'comment_body' => array(LANGUAGE_NONE => array(array('value' => $this->randomString()))),
+      'format' => 'plain_text',
+      'name' => $this->privilegedUser->name,
+      'language' => LANGUAGE_NONE,
+      'nid' => $node->nid,
+      'cid' => NULL,
+      'pid' => NULL,
+    );
+
+    $responseArray = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+    $commentResourceCreateReturn = $responseArray['body'];
+    $this->assertTrue(isset($commentResourceCreateReturn['cid']), t('Comment was successfully created'), 'CommentResource: Create');
+    $newComment = comment_load($commentResourceCreateReturn['cid']);
+    $this->assertTrue($newComment->subject == $comment['subject'], t('Subject was the same'), 'CommentResource: Create');
+    $this->assertTrue($newComment->comment_body[LANGUAGE_NONE][0]['value'] == $comment['comment_body'][LANGUAGE_NONE][0]['value'], t('Body was the same'), 'CommentResource: Create');
+  }
+}

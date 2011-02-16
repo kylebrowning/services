@@ -156,7 +156,7 @@ function services_menu() {
   
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
-    if ($endpoint->status) {
+    if (empty($endpoint->disabled)) {
       $items[$endpoint->path] = array(
         'title'             => 'Services endpoint',
         'access callback'   => 'services_access_menu',
