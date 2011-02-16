@@ -243,8 +243,13 @@ function _node_resource_update($nid, $node) {
   else {
     return services_error(t('Node not found'), 404);
   }
-
-  return $node->nid;
+  
+  $nid = $node->nid;
+  $node = array('nid' => $nid);
+  if ($uri = services_resource_uri(array('node', $nid))) {
+    $node['uri'] = $uri;
+  }
+  return $node;
 }
 
 /**

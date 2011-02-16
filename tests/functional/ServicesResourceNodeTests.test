@@ -99,9 +99,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $responseArray = $this->servicesPost($this->endpoint->path . '/node', array('node' => $node));
     $nodeResourceCreateReturn = $responseArray['body'];
 
-    $this->assertTrue(isset($nodeResourceCreateReturn->nid), t('Node was successfully created'), 'NodeResource: Create');
-    if (isset($nodeResourceCreateReturn->nid)) {
-      $newNode = node_load($nodeResourceCreateReturn->nid);
+    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create');
+    if (isset($nodeResourceCreateReturn['nid'])) {
+      $newNode = node_load($nodeResourceCreateReturn['nid']);
       $this->assertTrue($newNode->title = $node['title'], t('Title was the same'), 'NodeResource: Create');
       $this->assertTrue($newNode->body = $node['body'], t('Body was the same'), 'NodeResource: Create');
     }
@@ -172,7 +172,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     );
 
     $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, array('node' => $node_update));
-    $nodeAfterUpdate = node_load($responseArray['body']);
+    $nodeAfterUpdate = node_load($responseArray['body']['nid']);
     $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
     if (isset($nodeAfterUpdate->nid)) {
       $this->assertTrue($nodeAfterUpdate->title == $node_update['title'], t('Title was the same'), 'NodeResource: Update');
