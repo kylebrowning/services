@@ -302,6 +302,7 @@ function _node_resource_delete($nid) {
  *       for index requests more straightforward?
  **/
 function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
+  $nodes = array();
   $node_select = db_select('node', 'n')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
@@ -318,7 +319,11 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);
   }
-
+  if(is_array($parameters)) {
+    foreach ($parameters as $parameter => $parameter_value) {
+      $node_select->condition($parameter, $parameter_value, '=');
+    }
+  }
   $result = $node_select->execute();
 
   $nodes = array();
