@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Authenticates a call using OAuth to verify the request.

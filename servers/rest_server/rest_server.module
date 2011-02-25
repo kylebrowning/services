@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function rest_server_server_info() {
   return array(

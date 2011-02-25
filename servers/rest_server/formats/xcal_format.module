@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function xcal_format_autoload_info() {
   return array(

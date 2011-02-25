@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  *  Link general taxonomy functionalities to services module.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class XCalFormatView extends RESTServerView {
   const DATE_FORMAT = 'Ymd\This';

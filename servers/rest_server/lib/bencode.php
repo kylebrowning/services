@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  *  Bencode snippet from http://paste.lisp.org/display/17178
  */
