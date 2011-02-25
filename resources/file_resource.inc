@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * THERE SHOULD BE NO UPDATE!!!

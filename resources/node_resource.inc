@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function _node_resource_definition() {
   return array(

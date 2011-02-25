@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 class NodeResourceFeedModel implements ResourceTimeFeedModel {
   protected $nodes = NULL;

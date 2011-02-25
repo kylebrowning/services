@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * Install, uninstall and update the Services module.

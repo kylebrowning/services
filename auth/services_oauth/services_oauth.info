@@ -1,4 +1,3 @@
-; $Id$
 name = OAuth Authentication
 description = Provides OAuth authentication for the services module
 package = Services - authentication

@@ -1,4 +1,3 @@
-; $Id$
 name = REST Server
 description = Provides an REST server.
 package = Services - servers

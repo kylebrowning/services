@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 
 function _user_resource_definition() {

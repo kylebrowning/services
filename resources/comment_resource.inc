@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 function _comment_resource_definition() {
   if (!module_exists('comment')) {
