@@ -91,7 +91,7 @@ function _user_resource_definition() {
             'optional' => TRUE,
             'type' => 'int',
             'description' => 'The zero-based index of the page to get, defaults to 0.',
-            'default value' => 1,
+            'default value' => 0,
             'source' => array('param' => 'page'),
           ),
           array(
@@ -400,8 +400,8 @@ function _user_resource_logout() {
  *
  * @see _node_resource_index() for more notes
  **/
-function _user_resource_index($page = 1, $fields = '*', $parameters = array()) {
-  $user_select = db_select('users', 'u')->extend('PagerDefault');
+function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
+  $user_select = db_select('users', 'u');
   if($fields == '*') { 
     $user_select->fields('u');  
   } else {
@@ -409,7 +409,7 @@ function _user_resource_index($page = 1, $fields = '*', $parameters = array()) {
     $user_select->fields('u', $fields);
   }
   $user_select->orderBy('created', 'DESC');
-  $user_select->limit($page * 20);
+  $user_select->range($page * 20, 20);
   $result = $user_select->execute();
   foreach($result as $user) {  
     if ($uri = services_resource_uri(array('user', $user->uid))) {

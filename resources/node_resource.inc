@@ -82,7 +82,7 @@ function _node_resource_definition() {
             'optional' => TRUE,
             'type' => 'int',
             'description' => 'The zero-based index of the page to get, defaults to 0.',
-            'default value' => 1,
+            'default value' => 0,
             'source' => array('param' => 'page'),
           ),
           array(
@@ -301,14 +301,13 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  **/
-function _node_resource_index($page = 1, $fields = '*', $parameters = array()) {
+function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   $node_select = db_select('node', 'n')
-    ->extend('PagerDefault')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
     ->orderBy('created', 'DESC')
-    ->limit($page * 20);
-    
+    ->range($page * 20, 20);
+
   if ($fields == '*') {
     $node_select->fields('n');
   } else {
@@ -321,7 +320,8 @@ function _node_resource_index($page = 1, $fields = '*', $parameters = array()) {
   }
 
   $result = $node_select->execute();
-  
+
+  $nodes = array();
   foreach($result as $node) {
     if ($uri = services_resource_uri(array('node', $node->nid))) {
       $node->uri = $uri;

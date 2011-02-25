@@ -50,9 +50,43 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     ));
     $this->drupalLogin($this->privilegedUser);
 
-    $node = $this->drupalCreateNode();
-    $responseArray = $this->servicesGet($this->endpoint->path . '/node');
-    $this->assertTrue($node->title == $responseArray['body'][0]->title, t('Successfully received Node info'), 'NodeResource: Index');
+    // Create a set of nodes. The node resource returns 20 returns at a time,
+    // so we create two pages and a half worth.
+    $nodes = array();
+    $count = 50;
+    for ($i = 0; $i < $count; $i++) {
+      $node = $this->drupalCreateNode();
+      $nodes[$node->nid] = $node;
+    }
+
+    // Get the content.
+    $page_count = ceil(count($nodes) / 20);
+    $retrieved_nodes = array();
+    for ($page = 0; $page < $page_count; $page++) {
+      $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('page' => $page));
+      $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
+
+      // Store the returned node IDs.
+      foreach ($responseArray['body'] as $node) {
+        if (isset($retrieved_nodes[$node->nid])) {
+          $this->fail(t('Duplicate node @nid returned.', array('@nid' => $node->nid)));
+        }
+        $retrieved_nodes[$node->nid] = TRUE;
+
+        $this->assertTrue($nodes[$node->nid]->title == $node->title, t('Successfully received Node info'), 'NodeResource: Index');
+      }
+    }
+
+    // We should have got all the nodes.
+    $expected_nids = array_keys($nodes);
+    sort($expected_nids);
+    $retrieved_nids = array_keys($retrieved_nodes);
+    sort($retrieved_nids);
+    $this->assertEqual($expected_nids, $retrieved_nids, t('Retrieved all nodes'));
+
+    // The n+1 page should be empty.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('page' => $page_count + 1));
+    $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
   }
 
   /**
