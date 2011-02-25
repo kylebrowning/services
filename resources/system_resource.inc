@@ -108,6 +108,6 @@ function _system_resource_get_variable($name, $default) {
  *
  * @see variable_set()
  */
-function _system_service_set_variable($name, $value) {
+function _system_resource_set_variable($name, $value) {
   variable_set($name, $value);
 }
