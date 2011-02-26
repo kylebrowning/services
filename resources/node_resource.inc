@@ -290,7 +290,7 @@ function _node_resource_delete($nid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
+ *   An object containing fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of node objects.
@@ -301,8 +301,7 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  **/
-function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
-  $nodes = array();
+function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
   $node_select = db_select('node', 'n')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
@@ -319,11 +318,13 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);
   }
-  if(is_array($parameters)) {
+  
+  if (is_object($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
       $node_select->condition($parameter, $parameter_value, '=');
     }
   }
+  
   $result = $node_select->execute();
 
   $nodes = array();

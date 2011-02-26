@@ -379,7 +379,7 @@ function _user_resource_logout() {
 }
 
 /**
- * Return an array of optionally paged nids baed on a set of criteria.
+ * Return an array of optionally paged uids baed on a set of criteria.
  *
  * An example request might look like
  *
@@ -393,14 +393,14 @@ function _user_resource_logout() {
  * @param $fields
  *   The fields you want returned. 
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
+ *   An object containing fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of user objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
+function _user_resource_index($page = 0, $fields = '*', $parameters = NULL) {
   $user_select = db_select('users', 'u');
   if($fields == '*') { 
     $user_select->fields('u');  
@@ -410,7 +410,16 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   }
   $user_select->orderBy('created', 'DESC');
   $user_select->range($page * 20, 20);
+  
+  if (is_object($parameters)) {
+    foreach ($parameters as $parameter => $parameter_value) {
+      $user_select->condition($parameter, $parameter_value, '=');
+    }
+  }
+  
   $result = $user_select->execute();
+  
+  $users = array();
   foreach($result as $user) {  
     if ($uri = services_resource_uri(array('user', $user->uid))) {
       $user->uri = $uri;
