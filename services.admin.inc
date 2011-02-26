@@ -90,10 +90,10 @@ function services_list_endpoint($js = NULL) {
       else {
         $row_class = 'services-endpoint-enabled';
       }
-    }
-    else {
-      $row_class = 'services-endpoint-disabled';
-    }
+     } 
+     else {
+       $row_class = 'services-endpoint-disabled';
+     }
     $auth_names = array();
     foreach (array_keys($endpoint->authentication) as $module) {
       $info = services_authentication_info($module);
