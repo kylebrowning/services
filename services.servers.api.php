@@ -21,7 +21,7 @@
 function hook_server_info() {
   return array(
     'name' => 'REST',
-  );  
+  );
 }
 
 /**
@@ -32,5 +32,5 @@ function hook_server_info() {
  * servers.
  */
 function hook_server() {
-  
+
 }

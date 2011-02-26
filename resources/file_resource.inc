@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * File resource.
+ */
+
+/**
  * THERE SHOULD BE NO UPDATE!!!
  * Drupal doesn't allow updating or replacing a file in the files table.
  * If you need to, create a new file and remove the old file.
@@ -147,7 +152,7 @@ function _file_resource_create($file) {
   $file->filemime = file_get_mimetype($file->filename);
 
   // Rename potentially executable files, to help prevent exploits.
-  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (drupal_substr($file->filename, -4) != '.txt')) {
     $file->filemime = 'text/plain';
     $file->filepath .= '.txt';
     $file->filename .= '.txt';
@@ -193,12 +198,12 @@ function _file_resource_create($file) {
  */
 function _file_resource_retrieve($fid, $file_include_contents =  TRUE) {
   if ($file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid))) {
-    if($file_include_contents) {
+    if ($file_include_contents) {
       $filepath = file_create_path($file['filepath']);
       $binaryfile = fopen($filepath, 'rb');
       $file['file'] = base64_encode(fread($binaryfile, filesize($filepath)));
       fclose($binaryfile);
-    }    
+    }
     return $file;
   }
   else {
@@ -228,7 +233,7 @@ function _file_resource_load_node_files($nid, $file_include_contents = TRUE) {
       $send = array();
       foreach ($files as $file) {
         $file = array_shift($files);
-        if($file_include_contents) {
+        if ($file_include_contents) {
           $filepath = file_create_path($file->filepath);
           $binaryfile = fopen($filepath, 'rb');
           $file = base64_encode(fread($binaryfile, filesize($filepath)));

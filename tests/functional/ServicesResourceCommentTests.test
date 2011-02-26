@@ -43,11 +43,11 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
    * Implementation of getInfo().
    */
   public static function getInfo() {
-   return array(
-     'name'        => t('Resource Comment'),
-     'description' => t('Test the resource Comment methods and actions.'),
-     'group'       => t('Services'),
-   );
+    return array(
+      'name'        => t('Resource Comment'),
+      'description' => t('Test the resource Comment methods and actions.'),
+      'group'       => t('Services'),
+    );
   }
 
   /**
@@ -208,7 +208,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     }
 
     // Load all comments of the first node.
-   $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
+    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
     $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
 
     // Load only 5 comments of the first node.

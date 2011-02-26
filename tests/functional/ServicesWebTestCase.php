@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Services base testing class.
+ */
 
 class ServicesWebTestCase extends DrupalWebTestCase {
 
@@ -76,7 +80,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       CURLOPT_HEADER => TRUE,
       CURLOPT_HTTPHEADER => $headers,
       CURLOPT_INFILE => $putData,
-      CURLOPT_INFILESIZE => strlen($serialize_args)
+      CURLOPT_INFILESIZE => drupal_strlen($serialize_args)
     ));
     fclose($putData);
 
@@ -127,11 +131,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
    */
   function parseHeader($content) {
     $info = curl_getinfo($this->curlHandle);
-    $header = substr($content, 0, $info['header_size']);
+    $header = drupal_substr($content, 0, $info['header_size']);
     $header = str_replace("HTTP/1.1 100 Continue\r\n\r\n", '', $header);
     $status = strtok($header, "\r\n");
     $code = $info['http_code'];
-    $body = unserialize(substr($content, $info['header_size'], strlen($content) - $info['header_size']));
+    $body = unserialize(drupal_substr($content, $info['header_size'], drupal_strlen($content) - $info['header_size']));
     return array($info, $header, $status, $code, $body);
   }
 
@@ -383,7 +387,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       '!method' => $method,
       '@url'    => $url,
       '@status' => curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE),
-      '!length' => format_size(strlen($this->content))
+      '!length' => format_size(drupal_strlen($this->content))
     );
     $message = t('!method @url returned @status (!length).', $message_vars);
     $this->assertTrue($this->content !== FALSE, $message, t('Browser'));

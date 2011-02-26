@@ -1,6 +1,5 @@
 <?php
 
-
 function _user_resource_definition() {
   return array(
     'user' => array(
@@ -64,7 +63,7 @@ function _user_resource_definition() {
           ),
         ),
       ),
-     
+
       'delete' => array(
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
@@ -173,11 +172,11 @@ function _user_resource_retrieve($uid) {
 /**
  * Create a new user.
  *
- * This function uses drupal_execute() and as such exepects all input to match 
+ * This function uses drupal_execute() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $account
- *   A object containing account information. The $account object should 
+ *   A object containing account information. The $account object should
  *   contain, at minimum, the following properties:
  *     - name (user name)
  *     - mail (email address)
@@ -189,8 +188,8 @@ function _user_resource_retrieve($uid) {
  *
  *  Roles can be passed in a roles property which is an associative
  *  array formatted with '<role id>' => '<role id>', not including
- *  the authenticated user role, which is given by default. 
- *  
+ *  the authenticated user role, which is given by default.
+ *
  * @return
  *   The user object of the newly created user.
  */
@@ -216,7 +215,7 @@ function _user_resource_create($account) {
     'pass2' => $account->pass,
   );
   $form_state['values']['op'] = t('Create new account');
-  
+
   $ret = drupal_execute('user_register', $form_state);
 
   // Error if needed.
@@ -231,7 +230,7 @@ function _user_resource_create($account) {
 /**
  * Update an existing user.
  *
- * This function uses drupal_execute() and as such exepects all input to match 
+ * This function uses drupal_execute() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $uid
@@ -266,7 +265,7 @@ function _user_resource_update($uid, $account) {
     $category = $account->category;
     unset($account->category);
   }
-  
+
   // Drop any passed in values into the $account var. Anything
   // unused by the form just gets ignored.
   foreach ($account as $key => $value) {
@@ -382,7 +381,7 @@ function _user_resource_logout() {
  * @param $page
  *   Page number of results to return (in pages of 20).
  * @param $fields
- *   The fields you want returned. 
+ *   The fields you want returned.
  * @param $parameters
  *   An array of fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
@@ -390,7 +389,7 @@ function _user_resource_logout() {
  *   An array of user objects.
  *
  * @see _node_resource_index() for more notes
- **/
+ */
 function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
   $parameters = (array) $parameters;
   $schema = drupal_get_schema('users');
@@ -429,24 +428,24 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
  */
 function _user_resource_access($op = 'view', $args = array()) {
   global $user;
-  switch($op) {
+  switch ($op) {
     case 'view':
         $account = user_load($args[0]);
-        if(!$account->uid) {
+        if (!$account->uid) {
           return services_error('That user ID does not exist', 406);
         }
-        return user_view_access($account);   
+        return user_view_access($account);
     case 'update':
         $account = user_load($args[0]);
-        if(!$account->uid) {
+        if (!$account->uid) {
           return services_error('That user ID does not exist', 406);
-        }      
+        }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
       return user_access('administer users');
     case 'delete':
       $account = user_load($args[0]);
-      if(!$account->uid) {
+      if (!$account->uid) {
         return services_error('That user ID does not exist', 406);
       }
       return user_access('administer users');

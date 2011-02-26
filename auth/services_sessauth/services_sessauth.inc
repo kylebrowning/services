@@ -6,7 +6,7 @@
  */
 
 function _services_sessauth_authenticate_call($settings, $method, &$args, $auth_args) {
-  // Anyone passing in a specific session id to use, should do so in the 
+  // Anyone passing in a specific session id to use, should do so in the
   // 'sessid' key. Otherwise, just use the current session (IE do nothing.)
   if (isset($auth_args['sessid'])) {
     // Add additonal processing for methods requiring session

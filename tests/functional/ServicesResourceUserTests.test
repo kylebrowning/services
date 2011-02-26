@@ -41,11 +41,11 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
    * Implementation of getInfo().
    */
   public static function getInfo() {
-   return array(
-     'name'        => t('Resource User'),
-     'description' => t('Test the resource User methods and actions.'),
-     'group'       => t('Services'),
-   );
+    return array(
+      'name'        => t('Resource User'),
+      'description' => t('Test the resource User methods and actions.'),
+      'group'       => t('Services'),
+    );
   }
 
   /**

@@ -68,15 +68,15 @@ class XCalFormatView extends RESTServerView {
     $value = preg_replace('/\n+/', ' ', $value);
     $value = preg_replace('/\s{2,}/', ' ', $value);
 
-    $preamble_len = strlen($preamble);
+    $preamble_len = drupal_strlen($preamble);
 
     $lines = array();
-    while (strlen($value)>(75-$preamble_len)) {
+    while (drupal_strlen($value)>(75-$preamble_len)) {
       $space = (75-$preamble_len);
       $mbcc = $space;
       while ($mbcc) {
         $line = mb_substr($value, 0, $mbcc);
-        $oct = strlen($line);
+        $oct = drupal_strlen($line);
         if ($oct > $space) {
           $mbcc -= $oct-$space;
         }

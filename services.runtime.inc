@@ -97,7 +97,7 @@ class ServicesArgumentException extends ServicesException {
 function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
   // Check for missing arguments.
   $server_info =  services_server_info_object();
-  if($server_info->debug) {
+  if ($server_info->debug) {
     watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
     watchdog('services', 'Passed arguments: <pre>@arguments</pre>', array('@arguments' => print_r($args, TRUE)), WATCHDOG_DEBUG);
   }
@@ -130,7 +130,7 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
     // Just use the arguments array if no access arguments have been specified
     $access_arguments = $args;
   }
-  
+
   // Call default or custom access callback
   if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
     global $user;
@@ -209,7 +209,7 @@ function services_authentication_info($module) {
  *  arg1 = Settings
  *  arg2 = Method
  *  arg3 = Controller
- *  arg4 = Auth args  
+ *  arg4 = Auth args
  *
  */
 function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL, $arg4 = NULL) {

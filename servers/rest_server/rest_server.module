@@ -39,7 +39,7 @@ function rest_server_server() {
   }
   catch (Exception $e) {
     $code = $e->getCode();
-    switch($code) {
+    switch ($code) {
       case 401:
         drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
       break;

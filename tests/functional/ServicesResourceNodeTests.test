@@ -38,11 +38,11 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
    * Implementation of getInfo().
    */
   public static function getInfo() {
-   return array(
-     'name'        => t('Resource Node'),
-     'description' => t('test the resource Node methods and actions.'),
-     'group'       => t('Services'),
-   );
+    return array(
+      'name' => t('Resource Node'),
+      'description' => t('Test the resource Node methods and actions.'),
+      'group' => t('Services'),
+    );
   }
 
   /**

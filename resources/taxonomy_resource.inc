@@ -97,44 +97,44 @@ function _taxonomy_resource_definition() {
               'optional'     => FALSE,
             ),
             array(
-              'name'         => 'fields',
-              'type'         => 'string',
-              'description'  => t('The fields to retrieve, separated by comma.'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> array(),
+              'name'          => 'fields',
+              'type'          => 'string',
+              'description'   => t('The fields to retrieve, separated by comma.'),
+              'source'        => 'data',
+              'optional'      => TRUE,
+              'default value' => array(),
             ),
             array(
-              'name'         => 'operator',
-              'type'         => 'string',
-              'description'  => t('How to interpret multiple IDs in the array. Can be "or" or "and".'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> 'or',
+              'name'          => 'operator',
+              'type'          => 'string',
+              'description'   => t('How to interpret multiple IDs in the array. Can be "or" or "and".'),
+              'source'        => 'data',
+              'optional'      => TRUE,
+              'default value' => 'or',
             ),
             array(
-              'name'         => 'depth',
-              'type'         => 'int',
-              'description'  => t('How many levels deep to traverse the taxonomy tree. Can be a nonnegative integer or "all".'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> 0,
+              'name'          => 'depth',
+              'type'          => 'int',
+              'description'   => t('How many levels deep to traverse the taxonomy tree. Can be a nonnegative integer or "all".'),
+              'source'        => 'data',
+              'optional'      => TRUE,
+              'default value' => 0,
             ),
             array(
-              'name'         => 'pager',
-              'type'         => 'int',
-              'description'  => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> TRUE,
+              'name'          => 'pager',
+              'type'          => 'int',
+              'description'   => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
+              'source'        => 'data',
+              'optional'      => TRUE,
+              'default value' => TRUE,
             ),
             array(
-              'name'         => 'order',
-              'type'         => 'int',
-              'description'  => t('The order clause for the query that retrieve the nodes.'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> 'n.sticky DESC, n.created DESC',
+              'name'          => 'order',
+              'type'          => 'int',
+              'description'   => t('The order clause for the query that retrieve the nodes.'),
+              'source'        => 'data',
+              'optional'      => TRUE,
+              'default value' => 'n.sticky DESC, n.created DESC',
             ),
           ),
         ),
@@ -211,7 +211,7 @@ function _taxonomy_resource_definition() {
         'access arguments append' => TRUE,
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
-      'actions' =>array(
+      'actions' => array(
         'getTree' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
           'help'   => t('This method returns a full list of taxonomy terms.'),
@@ -258,7 +258,7 @@ function _taxonomy_resource_definition() {
  * @return
  *   A term object.
  *
- * @see taxonomy_get_term().
+ * @see taxonomy_get_term()
  */
 function _taxonomy_term_resource_retrieve($tid) {
   return taxonomy_get_term($tid);
@@ -272,7 +272,7 @@ function _taxonomy_term_resource_retrieve($tid) {
  * @return
  *   Status constant indicating if term was inserted or updated.
  *
- * @see taxonomy_save_term().
+ * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_create($term) {
   $term = (array) $term;
@@ -289,7 +289,7 @@ function _taxonomy_term_resource_create($term) {
  * @return
  *   Status constant indicating if term was inserted or updated.
  *
- * @see taxonomy_save_term().
+ * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_update($tid, $term) {
   $term = (array) $term;
@@ -305,7 +305,7 @@ function _taxonomy_term_resource_update($tid, $term) {
  * @return
  *   Status constant indicating deletion.
  *
- * @see taxonomy_del_term().
+ * @see taxonomy_del_term()
  */
 function _taxonomy_term_resource_delete($tid) {
   return taxonomy_del_term($tid);
@@ -320,7 +320,7 @@ function _taxonomy_term_resource_delete($tid) {
  * @return
  *   A vocabulary object or FALSE.
  *
- * @see taxonomy_vocabulary_load().
+ * @see taxonomy_vocabulary_load()
  */
 function _taxonomy_vocabulary_resource_retrieve($vid) {
   return taxonomy_vocabulary_load($vid);
@@ -353,7 +353,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary().
+ * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
   $vocabulary = (array) $vocabulary;
@@ -370,7 +370,7 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary().
+ * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   $vocabulary = (array) $vocabulary;
@@ -386,7 +386,7 @@ function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
  * @return
  *   Status constant indicating deletion.
  *
- * @see taxonomy_del_vocabulary().
+ * @see taxonomy_del_vocabulary()
  */
 function _taxonomy_vocabulary_resource_delete($vid) {
   return taxonomy_del_vocabulary($vid);
@@ -397,12 +397,11 @@ function _taxonomy_vocabulary_resource_delete($vid) {
 /**
  * Services interface to taxonomy_get_tree().
  *
- * @see
- *   taxonomy_get_tree()
+ * @see taxonomy_get_tree()
  */
 function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
   $terms = taxonomy_get_tree($vid, $parent, -1, $max_depth);
-  if(empty($terms)) {
+  if (empty($terms)) {
     return services_error('No vocabulary with id: '. $vid .' found.', 404);
   }
   return $terms;
@@ -414,23 +413,22 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
  * Note that where taxonomy_select_nodes() returns the results
  * of a db_query(), this function returns an array of node objects.
  *
- * @see
- *   taxonomy_select_nodes().
+ * @see taxonomy_select_nodes()
  * @return
  *   An array of node objects.
  */
 function taxonomy_service_select_nodes($tids, $fields, $operator, $depth, $pager, $order) {
-  if(!is_array($tids)) {
-   $tids =  explode(',', $tids);
+  if (!is_array($tids)) {
+    $tids =  explode(',', $tids);
   }
-  if(!is_array($fields)) {
-   $fields =  explode(',', $fields);
+  if (!is_array($fields)) {
+    $fields =  explode(',', $fields);
   }
   $result = taxonomy_select_nodes($tids, $operator, $depth, $pager, $order);
   while ($node = db_fetch_object($result)) {
     $nodes[] = services_node_load(node_load($node->nid), $fields);
   }
-  if(empty($nodes)) {
+  if (empty($nodes)) {
     return services_error('No nodes were found with tid(s): '. implode(",", $tids), 404);
   }
   return $nodes;

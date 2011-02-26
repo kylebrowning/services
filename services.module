@@ -206,10 +206,10 @@ function services_endpoint_callback($endpoint_name) {
 
   $endpoint = services_endpoint_load($endpoint_name);
   $server = $endpoint->server;
-  
+
   if (function_exists($server . '_server')) {
     // call the server
-    if($endpoint->debug) {
+    if ($endpoint->debug) {
       watchdog('services', 'Calling server: %server', array('%server' => $server . '_server'), WATCHDOG_DEBUG);
     }
     services_set_server_info_from_array(array(
@@ -219,7 +219,7 @@ function services_endpoint_callback($endpoint_name) {
       'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
     ));
-    if($endpoint->debug) {
+    if ($endpoint->debug) {
       watchdog('services', 'Server info main object: <pre>@info</pre>', array('@info' => print_r(services_server_info_object(), TRUE)), WATCHDOG_DEBUG);
     }
     print call_user_func($server . '_server');
@@ -278,7 +278,7 @@ function services_services_crossdomain_domain_policy() {
 function services_xml_output($xml) {
   $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . $xml;
   header('Connection: close');
-  header('Content-Length: ' . strlen($xml));
+  header('Content-Length: ' . drupal_strlen($xml));
   header('Content-Type: text/xml');
   header('Date: ' . date('r'));
   echo $xml;
@@ -309,10 +309,10 @@ function services_endpoint_load($name) {
   $result = ctools_export_load_object('services_endpoint', 'names', array($name));
   if (isset($result[$name])) {
     return $result[$name];
-  } 
+  }
   else {
-   $result =  db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
-   $matches = array();
+    $result = db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
+    $matches = array();
     while ($endpoint = db_fetch_object($result)) {
       return $endpoint;
     }
@@ -328,9 +328,9 @@ function services_endpoint_load($name) {
  */
 function services_endpoint_load_all() {
   ctools_include('export');
-  if(!ctools_export_load_object('services_endpoint')) {
-   $result =  db_query("SELECT * FROM {services_endpoint}");
-   $matches = array();
+  if (!ctools_export_load_object('services_endpoint')) {
+    $result = db_query("SELECT * FROM {services_endpoint}");
+    $matches = array();
     while ($endpoint = db_fetch_object($result)) {
       $matches[] = $endpoint;
     }

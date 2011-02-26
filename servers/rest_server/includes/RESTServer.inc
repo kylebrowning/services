@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Class for handling REST calls.
+ */
+
 class RESTServer {
   private $endpoint;
 
@@ -204,7 +209,7 @@ class RESTServer {
             }
           }
           else {
-              if(isset($sources[$info['source']][$info['name']])) {
+              if (isset($sources[$info['source']][$info['name']])) {
                 $arguments[$i] = $sources[$info['source']][$info['name']];
               }
           }
@@ -230,10 +235,10 @@ class RESTServer {
         if (!isset($arguments[$i])) {
           if (isset($info['default value'])) {
             $arguments[$i] = $info['default value'];
-          } 
-          else if (!isset($info['optional']) || !$info['optional']) {
+          }
+          elseif (!isset($info['optional']) || !$info['optional']) {
             throw new ServicesArgumentException(t('Missing required argument !arg', array(
-              '!arg'=>$info['name'])), $info['name'], 406);
+              '!arg' => $info['name'])), $info['name'], 406);
           }
           else {
               $arguments[$i] = NULL;
@@ -264,7 +269,7 @@ class RESTServer {
         $parser = $this->requestParsers($mime, $controller);
         if (!$parser) {
           throw new ServicesException(t('Unsupported request content type !mime', array(
-              '!mime'=>$mime,
+              '!mime' => $mime,
             )), 406);
         }
 
@@ -300,8 +305,8 @@ class RESTServer {
           $pcount = count($pm[0]);
           for ($i=0; $i<$pcount; $i++) {
             $value = $pm[2][$i];
-            if (substr($value, 0, 1) == '"') {
-              $value = stripcslashes(substr($value, 1, mb_strlen($value)-2));
+            if (drupal_substr($value, 0, 1) == '"') {
+              $value = stripcslashes(drupal_substr($value, 1, mb_strlen($value)-2));
             }
             $ret_val['param'][$pm[1][$i]] = $value;
           }
@@ -329,7 +334,7 @@ class RESTServer {
     $filename = file_munge_filename(trim(basename(($disposition['param']['filename']))));
 
     // Rename potentially executable files, to help prevent exploits.
-    if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $filename) && (substr($filename, -4) != '.txt')) {
+    if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $filename) && (drupal_substr($filename, -4) != '.txt')) {
       $type['value'] = 'text/plain';
       $filename .= '.txt';
     }
@@ -463,32 +468,32 @@ class RESTServer {
         'xml' => array(
           'mime types' => array('application/xml', 'text/xml'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'xml'),
+          'view arguments' => array('format' => 'xml'),
         ),
         'json' => array(
           'mime types' => array('application/json'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'json'),
+          'view arguments' => array('format' => 'json'),
         ),
         'jsonp' => array(
           'mime types' => array('text/javascript', 'application/javascript'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'jsonp'),
+          'view arguments' => array('format' => 'jsonp'),
         ),
         'php' => array(
           'mime types' => array('application/vnd.php.serialized'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'php'),
+          'view arguments' => array('format' => 'php'),
         ),
         'yaml' => array(
           'mime types' => array('text/plain', 'application/x-yaml', 'text/yaml'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'yaml'),
+          'view arguments' => array('format' => 'yaml'),
         ),
         'bencode' => array(
           'mime types' => array('application/x-bencode'),
           'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format'=>'bencode'),
+          'view arguments' => array('format' => 'bencode'),
         ),
         'rss' => array(
           'model' => 'ResourceFeedModel',
@@ -521,14 +526,14 @@ class RESTServer {
     }
   }
 
- private function resolveController($resource, $method, $path) {
+  private function resolveController($resource, $method, $path) {
     $pc = count($path);
     // Use the index handler for all empty path request, except on POST
     if (!$pc && $method!='POST') {
       return isset($resource['index']) ? $resource['index'] : NULL;
     }
     // Detect the standard crud operations
-    else if (
+    elseif (
         ($pc==1 && ($method=='GET' || $method=='PUT' || $method=='DELETE')) ||
         ($pc==0 && $method='POST')) {
       $action_mapping = array(
@@ -546,18 +551,18 @@ class RESTServer {
       }
     }
     // Detect relationship requests
-    else if ($pc>=2 && $method=='GET') {
+    elseif ($pc >= 2 && $method == 'GET') {
       if (isset($resource['relationships']) && $resource['relationships'][$path[1]]) {
         $relationship = $resource['relationships'][$path[1]];
         return $relationship;
       }
     }
     // Detect action requests
-    else if ($pc==1 && $method=='POST') {
+    elseif ($pc == 1 && $method == 'POST') {
       return $resource['actions'][$path[0]];
     }
     // Detect action requests targeted at specific resources
-    else if ($pc>=2 && $method=='POST') {
+    elseif ($pc >= 2 && $method == 'POST') {
       $action = $resource['targeted actions'][$path[1]];
       return $action;
     }

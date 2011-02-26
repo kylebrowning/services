@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Include file for services_oauth module.
+ */
+
+/**
  * Authenticates a call using OAuth to verify the request.
  *
  * @param array $settings

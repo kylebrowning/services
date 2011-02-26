@@ -39,7 +39,7 @@ function services_list_endpoint($js = NULL) {
     else {
       $debug[] = array(
         'title' => t('Turn On'),
-        'style' => array('color'=> 'green'),
+        'style' => array('color' => 'green'),
         'href'  => 'admin/build/services/' . $endpoint->name . '/enabledebug',
         'query' => drupal_get_destination(),
       );
@@ -89,12 +89,13 @@ function services_list_endpoint($js = NULL) {
       $auth_names[] = $info['title'];
     }
     $row_class = '';
-    if($endpoint->status) {
+    if ($endpoint->status) {
       $row_class = 'services-endpoint-enabled';
-    } else {
+    }
+    else {
       $row_class = 'services-endpoint-disabled';
     }
-    if($endpoint->debug && $endpoint->status) {
+    if ($endpoint->debug && $endpoint->status) {
       $row_class = 'services-endpoint-debug';
     }
     $rows[$endpoint->name] = array(
@@ -118,9 +119,9 @@ function services_list_endpoint($js = NULL) {
         'storage' => array(
           'data'  => ($endpoint->export_type == EXPORT_IN_CODE) ? t('In code') : t('In database'),
           'class' => 'services-endpoint-storage',
-        ),       
+        ),
         'debug' => array(
-          'data'  =>theme('links', $debug),
+          'data'  => theme('links', $debug),
           'class' => 'services-endpoint-debug',
         ),
         'operations' => array(
@@ -477,7 +478,7 @@ function services_edit_form_endpoint_authentication(&$form_state, $endpoint) {
         'Drupal session based security will be used.'),
     );
   }
-  else if (empty($endpoint->authentication)) {
+  elseif (empty($endpoint->authentication)) {
     $form['message'] = array(
       '#type'          => 'item',
       '#title'         => t('No enabled authentication modules'),

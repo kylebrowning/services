@@ -42,11 +42,11 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
    * Implementation of getInfo().
    */
   public static function getInfo() {
-   return array(
-     'name'        => t('Resource Taxonomy'),
-     'description' => t('Test the resource Taxonomy methods and actions.'),
-     'group'       => t('Services'),
-   );
+    return array(
+      'name'        => t('Resource Taxonomy'),
+      'description' => t('Test the resource Taxonomy methods and actions.'),
+      'group'       => t('Services'),
+    );
   }
 
   /**

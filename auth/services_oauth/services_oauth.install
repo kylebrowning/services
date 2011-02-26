@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Install, update and uninstall functions for the services_oauth module.
+ */
 
 /**
  * Implementation of hook_install().

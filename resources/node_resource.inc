@@ -112,7 +112,7 @@ function _node_resource_definition() {
  * Returns the results of a node_load() for the specified node.
  *
  * This returned node may optionally take content_permissions settings into
- * account, based on a configuration setting. 
+ * account, based on a configuration setting.
  *
  * @param $nid
  *   NID of the node we want to return.
@@ -120,7 +120,7 @@ function _node_resource_definition() {
  *   Node object or FALSE if not found.
  *
  * @see node_load()
- **/
+ */
 function _node_resource_retrieve($nid) {
   global $user;
   $node = node_load($nid);
@@ -140,7 +140,8 @@ function _node_resource_retrieve($nid) {
     }
     $node->uri = services_resource_uri(array('node', $node->nid));
     return $node;
-  } else {
+  }
+  else {
     return services_error('Node nid '. $nid .' not found', 404);
   }
 }
@@ -159,7 +160,7 @@ function _node_resource_retrieve($nid) {
  *   the fully qualified URI to this resource.
  *
  * @see drupal_execute()
- **/
+ */
 function _node_resource_create($node) {
   $node = (object)$node;
 
@@ -216,7 +217,7 @@ function _node_resource_create($node) {
  *   The node's nid.
  *
  * @see drupal_execute()
- **/
+ */
 function _node_resource_update($nid, $node) {
   $node = (object)$node;
   $node->nid = $nid;
@@ -242,7 +243,7 @@ function _node_resource_update($nid, $node) {
   else {
     return services_error(t('Node not found'), 404);
   }
-  
+
   $nid = $node->nid;
   $node = array('nid' => $nid);
   if ($uri = services_resource_uri(array('node', $nid))) {
@@ -258,7 +259,7 @@ function _node_resource_update($nid, $node) {
  *   Node ID of the node we're deleting.
  * @return
  *   The node's nid.
- **/
+ */
 function _node_resource_delete($nid) {
   node_delete($nid);
   return 1;
@@ -277,19 +278,19 @@ function _node_resource_delete($nid) {
  * @param $page
  *   Page number of results to return (in pages of 20).
  * @param $fields
- *   The fields you want returned. 
+ *   The fields you want returned.
  * @param $parameters
  *   An array of fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of node objects.
  *
- * @todo 
+ * @todo
  *   Evaluate the functionality here in general. Particularly around
  *     - Do we need fields at all? Should this just return full nodes?
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
- **/
+ */
 function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
   $parameters = (array) $parameters;
   $schema = drupal_get_schema('node');
@@ -299,10 +300,10 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
 
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
-  if (!user_access('administer nodes')) {	
+  if (!user_access('administer nodes')) {
     $parameters['status'] = 1;
   }
-  
+
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
   foreach ($parameters as $field => $value) {
@@ -339,26 +340,28 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
  * @return bool
  *
  * @see node_access()
- **/
+ */
 function _node_resource_access($op = 'view', $args = array()) {
   // Make sure we have an object or this all fails, some servers can
   // mess up the types.
   if (is_array($args[0])) {
     $args[0] = (object) $args[0];
-  } else if(!is_array($args[0]) && !is_object($args[0])) {  //This is to determine if it is just a string
-    $args[0] = (object)array('nid'=>$args[0]);
+  }
+  elseif (!is_array($args[0]) && !is_object($args[0])) {  //This is to determine if it is just a string
+    $args[0] = (object)array('nid' => $args[0]);
   }
 
   if ($op != 'create' && !empty($args)) {
     $node = node_load($args[0]->nid);
   }
-  else if ($op == 'create') {
+  elseif ($op == 'create') {
     $node = $args[0]->type;
     return node_access($op, $node);
   }
-  if(isset($node->nid) && $node->nid) {
+  if (isset($node->nid) && $node->nid) {
     return node_access($op, $node);
-  } else {
+  }
+  else {
     return services_error('Node id: '. $args[0]->nid .' could not be found', 404);
   }
 }

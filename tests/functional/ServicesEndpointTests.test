@@ -12,131 +12,133 @@ require_once('ServicesWebTestCase.php') ;
  * Run test cases for the endpoint with no authentication turned on.
  *
  */
- class ServicesEndpointTests extends ServicesWebTestCase {
+class ServicesEndpointTests extends ServicesWebTestCase {
 
-	/**
-    * Implementation of setUp().
-    */
-   public function setUp() {
-     parent::setUp(
+  /**
+   * Implementation of setUp().
+   */
+  public function setUp() {
+    parent::setUp(
       'autoload',
-     	'ctools',
-     	'services',
+      'ctools',
+      'services',
       'rest_server',
       'services_sessauth',
       'inputstream'
-     );
-   }
-   /**
-    * Test adding an endpoint succeeds.
-    */
-   public function testEndpointForm() {
-     // Create and log in our privileged user.
-     $this->privilegedUser = $this->drupalCreateUser(array(
-         'administer services',
-     ));
-     $this->drupalLogin($this->privilegedUser);
+    );
+  }
 
-     $edit = $this->populateEndpointFAPI() ;
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed'));
-     $this->drupalGet($edit['path']);
-   }
-   /**
-    * Test adding an endpoint succeeds.
-    */
-   public function testSuccessfulAddEndpoint() {
-     $edit = $this->populateEndpointFAPI() ;
+  /**
+   * Test adding an endpoint succeeds.
+   */
+  public function testEndpointForm() {
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer nodes',
+      'administer services',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', t('expected 200'));
-     $this->drupalGet('admin/build/services/list') ;
-     $this->assertResponse('200',t('expected 200'));
 
-     $this->assertText($edit['title'], t('Endpoint path appears')) ;
-     $this->assertText('rest_server', t('Server is rest server')) ;
-     $this->assertText('In database', t('Storage is in database')) ;
-   }
+    $edit = $this->populateEndpointFAPI() ;
+    $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed'));
+    $this->drupalGet($edit['path']);
+  }
 
-   /**
-    * Test missing path to endpoint causes an error.
-    */
-   public function testMissingPath() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['path']) ;
+  /**
+   * Test adding an endpoint succeeds.
+   */
+  public function testSuccessfulAddEndpoint() {
+    $edit = $this->populateEndpointFAPI() ;
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer nodes',
+      'administer services',
+      'administer nodes',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+    $this->assertResponse('200', t('expected 200'));
+    $this->drupalGet('admin/build/services/list') ;
+    $this->assertResponse('200', t('expected 200'));
 
-     $this->assertText('Path to endpoint field is required.',
-       t('Endpoint path missing error message.')) ;
-     $this->assertFieldByName('title', $edit['title'],
-       t('Title field remains.')) ;
-     $this->assertFieldByName('server', 'rest_server',
-       t('Server is rest server')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
-   }
+    $this->assertText($edit['title'], t('Endpoint path appears')) ;
+    $this->assertText('rest_server', t('Server is rest server')) ;
+    $this->assertText('In database', t('Storage is in database')) ;
+  }
 
-   /**
-    * Test missing title for endpoint causes an error.
-    */
-   public function testMissingTitle() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['title']) ;
+  /**
+   * Test missing path to endpoint causes an error.
+   */
+  public function testMissingPath() {
+    $edit = $this->populateEndpointFAPI() ;
+    unset($edit['path']) ;
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer nodes',
+      'administer services',
+      'administer nodes',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+    $this->assertResponse('200', 'expected 200');
 
-     $this->assertText('Endpoint title field is required.',
-       t('Endpoint title missing error message.')) ;
-     $this->assertFieldByName('name', $edit['name'],
-       t('Name field remains.')) ;
-     $this->assertFieldByName('server', 'rest_server',
-       t('Server is rest server')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
-   }
+    $this->assertText('Path to endpoint field is required.',
+      t('Endpoint path missing error message.')) ;
+    $this->assertFieldByName('title', $edit['title'],
+      t('Title field remains.')) ;
+    $this->assertFieldByName('server', 'rest_server',
+      t('Server is rest server')) ;
+    $this->assertFieldChecked('edit-services-use-content-permissions',
+      t('Storage use content permission is checked.')) ;
+  }
 
-   /**
-    * Test missing server for endpoint causes an error.
-    */
-   public function testMissingServer() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['server']) ;
+  /**
+   * Test missing title for endpoint causes an error.
+   */
+  public function testMissingTitle() {
+    $edit = $this->populateEndpointFAPI() ;
+    unset($edit['title']) ;
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer nodes',
+      'administer services',
+      'administer nodes',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/build/services/add', $edit,
-       t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/build/services/add', $edit, t('Save and proceed')) ;
+    $this->assertResponse('200', 'expected 200');
 
-     $this->assertText('Server field is required.',
-       t('Server missing error message.')) ;
-     $this->assertFieldByName('name', $edit['name'],
-       t('Name field remains.')) ;
-     $this->assertFieldByName('title', $edit['title'],
-       t('Title field remains.')) ;
-     $this->assertFieldChecked('edit-services-use-content-permissions',
-       t('Storage use content permission is checked.')) ;
-   }
+    $this->assertText('Endpoint title field is required.',
+      t('Endpoint title missing error message.')) ;
+    $this->assertFieldByName('name', $edit['name'],
+      t('Name field remains.')) ;
+    $this->assertFieldByName('server', 'rest_server',
+      t('Server is rest server')) ;
+    $this->assertFieldChecked('edit-services-use-content-permissions',
+      t('Storage use content permission is checked.')) ;
+  }
+
+  /**
+   * Test missing server for endpoint causes an error.
+   */
+  public function testMissingServer() {
+    $edit = $this->populateEndpointFAPI();
+    unset($edit['server']);
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+      'administer nodes',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $this->drupalPost('admin/build/services/add', $edit,
+      t('Save and proceed'));
+    $this->assertResponse('200', 'expected 200');
+
+    $this->assertText('Server field is required.',
+      t('Server missing error message.'));
+    $this->assertFieldByName('name', $edit['name'],
+      t('Name field remains.'));
+    $this->assertFieldByName('title', $edit['title'],
+      t('Title field remains.'));
+    $this->assertFieldChecked('edit-services-use-content-permissions',
+      t('Storage use content permission is checked.')) ;
+  }
 
    /*
     ------------------------------------
@@ -144,23 +146,23 @@ require_once('ServicesWebTestCase.php') ;
     ------------------------------------
    */
 
-   /**
-    * Creates a data array for populating an endpoint creation form.
-    *
-    * @return
-    * An array of fields for fully populating an endpoint creation form.
-    */
-   public function populateEndpointFAPI() {
-     return array(
-       'name'   => 'mchnname',
-       'title'  => $this->randomName(20),
-       'path'   => $this->randomName(10),
-       'server' => 'rest_server',
-       'services_use_content_permissions' => TRUE,
-     ) ;
-   }
+  /**
+   * Creates a data array for populating an endpoint creation form.
+   *
+   * @return
+   * An array of fields for fully populating an endpoint creation form.
+   */
+  public function populateEndpointFAPI() {
+    return array(
+      'name'   => 'machinename',
+      'title'  => $this->randomName(20),
+      'path'   => $this->randomName(10),
+      'server' => 'rest_server',
+      'services_use_content_permissions' => TRUE,
+    );
+  }
 
-   public function saveNewEndpoint() {
+  public function saveNewEndpoint() {
     $edit = $this->populateEndpointFAPI() ;
     $endpoint = new stdClass;
     $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
@@ -339,36 +341,37 @@ require_once('ServicesWebTestCase.php') ;
     $endpoint->status = 1;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
-    if($endpoint->name == $edit['name']) {
-      $this->pass('Endpoint successfully created');  
-    } else {
-       $this->fail('Endpoint creation failed');  
+    if ($endpoint->name == $edit['name']) {
+      $this->pass('Endpoint successfully created');
     }
-     $this->servicesGet($endpoint->path);
-     return $endpoint;
-   }
- /**
- * Builds out our post fields
- *
- */
+    else {
+      $this->fail('Endpoint creation failed');
+    }
+    $this->servicesGet($endpoint->path);
+    return $endpoint;
+  }
+  /**
+   * Builds out our post fields
+   *
+   */
   public function services_build_postfields($data = array()) {
-    $post_data = '';  
+    $post_data = '';
     if (is_array($data) && !empty($data)) {
       array_walk($data, array($this, 'services_flatten_fields'));
       $post_data = implode('&', $data);
     }
-    if(is_object($data) && !empty($data)) {
+    if (is_object($data) && !empty($data)) {
       array_walk(get_object_vars($data), array($this, 'services_flatten_fields'));
       $post_data = implode('&', $data);
     }
     return $post_data;
   }
-/**
- * Modifies our array data so we can turn it into a querystring
- * 
- * @param string $item - array value
- * @param string $key  - key of the array element
- */
+  /**
+   * Modifies our array data so we can turn it into a querystring
+   *
+   * @param string $item - array value
+   * @param string $key  - key of the array element
+   */
   public function services_flatten_fields(&$item, $key) {
     $item = $key .'='. $item;
   }
