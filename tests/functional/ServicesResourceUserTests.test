@@ -187,7 +187,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     // Logout first.
     $this->drupalLogout();
 
-    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('name' => $account->name, 'pass' => $account->pass_raw));
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $account->pass_raw));
 
     $response_data = $response['body'];
 
@@ -203,14 +203,14 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     // Try to login with another user to get error.
     $account2 = $this->drupalCreateUser();
-    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('name' => $account2->name, 'pass' => $account2->pass_raw));
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account2->name, 'password' => $account2->pass_raw));
     $this->assertTrue(strpos($response['status'], 'Already logged in as ' . $account->name) !== FALSE, t('Session is properly opened for logged in user.'), 'UserResource: Login');
 
     // Logout.
     $this->drupalLogout();
 
     // Try to login with wrong credentials.
-    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('name' => $account->name, 'pass' => $this->randomString()));
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $this->randomString()));
     $this->assertTrue(strpos($response['status'], 'Wrong username or password') !== FALSE, t('User cannot login with wrong username / password.'), 'UserResource: Login');
   }
 
