@@ -111,8 +111,8 @@ class ServicesModuleTests extends DrupalWebTestCase {
     // see how many with no endpoints
     $items = services_menu() ;
 
-    $message = t('There should be 14 menu items') ;
-    $this->assertEqual(count($items), 14, $message) ;
+    $message = t('There should be 13 menu items') ;
+    $this->assertEqual(count($items), 13, $message) ;
 
     $menuItem = 'admin/build/services' ;
     $this->helpMenuItem($menuItem, $items) ;
@@ -147,26 +147,6 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $menuItem = 'admin/build/services/ahah/security-options' ;
     $this->helpMenuItem($menuItem, $items) ;
 
-    // cross domain tested separately as it does not share so many settings.
-    $menuItem = 'crossdomain.xml' ;
-
-    $message = t('crossdomain.xml should have an array of 3 values') ;
-    $this->assertEqual(count($items['crossdomain.xml']), 3, $message) ;
-
-    $message = t('crossdomain.xml should have \'access callback\' '
-      . '=> \'services_access_menu\'') ;
-    $this->assertEqual($items['crossdomain.xml']['access callback'],
-      'services_access_menu', $message) ;
-
-    $message = t('crossdomain.xml should have \'page callback\' '
-      . '=> \'services_crossdomain_xml\'') ;
-    $this->assertEqual($items['crossdomain.xml']['page callback'],
-      'services_crossdomain_xml', $message) ;
-
-    $message = t('crossdomain.xml should have \'page callback\' '
-      . '=> \'services_crossdomain_xml\'') ;
-    $this->assertEqual($items['crossdomain.xml']['page callback'],
-      'services_crossdomain_xml', $message) ;
   } // function
 
   /**
@@ -267,33 +247,6 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $message = t('Server path should be \'rest\'.');
     $this->assertTrue(isset($results['rest_server']['path'])
       && ($results['rest_server']['path'] == 'rest'), $message);
-  }
-
-  /**
-   * Test services_services_crossdomain_domain_policy() callback.
-   */
-  public function testServicesCrossdomainDomainPolicy() {
-    $results = services_services_crossdomain_domain_policy();
-
-    $message = t('Should be one result in the array.');
-    $this->assertEqual(count($results), 1, $message);
-
-    $message = t('The key \'$_SERVER[\'HTTP_HOST\']\' should exist.');
-    $this->assertTrue(isset($results[$_SERVER['HTTP_HOST']]), $message);
-
-    $value = $results[$_SERVER['HTTP_HOST']];
-
-    $message = t('Value should be an array.');
-    $this->assertTrue(gettype($value) == 'array', $message);
-
-    $message = t('Value should have a length of one.');
-    $this->assertEqual(count($value), 1, $message);
-
-    $message = t('Key should be \'subdomain_wildcard\'');
-    $this->assertTrue(isset($value['subdomain_wildcard']), $message);
-
-    $message = t('Value should be \'TRUE\'.');
-    $this->assertEqual($value['subdomain_wildcard'], TRUE, $message);
   }
 
   /**
