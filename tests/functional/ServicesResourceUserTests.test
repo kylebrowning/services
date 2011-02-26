@@ -212,6 +212,10 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     // Try to login with wrong credentials.
     $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $this->randomString()));
     $this->assertTrue(strpos($response['status'], 'Wrong username or password') !== FALSE, t('User cannot login with wrong username / password.'), 'UserResource: Login');
+    
+    //Try missing param
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('user' => $account->name, 'password' => $this->randomString()));
+    $this->assertTrue(strpos($response['status'], 'Missing required argument username') !== FALSE, t('Found missing requirment'), 'UserResource: Login');
   }
 
   /**

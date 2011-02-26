@@ -237,8 +237,9 @@ class RESTServer {
             $arguments[$i] = $info['default value'];
           }
           elseif (!isset($info['optional']) || !$info['optional']) {
-            throw new ServicesArgumentException(t('Missing required argument !arg', array(
-              '!arg' => $info['name'])), $info['name'], 406);
+            return services_error(t('Missing required argument !arg', array(
+              '!arg' => $info['name'],
+            )), 401);
           }
           else {
               $arguments[$i] = NULL;
