@@ -1,6 +1,5 @@
 <?php
 
-
 function _user_resource_definition() {
   return array(
     'user' => array(
@@ -64,7 +63,7 @@ function _user_resource_definition() {
           ),
         ),
       ),
-     
+
       'delete' => array(
         'help' => 'Deletes a user',
         'callback' => '_user_resource_delete',
@@ -173,11 +172,11 @@ function _user_resource_retrieve($uid) {
 /**
  * Create a new user.
  *
- * This function uses drupal_execute() and as such exepects all input to match 
+ * This function uses drupal_execute() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $account
- *   A object containing account information. The $account object should 
+ *   A object containing account information. The $account object should
  *   contain, at minimum, the following properties:
  *     - name (user name)
  *     - mail (email address)
@@ -189,8 +188,8 @@ function _user_resource_retrieve($uid) {
  *
  *  Roles can be passed in a roles property which is an associative
  *  array formatted with '<role id>' => '<role id>', not including
- *  the authenticated user role, which is given by default. 
- *  
+ *  the authenticated user role, which is given by default.
+ *
  * @return
  *   The user object of the newly created user.
  */
@@ -216,7 +215,7 @@ function _user_resource_create($account) {
     'pass2' => $account->pass,
   );
   $form_state['values']['op'] = t('Create new account');
-  
+
   $ret = drupal_form_submit('user_register_form', $form_state);
 
   // Error if needed.
@@ -235,7 +234,7 @@ function _user_resource_create($account) {
 /**
  * Update an existing user.
  *
- * This function uses drupal_execute() and as such exepects all input to match 
+ * This function uses drupal_execute() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $uid
@@ -261,7 +260,7 @@ function _user_resource_update($uid, $account) {
   if (isset($account->roles[2])) {
     $account->roles[2] = 0;
   }
-  
+
   // If a profile category was passed in, use it. Otherwise default
   // to 'account' (for saving core user data.)
   $category = 'account';
@@ -269,14 +268,14 @@ function _user_resource_update($uid, $account) {
     $category = $account->category;
     unset($account->category);
   }
-  
+
   // Drop any passed in values into the $account var. Anything
   // unused by the form just gets ignored.
   foreach ($account as $key => $value) {
     $form_state['values'][$key] = $value;
   }
 
-  if(!isset($account->pass1) && !isset($account->pass2)) {
+  if (!isset($account->pass1) && !isset($account->pass2)) {
       $account->pass1 = $account->pass;
       $account->pass2 = $account->pass;
   }
@@ -391,7 +390,7 @@ function _user_resource_logout() {
  * @param $page
  *   Page number of results to return (in pages of 20).
  * @param $fields
- *   The fields you want returned. 
+ *   The fields you want returned.
  * @param $parameters
  *   An object containing fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
@@ -399,28 +398,28 @@ function _user_resource_logout() {
  *   An array of user objects.
  *
  * @see _node_resource_index() for more notes
- **/
+ */
 function _user_resource_index($page = 0, $fields = '*', $parameters = NULL) {
   $user_select = db_select('users', 'u');
-  if($fields == '*') { 
-    $user_select->fields('u');  
-  } else {
+  if ($fields == '*') {
+    $user_select->fields('u');
+  }
+  else {
     $fields = explode(',', $fields);
     $user_select->fields('u', $fields);
   }
   $user_select->orderBy('created', 'DESC');
   $user_select->range($page * 20, 20);
-  
+
   if (is_object($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
       $user_select->condition($parameter, $parameter_value, '=');
     }
   }
-  
+
   $result = $user_select->execute();
-  
   $users = array();
-  foreach($result as $user) {  
+  foreach ($result as $user) {
     if ($uri = services_resource_uri(array('user', $user->uid))) {
       $user->uri = $uri;
     }
@@ -434,27 +433,26 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = NULL) {
  */
 function _user_resource_access($op = 'view', $args = array()) {
   global $user;
-  switch($op) {
+  switch ($op) {
     case 'view':
-        $account = user_load($args[0]);
-        if(!$account->uid) {
-          return services_error('That user ID does not exist', 406);
-        }
-        return user_view_access($account);   
+      $account = user_load($args[0]);
+      if (!$account->uid) {
+        return services_error('That user ID does not exist', 406);
+      }
+      return user_view_access($account);
     case 'update':
-        $account = user_load($args[1]->uid);
-        if(!$account->uid) {
-          return services_error('That user ID does not exist', 406);
-        }      
+      $account = user_load($args[1]->uid);
+      if (!$account->uid) {
+        return services_error('That user ID does not exist', 406);
+      }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
       return user_access('administer users');
     case 'delete':
       $account = user_load($args[0]);
-      if(!$account->uid) {
+      if (!$account->uid) {
         return services_error('That user ID does not exist', 406);
       }
       return user_access('administer users');
   }
-
 }

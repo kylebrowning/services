@@ -1,7 +1,14 @@
 <?php
+// $Id$
 
 /**
- * Base class for all response format views
+ * @file
+ * Provide formatter class for all standard response formats.
+ *
+ */
+
+/**
+ * Base class for all response format views.
  */
 abstract class RESTServerView {
   protected $model;
@@ -91,7 +98,7 @@ class RESTServerViewBuiltIn extends RESTServerView {
         $parent->setAttribute('is_array', 'true');
       }
     }
-    else if ($data!==NULL) {
+    elseif ($data !== NULL) {
       $parent->appendChild($doc->createTextNode($data));
     }
   }

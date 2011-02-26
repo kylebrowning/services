@@ -11,105 +11,106 @@
  * Run test cases for the endpoint with no authentication turned on.
  *
  */
- class ServicesEndpointTests extends ServicesWebTestCase {
-
-/**
-    * Test adding an endpoint succeeds.
-    */
-   public function testEndpointForm() {
-     $edit = $this->populateEndpointFAPI();
-     // Create and log in our privileged user.
-     $this->privilegedUser = $this->drupalCreateUser(array(
-         'administer services',
-     ));
-     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
-     $this->drupalGet($edit['path']);
-   }
-   /**
-    * Test adding an endpoint succeeds.
-    */
-   public function testSuccessfulAddEndpoint() {
-     $edit = $this->populateEndpointFAPI() ;
+class ServicesEndpointTests extends ServicesWebTestCase {
+  /**
+   * Test adding an endpoint succeeds.
+   */
+  public function testEndpointForm() {
+    $edit = $this->populateEndpointFAPI();
+// Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer content types',
+      'administer services',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', t('expected 200'));
-     $this->drupalGet('admin/config/services/services/list') ;
-     $this->assertResponse('200',t('expected 200'));
+    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->drupalGet($edit['path']);
+  }
 
-     $this->assertText($edit['title'], t('Endpoint path appears')) ;
-     $this->assertText('rest_server', t('Server is rest server')) ;
-     $this->assertText('In database', t('Storage is in database')) ;
-   }
-
-   /**
-    * Test missing path to endpoint causes an error.
-    */
-   public function testMissingPath() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['path']) ;
+  /**
+   * Test adding an endpoint succeeds.
+   */
+  public function testSuccessfulAddEndpoint() {
+    $edit = $this->populateEndpointFAPI();
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer content types',
+      'administer services',
+      'administer content types',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->assertResponse('200', t('expected 200'));
+    $this->drupalGet('admin/config/services/services/list');
+    $this->assertResponse('200', t('expected 200'));
 
-     $this->assertText('Path to endpoint field is required.',
-       t('Endpoint path missing error message.')) ;
-     $this->assertFieldByName('title', $edit['title'],
-       t('Title field remains.')) ;
-     $this->assertFieldByName('server', 'rest_server',
-       t('Server is rest server')) ;
-   }
+    $this->assertText($edit['title'], t('Endpoint path appears'));
+    $this->assertText('rest_server', t('Server is rest server'));
+    $this->assertText('In database', t('Storage is in database'));
+  }
 
-   /**
-    * Test missing title for endpoint causes an error.
-    */
-   public function testMissingTitle() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['title']) ;
+  /**
+   * Test missing path to endpoint causes an error.
+   */
+  public function testMissingPath() {
+    $edit = $this->populateEndpointFAPI();
+    unset($edit['path']);
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer content types',
+      'administer services',
+      'administer content types',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->assertResponse('200', 'expected 200');
 
-     $this->assertText('Endpoint title field is required.',
-       t('Endpoint title missing error message.')) ;
-     $this->assertFieldByName('name', $edit['name'],
-       t('Name field remains.')) ;
-     $this->assertFieldByName('server', 'rest_server',
-       t('Server is rest server')) ;
-   }
+    $this->assertText('Path to endpoint field is required.',
+      t('Endpoint path missing error message.'));
+    $this->assertFieldByName('title', $edit['title'],
+      t('Title field remains.'));
+    $this->assertFieldByName('server', 'rest_server',
+      t('Server is rest server'));
+  }
 
-   /**
-    * Test missing server for endpoint causes an error.
-    */
-   public function testMissingServer() {
-     $edit = $this->populateEndpointFAPI() ;
-     unset($edit['server']) ;
+  /**
+   * Test missing title for endpoint causes an error.
+   */
+  public function testMissingTitle() {
+    $edit = $this->populateEndpointFAPI();
+    unset($edit['title']);
     $this->privilegedUser = $this->drupalCreateUser(array(
-       'administer services',
-       'administer content types',
+      'administer services',
+      'administer content types',
     ));
     $this->drupalLogin($this->privilegedUser);
-     $this->drupalPost('admin/config/services/services/add', $edit,
-       t('Save and proceed')) ;
-     $this->assertResponse('200', 'expected 200');
+    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->assertResponse('200', 'expected 200');
 
-     $this->assertText('Server field is required.',
-       t('Server missing error message.')) ;
-     $this->assertFieldByName('name', $edit['name'],
-       t('Name field remains.')) ;
-     $this->assertFieldByName('title', $edit['title'],
-       t('Title field remains.')) ;
-   }
+    $this->assertText('Endpoint title field is required.',
+      t('Endpoint title missing error message.'));
+    $this->assertFieldByName('name', $edit['name'],
+      t('Name field remains.'));
+    $this->assertFieldByName('server', 'rest_server',
+      t('Server is rest server'));
+  }
+
+  /**
+   * Test missing server for endpoint causes an error.
+   */
+  public function testMissingServer() {
+    $edit = $this->populateEndpointFAPI();
+    unset($edit['server']);
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+      'administer content types',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $this->drupalPost('admin/config/services/services/add', $edit,
+      t('Save and proceed'));
+    $this->assertResponse('200', 'expected 200');
+
+    $this->assertText('Server field is required.',
+      t('Server missing error message.'));
+    $this->assertFieldByName('name', $edit['name'],
+      t('Name field remains.'));
+    $this->assertFieldByName('title', $edit['title'],
+      t('Title field remains.'));
+  }
+
 }

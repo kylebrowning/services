@@ -39,7 +39,7 @@ function services_list_endpoint($js = NULL) {
     else {
       $debug[] = array(
         'title' => t('Turn On'),
-        'style' => array('color'=> 'green'),
+        'style' => array('color' => 'green'),
         'href'  => 'admin/config/services/services/' . $endpoint->name . '/enabledebug',
         'query' => drupal_get_destination(),
       );
@@ -90,7 +90,8 @@ function services_list_endpoint($js = NULL) {
       else {
         $row_class = 'services-endpoint-enabled';
       }
-    } else {
+    }
+    else {
       $row_class = 'services-endpoint-disabled';
     }
     $auth_names = array();
@@ -124,20 +125,20 @@ function services_list_endpoint($js = NULL) {
         ),
         'debug' => array(
           'data'  => array(
-             '#theme' => 'links',
-             '#links' => $debug,
-           ),
-	 	      'class' => array('services-endpoint-debug'),
+            '#theme' => 'links',
+            '#links' => $debug,
+          ),
+          'class' => array('services-endpoint-debug'),
         ),
         'operations' => array(
           'data'  => array(
-             '#theme' => 'links',
-             '#links' => $operations,
-           ),
+            '#theme' => 'links',
+            '#links' => $operations,
+          ),
           'class' => array('services-endpoint-operations'),
         ),
       ),
-      'class' =>$row_class,
+      'class' => $row_class,
     );
   }
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
@@ -492,7 +493,7 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
         'Drupal session based security will be used.'),
     );
   }
-  else if (empty($endpoint->authentication)) {
+  elseif (empty($endpoint->authentication)) {
     $form['message'] = array(
       '#type'          => 'item',
       '#title'         => t('No enabled authentication modules'),

@@ -193,7 +193,7 @@ function _taxonomy_resource_definition() {
         'access arguments append' => TRUE,
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
-      'actions' =>array(
+      'actions' => array(
         'getTree' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
           'help'   => t('This method returns a full list of taxonomy terms.'),
@@ -216,7 +216,7 @@ function _taxonomy_resource_definition() {
               'source'       => 'data',
               'default value' => 0,
               'optional'     => TRUE,
-            ), 
+            ),
             array(
               'name'         => 'maxdepth',
               'type'         => 'int',
@@ -240,7 +240,7 @@ function _taxonomy_resource_definition() {
  * @return
  *   A term object.
  *
- * @see taxonomy_get_term().
+ * @see taxonomy_get_term()
  */
 function _taxonomy_term_resource_retrieve($tid) {
   return taxonomy_get_term($tid);
@@ -254,7 +254,7 @@ function _taxonomy_term_resource_retrieve($tid) {
  * @return
  *   Status constant indicating if term was inserted or updated.
  *
- * @see taxonomy_save_term().
+ * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_create($term) {
   $term = (object)$term;
@@ -271,7 +271,7 @@ function _taxonomy_term_resource_create($term) {
  * @return
  *   Status constant indicating if term was inserted or updated.
  *
- * @see taxonomy_save_term().
+ * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_update($tid, $term) {
   $term = (object) $term;
@@ -287,7 +287,7 @@ function _taxonomy_term_resource_update($tid, $term) {
  * @return
  *   Status constant indicating deletion.
  *
- * @see taxonomy_del_term().
+ * @see taxonomy_del_term()
  */
 function _taxonomy_term_resource_delete($tid) {
   return taxonomy_term_delete($tid);
@@ -302,7 +302,7 @@ function _taxonomy_term_resource_delete($tid) {
  * @return
  *   A vocabulary object or FALSE.
  *
- * @see taxonomy_vocabulary_load().
+ * @see taxonomy_vocabulary_load()
  */
 function _taxonomy_vocabulary_resource_retrieve($vid) {
   return taxonomy_vocabulary_load($vid);
@@ -335,7 +335,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary().
+ * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
   $vocabulary = (array) $vocabulary;
@@ -352,7 +352,7 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary().
+ * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   $vocabulary = (array) $vocabulary;
@@ -368,7 +368,7 @@ function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
  * @return
  *   Status constant indicating deletion.
  *
- * @see taxonomy_del_vocabulary().
+ * @see taxonomy_del_vocabulary()
  */
 function _taxonomy_vocabulary_resource_delete($vid) {
   return taxonomy_del_vocabulary($vid);
@@ -379,13 +379,12 @@ function _taxonomy_vocabulary_resource_delete($vid) {
 /**
  * Services interface to taxonomy_get_tree().
  *
- * @see
- *   taxonomy_get_tree()
+ * @see taxonomy_get_tree()
  */
 function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
   $terms = taxonomy_get_tree($vid, $parent, $max_depth);
-  if(empty($terms)) {
-    return services_error('No vocabulary with id: '. $vid .' found.', 404);
+  if (empty($terms)) {
+    return services_error('No vocabulary with id: ' . $vid . ' found.', 404);
   }
   return $terms;
 }
@@ -396,22 +395,21 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
  * Note that where taxonomy_select_nodes() returns the results
  * of a db_query(), this function returns an array of node objects.
  *
- * @see
- *   taxonomy_select_nodes().
- * @return 
+ * @see taxonomy_select_nodes()
+ * @return
  *   An array of node objects.
  */
 function taxonomy_service_select_nodes($tid = '', $pager = TRUE, $limit = FALSE,  $order = array('t.sticky' => 'DESC', 't.created' => 'DESC')) {
   $result = taxonomy_select_nodes($tid, (bool)$pager, $limit, $order);
-  foreach($result as $nid) {  
+  foreach ($result as $nid) {
     if ($uri = services_resource_uri(array('node', $nid))) {
       $node = node_load($nid);
       $node->uri = $uri;
     }
     $nodes[] = $node;
   }
-  if(empty($nodes)) {
-    return services_error('No nodes were found with tid: '. $tid, 404);
+  if (empty($nodes)) {
+    return services_error('No nodes were found with tid: ' . $tid, 404);
   }
   return $nodes;
 }

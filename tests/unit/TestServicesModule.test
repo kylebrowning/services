@@ -9,15 +9,14 @@
 /**
  * Run test cases for the functions in the 'services.module' file.
  */
- class ServicesModuleTests extends DrupalWebTestCase {
+class ServicesModuleTests extends DrupalWebTestCase {
+  // Class variables.
+  protected $privilegedUser = NULL ;
 
-   // Class variables.
-   protected $privilegedUser = NULL ;
-
-   /**
-    * Implementation of getInfo.
-    */
-   public static function getInfo() {
+  /**
+   * Implementation of getInfo.
+   */
+  public static function getInfo() {
     return array(
       'name' => 'Unit tests for services.module file.',
       'description' => 'These are the unit tests for the services.module file functions.',
@@ -33,7 +32,7 @@
       'ctools',
       'services',
       'rest_server'
-      );
+    );
 
     // Create and logi in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
@@ -103,10 +102,8 @@
 
     $message = t("There should be a '$perm' permission") ;
     $this->assertTrue($result, $message);
-/*
-    $this->fail(print_r($arrayToSearch, 1));
-    $this->assertNotIdentical($result, FALSE, $message) ;
-*/
+//    $this->fail(print_r($arrayToSearch, 1));
+//    $this->assertNotIdentical($result, FALSE, $message) ;
   } // function
 
   /**
@@ -186,30 +183,30 @@
        'title'  => $this->randomName(20),
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
-     );
+    );
 
-     $this->drupalPost('admin/config/services/services/add', $endpointSettings,
-       t('Save and proceed'));
-     $this->assertResponse('200', t('Failed to create endpoint.'));
+    $this->drupalPost('admin/config/services/services/add', $endpointSettings,
+      t('Save and proceed'));
+    $this->assertResponse('200', t('Failed to create endpoint.'));
 
-     // Check path.
-     $this->drupalGet($endpointSettings['path']);
-     $this->assertResponse('200', t('Failed to access endpoint menu path.'));
+    // Check path.
+    $this->drupalGet($endpointSettings['path']);
+    $this->assertResponse('200', t('Failed to access endpoint menu path.'));
 
-     // Check edit.
-     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
-       . '/edit');
-     $this->assertResponse('200', t('Failed to access endpoint edit path.')) ;
+    // Check edit.
+    $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
+     . '/edit');
+    $this->assertResponse('200', t('Failed to access endpoint edit path.')) ;
 
-     // Check export.
-     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
-       . '/export');
-     $this->assertResponse('200', t('Failed to access endpoint export path.')) ;
+    // Check export.
+    $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
+     . '/export');
+    $this->assertResponse('200', t('Failed to access endpoint export path.')) ;
 
-     // Check delete.
-     $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
-       . '/delete');
-     $this->assertResponse('200', t('Failed to access endpoint delete path.')) ;
+    // Check delete.
+    $this->drupalGet('admin/config/services/services/' . $endpointSettings['name']
+     . '/delete');
+    $this->assertResponse('200', t('Failed to access endpoint delete path.')) ;
   }
 
   /*
@@ -227,24 +224,20 @@
    * Void. Feedback is given through the test harness via assertions.
    */
   protected function helpMenuItem($menuItem, $items) {
-    $message = $menuItem . t(' should exist') ;
-    $this->assertTrue(isset($items[$menuItem]), $message) ;
+    $message = t('%menuItem should exist', array('%menuItem' => $menuItem));
+    $this->assertTrue(isset($items[$menuItem]), $message);
 
-    $message = $menuItem . t(' value should be an array') ;
-    $this->assertTrue(gettype($items[$menuItem]) == 'array', $message) ;
+    $message = t('%menuItem value should be an array', array('%menuItem' => $menuItem));
+    $this->assertTrue(gettype($items[$menuItem]) == 'array', $message);
 
-    $message = $menuItem
-      . t(' should have \'access arguments\' set to \'administer services\'') ;
-    $this->assertEqual($items[$menuItem]['access arguments']
-      [0], 'administer services', $message) ;
+    $message = t("%menuItem should have 'access arguments' set to 'administer services'", array('%menuItem' => $menuItem));
+    $this->assertEqual($items[$menuItem]['access arguments'][0], 'administer services', $message);
 
-    $message = $menuItem
-      . t(' should have \'file\' to \'services.admin.inc\'') ;
-    $this->assertEqual($items[$menuItem]['file'], 'services.admin.inc',
-      $message) ;
+    $message = t("%menuItem should have 'file' to 'services.admin.inc'", array('%menuItem' => $menuItem));
+    $this->assertEqual($items[$menuItem]['file'], 'services.admin.inc', $message);
 
-    $message = $menuItem . t(' should have a \'page callback\'') ;
-    $this->assertTrue(isset($items[$menuItem]['page callback']), $message) ;
+    $message = t("%menuItem should have a 'page callback'", array('%menuItem' => $menuItem));
+    $this->assertTrue(isset($items[$menuItem]['page callback']), $message);
   } // function
 
   /**
@@ -288,23 +281,18 @@
     $message = t('services_endpoints_new() should return an object.');
     $this->assertEqual($results_type, 'object', $message);
 
-    $message = t('New Service object should have property ') ;
-    $this->assertTrue(property_exists($results, 'eid'   ),
-      $message . t('eid.'));
-    $this->assertTrue(property_exists($results, 'name'  ),
-      $message . t('name.'));
-    $this->assertTrue(property_exists($results, 'title' ),
-      $message . t('title.'));
-    $this->assertTrue(property_exists($results, 'server'),
-      $message . t('server.'));
-    $this->assertTrue(property_exists($results, 'path'  ),
-      $message . t('path.'));
+    $string = 'New Service object should have property ';
+    $this->assertTrue(property_exists($results, 'eid'), t($string . 'eid.'));
+    $this->assertTrue(property_exists($results, 'name'), t($string . 'name.'));
+    $this->assertTrue(property_exists($results, 'title'), t($string . 'title.'));
+    $this->assertTrue(property_exists($results, 'server'), t($string . 'server.'));
+    $this->assertTrue(property_exists($results, 'path'  ), t($string . 'path.'));
   }
 
   /**
    * Test services_controller_get().
    */
-  public function testServicesControllerGet() {
-
-  }
- } // class
+//  public function testServicesControllerGet() {
+//
+//  }
+} // class

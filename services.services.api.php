@@ -16,7 +16,7 @@
   * ways Services can be seen as an abstraction layer on top of hook_menu().
   *
   * @return
-  *   An associative array which defines available resources. 
+  *   An associative array which defines available resources.
   *
   *   The associative array which defines services has eight possible top
   *   level keys:
@@ -33,30 +33,30 @@
   *   The CRUD functions are pretty self-explanatory. Index is an extra CRUD-
   *   type function that allows you to create pageable lists.
   *
-  *   Actions are performed directly on the resource type, not a individual 
+  *   Actions are performed directly on the resource type, not a individual
   *   resource. The following example is hypothetical (but plausible). Say
-  *   that you want to expose a API for the apachesolr module. One of the 
-  *   things that could be exposed is the functionality to reindex the whole 
+  *   that you want to expose a API for the apachesolr module. One of the
+  *   things that could be exposed is the functionality to reindex the whole
   *   site at apachesolr/reindex.
   *
-  *   Targeted actions acts on a individual resource. A good, but again - 
+  *   Targeted actions acts on a individual resource. A good, but again -
   *   hypothetical, example would be the publishing and unpublishing of nodes
   *   at node/123/publish.
   *
-  *   Relationship requests are convenience methods (sugar) to get something 
+  *   Relationship requests are convenience methods (sugar) to get something
   *   thats related to a individual resource. A real example would be the
-  *   ability to get the files for a node at node/123/files.  
+  *   ability to get the files for a node at node/123/files.
   *
   *   The first five (the CRUD functions + index) define the indvidual service
   *   callbacks for each function. However 'actions', 'targeted actions',
-  *   and 'relationships' can contain multiple callbacks. 
+  *   and 'relationships' can contain multiple callbacks.
   *
-  *   For those familiar with Services 2.x, these callbacks are created 
+  *   For those familiar with Services 2.x, these callbacks are created
   *   similarly, but the keys have changed around a bit. The following keys
   *   are used to describe a callback.
   *
   *   - help: Text describing what this callback does.
-  *   - callback: The name of a function to call when this resource is 
+  *   - callback: The name of a function to call when this resource is
   *     requested.
   *   - access callback: The name of a function to call to check whether
   *     the requesting user has permission to access this resource. If not
@@ -75,10 +75,10 @@
   *     - description: Text describing this argument's usage.
   *     - optional: A boolean indicating whether or not this argument is optional.
   *     - source: Where this argument should be retrieved from. This can be
-  *       'data' (indicating the POST data), 'param' (indicating the query 
-  *       string) or 'path' (indicating the url path). In the case of path, 
+  *       'data' (indicating the POST data), 'param' (indicating the query
+  *       string) or 'path' (indicating the url path). In the case of path,
   *       an additional parameter must be passed indicating the index to be used.
-  *     - default value: this is a value that will be passed to the method for 
+  *     - default value: this is a value that will be passed to the method for
   *       this particular argument if no argument value is passed
   *
   *   A detailed example of creating a new resource can be found at

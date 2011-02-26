@@ -147,7 +147,7 @@ function _node_resource_definition() {
  *   Node object or FALSE if not found.
  *
  * @see node_load()
- **/
+ */
 function _node_resource_retrieve($nid) {
   global $user;
   $node = node_load($nid);
@@ -172,7 +172,7 @@ function _node_resource_retrieve($nid) {
  *   the fully qualified URI to this resource.
  *
  * @see drupal_execute()
- **/
+ */
 function _node_resource_create($node) {
   $node = (object)$node;
 
@@ -191,10 +191,11 @@ function _node_resource_create($node) {
 
   //Wanted to return a gracefull error instead of a blank nid, this should allow for that.
   $types = node_type_get_types();
-  if(array_key_exists($node->type, $types)) {
+  if (array_key_exists($node->type, $types)) {
     drupal_form_submit($node->type . '_node_form', $form_state, $node);
-  } else {
-    return services_error('Node type "'. $node->type .'" does not exist.', 406);
+  }
+  else {
+    return services_error('Node type "' . $node->type . '" does not exist.', 406);
   }
 
 
@@ -226,7 +227,7 @@ function _node_resource_create($node) {
  *   The node's nid.
  *
  * @see drupal_execute()
- **/
+ */
 function _node_resource_update($nid, $node) {
   $node = (object)$node;
   $node->nid = $nid;
@@ -269,7 +270,7 @@ function _node_resource_update($nid, $node) {
  *   Node ID of the node we're deleting.
  * @return
  *   The node's nid.
- **/
+ */
 function _node_resource_delete($nid) {
   node_delete($nid);
   return 1;
@@ -300,7 +301,7 @@ function _node_resource_delete($nid) {
  *     - Do we need fields at all? Should this just return full nodes?
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
- **/
+ */
 function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
   $node_select = db_select('node', 'n')
     ->addTag('node_access')
@@ -310,25 +311,26 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
 
   if ($fields == '*') {
     $node_select->fields('n');
-  } else {
+  }
+  else {
     $fields = explode(',', $fields);
     $node_select->fields('n', $fields);
   }
-  
+
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);
   }
-  
+
   if (is_object($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
       $node_select->condition($parameter, $parameter_value, '=');
     }
   }
-  
+
   $result = $node_select->execute();
 
   $nodes = array();
-  foreach($result as $node) {
+  foreach ($result as $node) {
     if ($uri = services_resource_uri(array('node', $node->nid))) {
       $node->uri = $uri;
     }
@@ -348,31 +350,34 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
  * @return bool
  *
  * @see node_access()
- **/
+ */
 function _node_resource_access($op = 'view', $args = array()) {
   // Make sure we have an object or this all fails, some servers can
   // mess up the types.
   if (is_array($args[0])) {
     $args[0] = (object) $args[0];
-  } else if(!is_array($args[0]) && !is_object($args[0])) {  //This is to determine if it is just a string happens on node/%NID
-    $args[0] = (object)array('nid'=>$args[0]);
+  }
+  elseif (!is_array($args[0]) && !is_object($args[0])) {  //This is to determine if it is just a string happens on node/%NID
+    $args[0] = (object)array('nid' => $args[0]);
   }
 
   if ($op != 'create' && !empty($args)) {
     $node = node_load($args[0]->nid);
   }
-  else if ($op == 'create') {
-    if(isset($args[0]->type)) {
+  elseif ($op == 'create') {
+    if (isset($args[0]->type)) {
       $node = $args[0]->type;
       return node_access($op, $node);
-    } else {
+    }
+    else {
       return services_error('Node type is required', 406);
     }
   }
-  if(isset($node->nid) && $node->nid) {
+  if (isset($node->nid) && $node->nid) {
     return node_access($op, $node);
-  } else {
-    return services_error('Node id: '. $args[0]->nid .' could not be found', 404);
+  }
+  else {
+    return services_error('Node id: ' . $args[0]->nid . ' could not be found', 404);
   }
 }
 
@@ -396,7 +401,7 @@ function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
 
   // Loop through all of the fields on the site
   foreach ($fields as $key => $field) {
-    //if we are a field type of file 
+    //if we are a field type of file
     if ($field['type'] == 'image' || $field['type'] == 'file') {
       // If this field exists on our current node..
       if (isset($node->{$field['field_name']})) {
@@ -404,7 +409,7 @@ function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
         if (isset($node->{$field['field_name']}[LANGUAGE_NONE])) {
           // Grab the items given and attach them to the array.
           $node_file_field_items = $node->{$field['field_name']}[LANGUAGE_NONE];
-          foreach ($node_file_field_items as $file) { 
+          foreach ($node_file_field_items as $file) {
             $files[] = _file_resource_retrieve($file['fid'], $include_file_contents);
           }
         }

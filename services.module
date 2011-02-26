@@ -6,18 +6,18 @@
  */
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  */
 function services_help($path, $arg) {
   $output = NULL;
 
   switch ($path) {
     case 'admin/help#services':
-      $output = '<p>'. t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
+      $output = '<p>' . t('Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) . '</p>';
       break;
     case 'admin/config/services/services':
-      $output = '<p>'. t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) .'</p>';
-      $output .= '<p>'. t('All enabled services and methods are shown. Click on any method to view information or test.') .'</p>';
+      $output = '<p>' . t('Services are collections of methods available to remote applications. They are defined in modules, and may be accessed in a number of ways through server modules. Visit the <a href="@handbook_url">Services Handbook</a> for help and information.', array('@handbook_url' => 'http://drupal.org/node/109782')) . '</p>';
+      $output .= '<p>' . t('All enabled services and methods are shown. Click on any method to view information or test.') . '</p>';
       $output .= '<div id="services-help-legend"><div class="services-endpoint-enabled">Enabled</div><div class="services-endpoint-debug">Enabled With Debug</div><div class="services-endpoint-disabled">Disabled</div></div>';
       break;
   }
@@ -26,7 +26,7 @@ function services_help($path, $arg) {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_perm().
  */
 function services_permission() {
   return array(
@@ -60,7 +60,7 @@ function services_permission() {
 }
 
 /**
- * Implementation of hook_hook_info().
+ * Implements hook_hook_info().
  */
 function services_hook_info() {
   $hooks['services_resources'] = array(
@@ -70,7 +70,7 @@ function services_hook_info() {
 }
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function services_menu() {
   $base = array(
@@ -132,12 +132,12 @@ function services_menu() {
      'page callback'  => 'services_disable_debug_mode',
      'page arguments' => array(4),
      'type'           => MENU_CALLBACK,
-   ) + $base;
-   $items['admin/config/services/services/%services_endpoint/enabledebug'] = array(
+  ) + $base;
+  $items['admin/config/services/services/%services_endpoint/enabledebug'] = array(
      'page callback'  => 'services_enable_debug_mode',
      'page arguments' => array(4),
      'type'           => MENU_CALLBACK,
-   ) + $base;
+  ) + $base;
   $items['admin/config/services/services/%services_endpoint/disable'] = array(
     'page callback'  => 'services_disable_endpoint',
     'page arguments' => array(4),
@@ -152,7 +152,7 @@ function services_menu() {
     'page callback' => '_services_ahah_security_options',
     'type'          => MENU_CALLBACK,
   ) + $base;
-  
+
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
     if (empty($endpoint->disabled)) {
@@ -183,7 +183,7 @@ function services_access_menu() {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function services_theme() {
   return array(
@@ -236,7 +236,7 @@ function services_endpoint_callback($endpoint_name) {
       'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
     ));
-    if($endpoint->debug) {
+    if ($endpoint->debug) {
       watchdog('services', 'Calling server: %server', array('%server' => $server . '_server'), WATCHDOG_DEBUG);
       watchdog('services', 'Server info main object: <pre>@info</pre>', array('@info' => print_r(services_server_info_object(), TRUE)), WATCHDOG_DEBUG);
     }
@@ -278,8 +278,8 @@ function services_endpoint_load($name) {
     return $result[$name];
   }
   else {
-    $result =  db_query("SELECT * FROM {services_endpoint} WHERE name = :name", array(':name'=>$name));
- 	  $matches = array();
+    $result = db_query("SELECT * FROM {services_endpoint} WHERE name = :name", array(':name' => $name));
+    $matches = array();
     foreach ($result as $endpoint) {
       return $endpoint;
     }
@@ -296,9 +296,9 @@ function services_endpoint_load($name) {
 function services_endpoint_load_all() {
   ctools_include('export');
   $matches = ctools_export_load_object('services_endpoint');
-  if(!$matches) {
+  if (!$matches) {
     $result =  db_query("SELECT * FROM {services_endpoint}");
- 	  $matches = array();
+    $matches = array();
     foreach ($result as $endpoint) {
       $matches[] = $endpoint;
     }
@@ -381,7 +381,7 @@ function services_get_resources($endpoint_name = '') {
 }
 
 /**
- * Implementation of hook_services_resources().
+ * Implements hook_services_resources().
  */
 function services_services_resources() {
   module_load_include('resource_build.inc', 'services');

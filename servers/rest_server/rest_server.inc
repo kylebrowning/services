@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Autoload classes.
+ */
+
 function _rest_server_autoload_info() {
   return array(
     'RESTServer' => array(

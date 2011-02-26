@@ -142,7 +142,11 @@ class NodeResourceFeedModelItem implements ResourceTimeFeedModelItem {
 
     // Allow modules to add additional item fields and/or modify $item
     $extra = node_invoke_nodeapi($item, 'rss item');
-    $extra = array_merge($extra, array(array('key' => 'pubDate', 'value' => gmdate('r', $item->created)), array('key' => 'dc:creator', 'value' => $item->name), array('key' => 'guid', 'value' => $item->nid .' at '. $base_url, 'attributes' => array('isPermaLink' => 'false'))));
+    $extra = array_merge($extra, array(
+      array('key' => 'pubDate', 'value' => gmdate('r', $item->created)),
+      array('key' => 'dc:creator', 'value' => $item->name),
+      array('key' => 'guid', 'value' => $item->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false')))
+    );
     foreach ($extra as $element) {
       if (isset($element['namespace'])) {
         $namespaces = array_merge($namespaces, $element['namespace']);
@@ -157,7 +161,7 @@ class NodeResourceFeedModelItem implements ResourceTimeFeedModelItem {
       case 'teaser':
         $item_text = $item->teaser;
         if (!empty($item->readmore)) {
-          $item_text .= '<p>'. l(t('read more'), 'node/'. $item->nid, array('absolute' => TRUE, 'attributes' => array('target' => '_blank'))) .'</p>';
+          $item_text .= '<p>' . l(t('read more'), 'node/' . $item->nid, array('absolute' => TRUE, 'attributes' => array('target' => '_blank'))) . '</p>';
         }
         break;
       case 'title':

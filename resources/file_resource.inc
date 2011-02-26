@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * File resource.
+ */
+
+/**
  * THERE SHOULD BE NO UPDATE!!!
  * Drupal doesn't allow updating or replacing a file in the files table.
  * If you need to, create a new file and remove the old file.
@@ -99,10 +104,10 @@ function _file_resource_create($file) {
 
   // Get the directory name for the location of the file:
 
-  if(isset($file->filename) && !isset($file->filepath)) {
-    $file->filepath = file_default_scheme() . '://'. $file->filename;
+  if (isset($file->filename) && !isset($file->filepath)) {
+    $file->filepath = file_default_scheme() . '://' . $file->filename;
   }
-  $dir = file_default_scheme() . '://';  
+  $dir = file_default_scheme() . '://';
   // Build the destination folder tree if it doesn't already exists.
   if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
     return services_error("Could not create destination directory for file.", 500);
@@ -111,7 +116,7 @@ function _file_resource_create($file) {
   $file->filemime = file_get_mimetype($file->filename);
 
   // Rename potentially executable files, to help prevent exploits.
-  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (drupal_substr($file->filename, -4) != '.txt')) {
     $file->filemime = 'text/plain';
     $file->filepath .= '.txt';
     $file->filename .= '.txt';
@@ -120,20 +125,20 @@ function _file_resource_create($file) {
 /*
   //The filepath that ends up in the node must contain the filename
   $file->filepath .= '/'. $file->filename;
-*/
+ */
 
   // Write the file
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
     return services_error("Could not write file to destination", 500);
   }
-  
+
   //Required to be able to reference this file.
   file_usage_add($file, 'services', 'files', $file->fid);
-  
+
   // hook_file_insert() requires an object
   if (empty($update)) {
     foreach (module_implements('file_insert') as $module) {
-      $function =  $module .'_file_insert';
+      $function =  $module . '_file_insert';
       $function($file);
     }
   }
@@ -157,9 +162,9 @@ function _file_resource_create($file) {
 function _file_resource_retrieve($fid, $include_file_contents = TRUE) {
   if ($file = file_load($fid)) {
     $filepath = $file->uri;
-    if($include_file_contents) {
+    if ($include_file_contents) {
       $file->file = base64_encode(file_get_contents($filepath));
-    } 
+    }
     return $file;
   }
 }
@@ -193,8 +198,8 @@ function _file_resource_access($op = 'view', $args = array()) {
   else {
     $file = file_load($args[0]);
   }
-  if(empty($file)) {
-    return services_error('There is no file with the given ID: '. $args[0], 406);
+  if (empty($file)) {
+    return services_error('There is no file with the given ID: ' . $args[0], 406);
   }
   switch ($op) {
     case 'view':

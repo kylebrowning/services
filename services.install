@@ -5,7 +5,7 @@
  */
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function services_schema() {
   $schema = array();
@@ -88,7 +88,7 @@ function services_schema() {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function services_uninstall() {
   $ret = array();
@@ -106,6 +106,7 @@ function services_uninstall() {
   variable_del('services_debug');
   variable_del('services_auth_module');
 }
+
 /**
  * Update 7301 adds debugging to each endopint to facilitate easier development
  */
