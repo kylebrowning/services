@@ -134,7 +134,7 @@ function services_menu() {
   // Add menu items for the different endpoints
   $endpoints = services_endpoint_load_all();
   foreach ($endpoints as $endpoint) {
-    if ($endpoint->status) {
+    if (empty($endpoint->disabled)) {
       $items[$endpoint->path] = array(
         'title'             => 'Services endpoint',
         'access callback'   => 'services_access_menu',

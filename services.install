@@ -67,13 +67,6 @@ function services_schema() {
         'not null'    => TRUE,
         'default'     => 0
       ),
-      'status' => array(
-        'description' => 'Endpoint is enabled.',
-        'type'        => 'int',
-        'length'      => 2,
-        'not null'    => TRUE,
-        'default'     => 1
-      ),
     ),
     'primary key' => array('eid'),
     'unique keys' => array(
@@ -262,5 +255,11 @@ function services_update_6301() {
   $ret = array();
   db_add_field($ret, 'services_endpoint', 'debug', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
   db_add_field($ret, 'services_endpoint', 'status', array('type' => 'int', 'not null' => TRUE, 'default' => 1));
+  return $ret;
+}
+
+function services_update_6302() {
+  $ret = array();
+  db_drop_field($ret, 'services_endpoint', 'status');
   return $ret;
 }
