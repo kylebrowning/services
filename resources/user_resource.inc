@@ -106,7 +106,7 @@ function _user_resource_definition() {
             'optional' => TRUE,
             'type' => 'struct',
             'description' => 'Parameters',
-            'default value' => NULL,
+            'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
         ),
@@ -172,7 +172,7 @@ function _user_resource_retrieve($uid) {
 /**
  * Create a new user.
  *
- * This function uses drupal_execute() and as such exepects all input to match
+ * This function uses drupal_form_submit() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $account
@@ -195,14 +195,14 @@ function _user_resource_retrieve($uid) {
  */
 function _user_resource_create($account) {
   // Load the required includes for saving profile information
-  // with drupal_execute().
+  // with drupal_form_submit().
   module_load_include('inc', 'user', 'user.pages');
 
   // Any logged in user is by default authenticated,
   // and leaving this role set in the user's roles array
   // causes big problems because of a FAPI hack that controls
   // this checkbox on the user create and edit form (and thus
-  // causes problems with drupal_execute()). Therefore we just
+  // causes problems with drupal_form_submit()). Therefore we just
   // force it to 0 here.
   if (isset($account->roles[2])) {
     $account->roles[2] = 0;
@@ -234,7 +234,7 @@ function _user_resource_create($account) {
 /**
  * Update an existing user.
  *
- * This function uses drupal_execute() and as such exepects all input to match
+ * This function uses drupal_form_submit() and as such exepects all input to match
  * the submitting form in question.
  *
  * @param $uid
@@ -246,20 +246,17 @@ function _user_resource_create($account) {
  *   The modified user object.
  */
 function _user_resource_update($uid, $account) {
+  $account = (object)$account;
   $account->uid = $uid;
-  // Load the required includes for saving profile information
-  // with drupal_execute().
-  module_load_include('inc', 'user', 'user.pages');
 
-  // Any logged in user is by default authenticated,
-  // and leaving this role set in the user's roles array
-  // causes big problems because of a FAPI hack that controls
-  // this checkbox on the user create and edit form (and thus
-  // causes problems with drupal_execute()). Therefore we just
-  // force it to 0 here.
-  if (isset($account->roles[2])) {
-    $account->roles[2] = 0;
+  $account_loaded = user_load($uid);
+
+  if (!isset($account->roles)) {
+    $account->roles = $account_loaded->roles;
   }
+  // Load the required includes for saving profile information
+  // with drupal_form_submit().
+  module_load_include('inc', 'user', 'user.pages');
 
   // If a profile category was passed in, use it. Otherwise default
   // to 'account' (for saving core user data.)
@@ -270,22 +267,33 @@ function _user_resource_update($uid, $account) {
   }
 
   // Drop any passed in values into the $account var. Anything
-  // unused by the form just gets ignored.
-  foreach ($account as $key => $value) {
-    $form_state['values'][$key] = $value;
+  // unused by the form just gets ignored. We handle roles and
+  // password separately.
+  foreach ((array)$account as $key => $value) {
+    if ($key != 'pass' || $key != 'roles') {
+      $form_state['values'][$key] = $value;
+    }
   }
 
-  if (!isset($account->pass1) && !isset($account->pass2)) {
-      $account->pass1 = $account->pass;
-      $account->pass2 = $account->pass;
+  // Prepare values of roles.
+  foreach ($account->roles as $key => $value) {
+    if (!empty($value)) {
+      $form_state['values']['roles'][$key] = $key;
+    }
   }
-  $form_state['values']['op'] = 'Save';
-  $form_state['values']['pass']['pass1'] = $account->pass1;
-  $form_state['values']['pass']['pass2'] = $account->pass1;
+  unset($form_state['values']['roles'][2]);
+
+  // Prepare values for password.
+  if (isset($account->pass)) {
+    $form_state['values']['pass']['pass1'] = $account->pass;
+    $form_state['values']['pass']['pass2'] = $account->pass;
+  }
+
+  $form_state['values']['op'] = t('Save');
   $form_state['values']['#user_category'] = $category;
-  $form_state['values']['#account'] = (object)$account;
+  $form_state['values']['#account'] = $account_loaded;
 
-  $ret = drupal_form_submit('user_profile_form', $form_state, $account, $category);
+  $ret = drupal_form_submit('user_profile_form', $form_state, $account_loaded, $category);
 
   // Error if needed.
   if ($errors = form_get_errors()) {
@@ -336,21 +344,24 @@ function _user_resource_login($username, $password) {
     return services_error(t('Already logged in as !user.', array('!user' => $user->name)), 406);
   }
 
-  $user = user_load(user_authenticate($username, $password));
-  if ($user->uid) {
-    // Regenerate the session ID to prevent against session fixation attacks.
-    drupal_session_regenerate();
-    module_invoke_all('user', 'login', NULL, $user);
+  $uid = user_authenticate($username, $password);
 
-    $return = new stdClass();
-    $return->sessid = session_id();
-    $return->session_name = session_name();
-    $return->user = $user;
+  if ($uid) {
+    $user = user_load($uid);
+    if ($user->uid) {
+      // Regenerate the session ID to prevent against session fixation attacks.
+      drupal_session_regenerate();
+      module_invoke_all('user', 'login', NULL, $user);
 
-    return $return;
+      $return = new stdClass();
+      $return->sessid = session_id();
+      $return->session_name = session_name();
+      $return->user = $user;
+
+      return $return;
+    }
   }
-  session_destroy();
-  watchdog('user', 'Invalid login attempt.', array('%name' => theme('placeholder', $user->name)));
+  watchdog('user', 'Invalid login attempt for %username.', array('%username' => $username));
   return services_error(t('Wrong username or password.'), 401);
 }
 
@@ -399,7 +410,7 @@ function _user_resource_logout() {
  *
  * @see _node_resource_index() for more notes
  */
-function _user_resource_index($page = 0, $fields = '*', $parameters = NULL) {
+function _user_resource_index($page, $fields, $parameters) {
   $user_select = db_select('users', 'u');
   if ($fields == '*') {
     $user_select->fields('u');
@@ -408,14 +419,11 @@ function _user_resource_index($page = 0, $fields = '*', $parameters = NULL) {
     $fields = explode(',', $fields);
     $user_select->fields('u', $fields);
   }
+  foreach ($parameters as $key => $value) {
+    $user_select->condition('u.' . $key, $value, '=');
+  }
   $user_select->orderBy('created', 'DESC');
   $user_select->range($page * 20, 20);
-
-  if (is_object($parameters)) {
-    foreach ($parameters as $parameter => $parameter_value) {
-      $user_select->condition($parameter, $parameter_value, '=');
-    }
-  }
 
   $result = $user_select->execute();
   $users = array();
@@ -441,7 +449,7 @@ function _user_resource_access($op = 'view', $args = array()) {
       }
       return user_view_access($account);
     case 'update':
-      $account = user_load($args[1]->uid);
+      $account = user_load($args[0]);
       if (!$account->uid) {
         return services_error('That user ID does not exist', 406);
       }
