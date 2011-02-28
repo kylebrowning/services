@@ -455,3 +455,55 @@ function services_controller_get($name, $endpoint) {
     }
   }
 }
+
+/**
+ * Convert a resource to RPC-style methods.
+ *
+ * @param array $resource
+ *   A resource definition.
+ *
+ * @return array
+ *   An array of RPC method definitions
+ */
+function services_resources_as_procedures($resource) {
+  static $controllers = array('create', 'retrieve', 'update', 'delete', 'index');
+  static $subcontrollers = array('actions', 'relationships', 'targeted actions');
+
+  $methods = array();
+
+  foreach ($controllers as $name) {
+    if (isset($resource[$name])) {
+      $methods[] = _services_resource_controller_as_procedure($resource['name'], $name, $resource[$name]);
+    }
+  }
+
+  foreach ($subcontrollers as $name) {
+    if (isset($resource[$name])) {
+      foreach ($resource[$name] as $sc_name => $controller) {
+        $methods[] = _services_resource_controller_as_procedure($resource['name'], $sc_name, $controller);
+      }
+    }
+  }
+
+  return $methods;
+}
+
+/**
+ * Helper function for _services_resources_as_procedures() that turns a resource
+ * controller into an RPC method.
+ *
+ * @param $resource
+ *   The resource being converted (node, user, etc.)
+ * @param $name
+ *   The method name (retrieve, create, etc.)
+ * @param $controller
+ *   Associative array defining the method's properties and callbacks.
+ *
+ */
+function _services_resource_controller_as_procedure($resource, $name, $controller) {
+  $method = array_merge($controller, array(
+    'method' => $resource .'.'. $name,
+  ));
+
+  return $method;
+}
