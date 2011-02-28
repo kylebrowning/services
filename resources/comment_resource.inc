@@ -89,7 +89,7 @@ function _comment_resource_definition() {
         'loadNodeComments' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of new comments on a given node since a given timestamp.'),
-          'access callback' => '_comment_resource_node_access',
+          'access callback' => '_comment_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_load_node_comments',
@@ -107,6 +107,7 @@ function _comment_resource_definition() {
               'description'  => t('Number of comments to load.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> 10,
             ),
             array(
               'name'         => 'start',
@@ -114,13 +115,14 @@ function _comment_resource_definition() {
               'description'  => t('If count is set to non-zero value, you can pass also non-zero value for start. For example to get comments from 5 to 15, pass count=10 and start=5.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> 0,
             ),
           ),
         ),
         'countAll' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of comments on a given node.'),
-          'access callback' => '_comment_resource_node_access',
+          'access callback' => '_comment_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_count_all',
@@ -137,7 +139,7 @@ function _comment_resource_definition() {
         'countNew' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of new comments on a given node since a given timestamp.'),
-          'access callback' => '_comment_resource_node_access',
+          'access callback' => '_comment_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_comment_resource_count_new',
@@ -150,12 +152,13 @@ function _comment_resource_definition() {
               'optional'      => FALSE,
             ),
             array(
-              'name'         => 'since',
-              'type'         => 'int',
-              'optional'     => TRUE,
-              'description'  => t('Timestamp to count from (defaults to time of last user acces to node).'),
+              'name'          => 'since',
+              'type'          => 'int',
+              'optional'      => TRUE,
+              'description'   => t('Timestamp to count from (defaults to time of last user acces to node).'),
               'source'        => 'data',
               'optional'      => TRUE,
+              'default value' => 0,
             ),
           ),
         ),
@@ -174,37 +177,26 @@ function _comment_resource_definition() {
  */
 
 function _comment_resource_create($comment) {
-  if (!is_object($comment)) {
-    $comment = (object) $comment;
+  $comment = (object)$comment;
+
+  $form_state['values'] = (array)$comment;
+  $form_state['values']['op'] = t('Save');
+
+  $comment_empty = (object)array(
+    'nid' => $comment->nid,
+    'cid' => NULL,
+  );
+
+  $ret = drupal_form_submit('comment_form', $form_state, $comment_empty);
+
+  // Error if needed.
+  if ($errors = form_get_errors()) {
+    return services_error(implode(" ", $errors), 406);
   }
 
-  // If the submitted comment does not contain a uid, set it to anonymous.
-  if (!isset($comment->uid)) {
-    $comment->uid = 0;
-  }
+  $comment = $form_state['comment'];
 
-  // If the submitted comment does not contain a nid, then return an error.
-  if (!isset($comment->nid)) {
-    return services_error(t("No node specified."));
-  }
-
-  // If a cid is present then the user is trying to edit an existing comment.
-  if (isset($comment->cid) && ($comment->cid != 0)) {
-    $initial_comment = _comment_load($comment->cid);
-    $admin = user_access("administer comments");
-
-    if ($initial_comment->uid == 0 && !$admin) {
-      return services_error(t("Anonymous comments can't be edited"));
-    }
-
-    if (($initial_comment->uid != $comment->uid || comment_num_replies($comment->cid) != 0) && !$admin) {
-      return services_error(t("User does not have permission to edit this comment"));
-    }
-  }
-
-  comment_save($comment);
-
-  return (object)array(
+  return array(
     'cid' => $comment->cid,
     'uri' => services_resource_uri(array('comment', $comment->cid)),
   );
@@ -233,24 +225,25 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
 function _comment_resource_update($cid, $comment) {
+  $comment = (object)$comment;
+
   $comment->cid = $cid;
 
-  $old_comment = (array) _comment_load($comment->cid);
-  if ($old_comment['cid']) {
-    // Setup form_state.
-    $form_state = array();
-    $form_state['values'] = (array) $comment;
-    $form_state['values']['op'] = t('Save');
-    $form_state['comment'] = $old_comment;
-
-    drupal_execute('comment_form', $form_state, $old_comment);
-
-    if ($errors = form_get_errors()) {
-      return services_error(implode("\n", $errors), 406);
-    }
-  }
-  else {
+  $old_comment = comment_load($comment->cid);
+  if (empty($old_comment)) {
     return services_error(t('Comment not found'), 404);
+  }
+
+  // Setup form_state.
+  $form_state = array();
+  $form_state['values'] = (array) $comment;
+  $form_state['values']['op'] = t('Save');
+  $form_state['comment'] = $old_comment;
+
+  drupal_form_submit('comment_form', $form_state, $old_comment);
+
+  if ($errors = form_get_errors()) {
+    return services_error(implode("\n", $errors), 406);
   }
 
   return $comment->cid;
@@ -269,12 +262,13 @@ function _comment_resource_delete($cid) {
   module_load_include('inc', 'comment', 'comment.admin');
 
   // The following is from comment_confirm_delete_submit in comment.admin.inc
-  $comment = _comment_load($cid);
+  $comment = comment_load($cid);
+  if (empty($comment)) {
+    return services_error(t('There is no comment found with id !cid', array('!cid' => $cid)));
+  }
 
   // Delete comment and its replies.
-  _comment_delete_thread($comment);
-
-  _comment_update_node_statistics($comment->nid);
+  comment_delete($cid);
 
   // Clear the cache so an anonymous user sees that his comment was deleted.
   cache_clear_all();
@@ -294,11 +288,11 @@ function _comment_resource_delete($cid) {
  * @return
  *   An array of comment objects.
  */
-function _comment_resource_load_node_comments($nid, $count = 0, $start = 0) {
+function _comment_resource_load_node_comments($nid, $count, $start) {
   $comments = array();
-  $result = db_query_range('SELECT c.cid FROM {comment} c WHERE c.nid = :nid', 0, 10, array(':nid' => $nid));
+  $result = db_query_range('SELECT c.cid FROM {comment} c WHERE c.nid = :nid', $start, $count, array(':nid' => $nid));
   foreach ($result as $record) {
-        $comments[] = comment_load($record->cid);
+    $comments[] = comment_load($record->cid);
   }
   return $comments;
 }
@@ -326,7 +320,7 @@ function _comment_resource_count_all($nid) {
  * @return
  *   Number of comments that node has.
  */
-function _comment_resource_count_new($nid, $since = 0) {
+function _comment_resource_count_new($nid, $since) {
   return comment_num_new($nid, $since);
 }
 
@@ -338,37 +332,30 @@ function _comment_resource_access($op = 'view', $args = array()) {
     return TRUE;
   }
 
-  if ($op=='create') {
+  if ($op == 'create') {
     $comment = (object)$args[0];
   }
   else {
     $comment = comment_load($args[0]);
   }
 
+  // If the submitted comment does not contain a nid, then return an error.
+  if (!isset($comment->nid)) {
+    return services_error(t("No node specified."));
+  }
+
+  $node = node_load($comment->nid);
+
   switch ($op) {
     case 'view':
-      // Check if the user has access to comments and that the node has comments enabled
-      return $comment->status && user_access('access comments') && _comment_resource_node_access($comment->nid);
-    case 'edit':
-      // Check if the user may edit the comment, and has access to the input format
-      return comment_access('edit', $comment) && filter_access($comment->format);
+      // Check if the user has access to comments
+      // and that the node has comments enabled.
+      return $comment->status && user_access('access comments');
     case 'create':
-      // Check if the user may post comments, and has access to the used format and
-      // check if the node has comments enabled, and that the user has access to the node
-      return user_access('post comments') && filter_access($comment->format) &&
-        _comment_resource_node_access($comment->nid, COMMENT_NODE_READ_WRITE);
     case 'delete':
-      // Check if the user may edit the comment
-      return comment_access('edit', $comment);
+    case 'edit':
+      // Check if the user may post comments, node has comments enabled
+      // and that the user has access to the node.
+      return user_access('post comments') && ($node->comment == COMMENT_NODE_OPEN);
   }
-}
-
-/**
- * Passthrough function to _node_resource_access().
- *
- * @see _node_resource_access()
- */
-function _comment_resource_node_access($op = 'view', $args = array()) {
-  module_load_include('inc', 'services', 'resources/node_resource');
-  return _node_resource_access($op, $args);
 }
