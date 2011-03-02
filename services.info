@@ -17,6 +17,7 @@ files[] = tests/functional/ServicesResourceNodeTests.test
 files[] = tests/functional/ServicesResourceUserTests.test
 files[] = tests/functional/ServicesResourceSystemTests.test
 files[] = tests/functional/ServicesResourceCommentTests.test
+files[] = tests/functional/ServicesResourceTaxonomyTests.test
 files[] = tests/functional/ServicesEndpointTests.test
 files[] = tests/unit/TestServicesModule.test
 files[] = tests/services.test

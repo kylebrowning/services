@@ -22,9 +22,7 @@ function _taxonomy_resource_definition() {
             'description' => 'The tid of the taxonomy term to get',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('view'),
-        'access arguments append' => TRUE,
+        'access arguments' => array('access content'),
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'create' => array(
@@ -38,8 +36,7 @@ function _taxonomy_resource_definition() {
             'type' => 'struct',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('create'),
+        'access callback' => '_taxonomy_resource_create_access',
         'access arguments append' => TRUE,
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
@@ -61,8 +58,7 @@ function _taxonomy_resource_definition() {
             'type' => 'struct',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('update'),
+        'access callback' => '_taxonomy_resource_update_access',
         'access arguments append' => TRUE,
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
@@ -73,10 +69,10 @@ function _taxonomy_resource_definition() {
             'name' => 'tid',
             'optional' => FALSE,
             'source' => array('path' => 0),
+            'type' => 'int',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('delete'),
+        'access callback' => '_taxonomy_resource_delete_access',
         'access arguments append' => TRUE,
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
@@ -84,9 +80,7 @@ function _taxonomy_resource_definition() {
         'selectNodes' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
           'help'   => t('This method returns all nodes with provided taxonomy id.'),
-          'access callback' => '_taxonomy_resource_access',
-          'access arguments' => array('view'),
-          'access arguments append' => TRUE,
+          'access arguments' => array('access content'),
           'callback' => 'taxonomy_service_select_nodes',
           'args'     => array(
             array(
@@ -102,6 +96,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> TRUE,
             ),
             array(
               'name'         => 'limit',
@@ -109,7 +104,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('Maximum number of nodes to find.'),
               'source'       => 'data',
               'optional'     => TRUE,
-              'default value' => FALSE,
+              'default value'=> FALSE,
             ),
             array(
               'name'         => 'order',
@@ -117,6 +112,7 @@ function _taxonomy_resource_definition() {
               'description'  => t('The order clause for the query that retrieve the nodes.'),
               'source'       => 'data',
               'optional'     => TRUE,
+              'default value'=> array('t.sticky' => 'DESC', 't.created' => 'DESC'),
             ),
           ),
         ),
@@ -135,9 +131,7 @@ function _taxonomy_resource_definition() {
             'description' => 'The vid of the taxonomy vocabulary to get',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('view'),
-        'access arguments append' => TRUE,
+        'access arguments' => array('access content'),
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'create' => array(
@@ -151,9 +145,7 @@ function _taxonomy_resource_definition() {
             'type' => 'struct',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('create'),
-        'access arguments append' => TRUE,
+        'access arguments' => array('administer taxonomy'),
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'update' => array(
@@ -174,9 +166,7 @@ function _taxonomy_resource_definition() {
             'type' => 'struct',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('update'),
-        'access arguments append' => TRUE,
+        'access arguments' => array('administer taxonomy'),
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'delete' => array(
@@ -186,20 +176,17 @@ function _taxonomy_resource_definition() {
             'name' => 'vid',
             'optional' => FALSE,
             'source' => array('path' => 0),
+            'type' => 'int',
           ),
         ),
-        'access callback' => '_taxonomy_resource_access',
-        'access arguments' => array('delete'),
-        'access arguments append' => TRUE,
+        'access arguments' => array('administer taxonomy'),
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
       ),
       'actions' => array(
         'getTree' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
           'help'   => t('This method returns a full list of taxonomy terms.'),
-          'access callback' => '_taxonomy_resource_access',
-          'access arguments' => array('view'),
-          'access arguments append' => TRUE,
+          'access arguments' => array('access content'),
           'callback' => 'taxonomy_service_get_tree',
           'args'     => array(
             array(
@@ -243,7 +230,7 @@ function _taxonomy_resource_definition() {
  * @see taxonomy_get_term()
  */
 function _taxonomy_term_resource_retrieve($tid) {
-  return taxonomy_get_term($tid);
+  return taxonomy_term_load($tid);
 }
 
 /**
@@ -276,7 +263,7 @@ function _taxonomy_term_resource_create($term) {
 function _taxonomy_term_resource_update($tid, $term) {
   $term = (object) $term;
   $term->tid = $tid;
-  return _taxonomy_term_resource_create($term);
+  return taxonomy_term_save($term);
 }
 
 /**
@@ -335,11 +322,11 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary()
+ * @see taxonomy_vocabulary_save()
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
-  $vocabulary = (array) $vocabulary;
-  return taxonomy_save_vocabulary($vocabulary);
+  $vocabulary = (object) $vocabulary;
+  return taxonomy_vocabulary_save($vocabulary);
 }
 
 /**
@@ -352,12 +339,12 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @return
  *   Status constant indicating if vocabulary was inserted or updated.
  *
- * @see taxonomy_save_vocabulary()
+ * @see taxonomy_vocabulary_save()
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
-  $vocabulary = (array) $vocabulary;
-  $vocabulary['vid'] = $vid;
-  return _taxonomy_vocabulary_resource_create($vocabulary);
+  $vocabulary = (object) $vocabulary;
+  $vocabulary->vid = $vid;
+  return taxonomy_vocabulary_save($vocabulary);
 }
 
 /**
@@ -371,7 +358,7 @@ function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
  * @see taxonomy_del_vocabulary()
  */
 function _taxonomy_vocabulary_resource_delete($vid) {
-  return taxonomy_del_vocabulary($vid);
+  return taxonomy_vocabulary_delete($vid);
 }
 
 
@@ -399,7 +386,7 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
  * @return
  *   An array of node objects.
  */
-function taxonomy_service_select_nodes($tid = '', $pager = TRUE, $limit = FALSE,  $order = array('t.sticky' => 'DESC', 't.created' => 'DESC')) {
+function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
   $result = taxonomy_select_nodes($tid, (bool)$pager, $limit, $order);
   foreach ($result as $nid) {
     if ($uri = services_resource_uri(array('node', $nid))) {
@@ -414,9 +401,47 @@ function taxonomy_service_select_nodes($tid = '', $pager = TRUE, $limit = FALSE,
   return $nodes;
 }
 
-function _taxonomy_resource_access($op = 'view', $args = array()) {
-  if (user_access('administer taxonomy')) {
-    return TRUE;
+/**
+ * Access callback for term updating.
+ *
+ * @param $term
+ *   An taxonomy term object
+ * @return
+ *   Boolean whether or not the user has access to create or edit the term.
+ */
+function _taxonomy_resource_update_access($tid, $term) {
+  $term = (object) $term;
+  if (!isset($term->vid)) {
+    throw new ServicesArgumentException(t('Term object needs vid property.'), 'term', 0);
   }
-  // TODO - check perms of user to return ability to interact with terms / vocabulary
+  return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
+}
+
+/**
+ * Access callback for term creating.
+ *
+ * @param $term
+ *   An taxonomy term object
+ * @return
+ *   Boolean whether or not the user has access to create or edit the term.
+ */
+function _taxonomy_resource_create_access($term) {
+  $term = (object) $term;
+  return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
+}
+
+/**
+ * Access callback for term deleting.
+ *
+ * @param $term
+ *   An taxonomy term object
+ * @return
+ *   Boolean whether or not the user has access to delete the term.
+ */
+function _taxonomy_resource_delete_access($tid) {
+  $term = taxonomy_term_load($tid);
+  if (!$term) {
+    throw new ServicesArgumentException(t('There is no term with id %tid', array('%tid' => $tid)), 'tid', 0);
+  }
+  return user_access('delete terms in ' . $term->vid) || user_access('administer taxonomy');
 }
