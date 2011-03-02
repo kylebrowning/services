@@ -3,11 +3,11 @@
  * @file
  *  Enable XML-RPC for services module.
  *
- * Resource definitions get converted to RPC-style procedure names, but 
- * otherwise this is really just a wrapper around the core xmlrpc server. 
- * These procedures are renamed as <resource>.<method>. So the node 
+ * Resource definitions get converted to RPC-style procedure names, but
+ * otherwise this is really just a wrapper around the core xmlrpc server.
+ * These procedures are renamed as <resource>.<method>. So the node
  * resource's retrieve method has an XMLRPC procedure name of node.retrieve,
- * the user resource's login action has an XMLRPC procedure name of 
+ * the user resource's login action has an XMLRPC procedure name of
  * user.login, etc.
  */
 
@@ -27,7 +27,7 @@ function xmlrpc_server_server() {
   require_once './includes/xmlrpc.inc';
   require_once './includes/xmlrpcs.inc';
 
-  // 
+  //
   return xmlrpc_server(xmlrpc_server_xmlrpc());
 }
 
@@ -38,8 +38,8 @@ function xmlrpc_server_server() {
  */
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-  
-  $resources = services_get_resources();
+
+  $resources = services_get_resources(services_get_server_info('endpoint', ''));
   if (!empty($resources)) {
     // Translate all resources
     foreach ($resources as $name => $def) {
@@ -56,7 +56,7 @@ function xmlrpc_server_xmlrpc() {
  * Pass XMLRPC server requests to the appropriate services method.
  *
  * This function can take varying parameters as are appropriate to
- * the service in question. 
+ * the service in question.
  */
 function xmlrpc_server_call_wrapper() {
   $xmlrpc_server = xmlrpc_server_get();
@@ -66,8 +66,8 @@ function xmlrpc_server_call_wrapper() {
   $controller = services_controller_get($method_name, $endpoint);
 
   try {
-    return services_controller_execute($controller, $args);  
-  } 
+    return services_controller_execute($controller, $args);
+  }
   catch (Exception $e) {
     $code = $e->getCode();
     switch($code) {

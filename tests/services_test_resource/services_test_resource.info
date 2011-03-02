@@ -1,0 +1,9 @@
+name = Services Test Resource
+description = Provide test methods to check different situations.
+package = Services
+core = 7.x
+php = 5.x
+
+files[] = services_test_resource.module
+
+dependencies[] = services
