@@ -284,7 +284,7 @@ function _file_resource_access($op = 'view', $args = array()) {
     $file = (object)$args[0];
   }
   else {
-    $file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $args[0]));
+    $file = db_fetch_object(db_query('SELECT * FROM {files} WHERE fid = %d', $args[0]));
   }
 
   switch ($op) {
