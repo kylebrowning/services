@@ -193,7 +193,7 @@ function _file_resource_access($op = 'view', $args = array()) {
   }
 
   if ($op=='create') {
-    $file = (object)$args[0];
+    $file = (array)$args[0];
   }
   else {
     $file = file_load($args[0]);
