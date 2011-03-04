@@ -292,11 +292,11 @@ function _file_resource_access($op = 'view', $args = array()) {
       if (user_access('get any binary files')) {
         return TRUE;
       }
-      return $file['uid'] == $user->uid && user_access('get own binary files');
+      return $file->uid == $user->uid && user_access('get own binary files');
       break;
     case 'create':
     case 'delete':
-      return $file['uid'] == $user->uid && user_access('save file information');
+      return $file->uid == $user->uid && user_access('save file information');
       break;
   }
 
