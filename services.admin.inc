@@ -60,13 +60,13 @@ function services_list_endpoint($js = NULL) {
     if ($endpoint->export_type == (EXPORT_IN_CODE | EXPORT_IN_DATABASE)) {
       $operations[] = array(
         'title' => t('Revert'),
-        'href'  => 'admin/build/services/' . $endpoint->name . '/delete',
+        'href'  => 'admin/config/services/services/' . $endpoint->name . '/delete',
       );
     }
     elseif ($endpoint->export_type != EXPORT_IN_CODE) {
       $operations[] = array(
         'title' => t('Delete'),
-        'href'  => 'admin/build/services/' . $endpoint->name . '/delete',
+        'href'  => 'admin/config/services/services/'. $endpoint->name . '/delete',
       );
     }
     else {
