@@ -94,16 +94,10 @@ function _file_resource_create($file) {
     return FALSE;
   }
 
-  // If the submitted file is an update, then set the update parameter for
-  // drupal_write_record(), indicating such. Otherwise we can just pass the
-  // object in and it will be treated as an insert.
-  $update = array();
-  if (!empty($file->fid)) {
-    $update = 'fid';
-  }
+  // Make sure we create new file.
+  $file->fid = NULL;
 
   // Get the directory name for the location of the file:
-
   if (isset($file->filename) && !isset($file->filepath)) {
     $file->filepath = file_default_scheme() . '://' . $file->filename;
   }
@@ -122,28 +116,15 @@ function _file_resource_create($file) {
     $file->filename .= '.txt';
   }
 
-/*
-  //The filepath that ends up in the node must contain the filename
-  $file->filepath .= '/'. $file->filename;
- */
-
   // Write the file
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
     return services_error("Could not write file to destination", 500);
   }
 
-  //Required to be able to reference this file.
+  // Required to be able to reference this file.
   file_usage_add($file, 'services', 'files', $file->fid);
 
-  // hook_file_insert() requires an object
-  if (empty($update)) {
-    foreach (module_implements('file_insert') as $module) {
-      $function =  $module . '_file_insert';
-      $function($file);
-    }
-  }
-
-  return (object)array(
+  return array(
     'fid' => $file->fid,
     'uri' => services_resource_uri(array('file', $file->fid)),
   );
@@ -178,9 +159,11 @@ function _file_resource_retrieve($fid, $include_file_contents = TRUE) {
  *   Whether or not the delete was successful.
  */
 function _file_resource_delete($fid) {
-  $file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
-  file_usage_delete($file, 'services', 'files', $file['fid']);
-  return file_delete($file['filepath']);
+  if ($file = file_load($fid)) {
+    file_usage_delete($file, 'services');
+    return file_delete($file);
+  }
+  return FALSE;
 }
 
 /**
@@ -188,9 +171,6 @@ function _file_resource_delete($fid) {
  */
 function _file_resource_access($op = 'view', $args = array()) {
   global $user;
-  if (user_access('administer files')) {
-    return TRUE;
-  }
 
   if ($op=='create') {
     $file = (object)$args[0];

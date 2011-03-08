@@ -18,8 +18,8 @@ class ServicesModuleTests extends DrupalWebTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => 'Unit tests for services.module file.',
-      'description' => 'These are the unit tests for the services.module file functions.',
+      'name' => 'Resource File.',
+      'description' => 'Test the resource File methods.',
       'group' => 'Services',
     );
   }
