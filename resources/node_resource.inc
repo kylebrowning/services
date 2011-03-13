@@ -177,7 +177,7 @@ function _node_resource_create($node) {
   $node = (object)$node;
 
   if (!isset($node->type)) {
-    return services_error('Missing node type', 406);
+    return services_error(t('Missing node type'), 406);
   }
 
   // Load the required includes for drupal_execute
@@ -195,12 +195,12 @@ function _node_resource_create($node) {
     drupal_form_submit($node->type . '_node_form', $form_state, $node);
   }
   else {
-    return services_error('Node type "' . $node->type . '" does not exist.', 406);
+    return services_error(t('Node type @type does not exist.', array('@type' => $node->type)), 406);
   }
 
 
   if ($errors = form_get_errors()) {
-    return services_error(implode("\n", $errors), 406);
+    return services_error(implode(" "("\n", $errors), 406);
   }
   // Fetch $nid out of $form_state
   $nid = $form_state['nid'];
@@ -248,11 +248,11 @@ function _node_resource_update($nid, $node) {
 
 
     if ($errors = form_get_errors()) {
-      return services_error(implode("\n", $errors), 406);
+      return services_error(implode(" "("\n", $errors), 406);
     }
   }
   else {
-    return services_error(t('Node not found'), 404);
+    return services_error(t('Node @nid not found', array('@nid' => $old_node->nid)), 404);
   }
 
   $nid = $node->nid;
@@ -370,14 +370,14 @@ function _node_resource_access($op = 'view', $args = array()) {
       return node_access($op, $node);
     }
     else {
-      return services_error('Node type is required', 406);
+      return services_error(t('Node type is required'), 406);
     }
   }
   if (isset($node->nid) && $node->nid) {
     return node_access($op, $node);
   }
   else {
-    return services_error('Node id: ' . $args[0]->nid . ' could not be found', 404);
+    return services_error(t('Node @nid could not be found', array('@nid' => $args[0]->nid)), 404);
   }
 }
 

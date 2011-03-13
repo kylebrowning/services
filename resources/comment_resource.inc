@@ -191,7 +191,7 @@ function _comment_resource_create($comment) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" "("\n", $errors), 406);
   }
 
   $comment = $form_state['comment'];
@@ -231,7 +231,7 @@ function _comment_resource_update($cid, $comment) {
 
   $old_comment = comment_load($comment->cid);
   if (empty($old_comment)) {
-    return services_error(t('Comment not found'), 404);
+    return services_error(t('Comment @cid not found', array('@cid' => $comment->cid)), 404);
   }
 
   // Setup form_state.
@@ -243,7 +243,7 @@ function _comment_resource_update($cid, $comment) {
   drupal_form_submit('comment_form', $form_state, $old_comment);
 
   if ($errors = form_get_errors()) {
-    return services_error(implode("\n", $errors), 406);
+    return services_error(implode(" "("\n", $errors), 406);
   }
 
   return $comment->cid;
@@ -264,7 +264,7 @@ function _comment_resource_delete($cid) {
   // The following is from comment_confirm_delete_submit in comment.admin.inc
   $comment = comment_load($cid);
   if (empty($comment)) {
-    return services_error(t('There is no comment found with id !cid', array('!cid' => $cid)));
+    return services_error(t('There is no comment found with id @cid', array('@cid' => $cid)), 404);
   }
 
   // Delete comment and its replies.

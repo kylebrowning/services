@@ -130,8 +130,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // Call default or custom access callback
   if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
     global $user;
-    return services_error(t('Access denied for user !uid "@user"', array(
-      '!uid'  => $user->uid,
+    return services_error(t('Access denied for user @user', array(
       '@user' => isset($user->name) ? $user->name : 'anonymous',
     )), 401);
   }

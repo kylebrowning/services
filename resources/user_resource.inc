@@ -162,7 +162,7 @@ function _user_resource_definition() {
 function _user_resource_retrieve($uid) {
   $account = user_load($uid);
   if (empty($account)) {
-    return services_error(t('There is no user with such ID.'), 404);
+    return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
   }
 
   // Everything went right.
@@ -220,7 +220,7 @@ function _user_resource_create($account) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" "("\n", $errors), 406);
   }
   else {
     $user = array('uid' => $form_state['user']->uid);
@@ -297,7 +297,7 @@ function _user_resource_update($uid, $account) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" "("\n", $errors), 406);
   }
   else {
     return $account;
@@ -315,7 +315,7 @@ function _user_resource_update($uid, $account) {
 function _user_resource_delete($uid) {
   $account = user_load($uid);
   if (empty($account)) {
-    return services_error(t('There is no user with such ID.'), 404);
+    return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
   }
   user_delete($uid);
 
@@ -341,7 +341,7 @@ function _user_resource_login($username, $password) {
 
   if ($user->uid) {
     // user is already logged in
-    return services_error(t('Already logged in as !user.', array('!user' => $user->name)), 406);
+    return services_error(t('Already logged in as @user.', array('@user' => $user->name)), 406);
   }
 
   $uid = user_authenticate($username, $password);
@@ -445,13 +445,13 @@ function _user_resource_access($op = 'view', $args = array()) {
     case 'view':
       $account = user_load($args[0]);
       if (!$account->uid) {
-        return services_error('That user ID does not exist', 406);
+        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
       }
       return user_view_access($account);
     case 'update':
       $account = user_load($args[0]);
       if (!$account->uid) {
-        return services_error('That user ID does not exist', 406);
+        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
       }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
@@ -459,7 +459,7 @@ function _user_resource_access($op = 'view', $args = array()) {
     case 'delete':
       $account = user_load($args[0]);
       if (!$account->uid) {
-        return services_error('That user ID does not exist', 406);
+        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
       }
       return user_access('administer users');
   }

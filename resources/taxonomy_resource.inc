@@ -371,7 +371,7 @@ function _taxonomy_vocabulary_resource_delete($vid) {
 function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
   $terms = taxonomy_get_tree($vid, $parent, $max_depth);
   if (empty($terms)) {
-    return services_error('No vocabulary with id: ' . $vid . ' found.', 404);
+    return services_error(t('No vocabulary with id @vid found.', array('@vid' => $vid)), 404);
   }
   return $terms;
 }
@@ -396,7 +396,7 @@ function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
     $nodes[] = $node;
   }
   if (empty($nodes)) {
-    return services_error('No nodes were found with tid: ' . $tid, 404);
+    return services_error(t('No nodes were found with tid @tid', array('@tid' => $tid)), 404);
   }
   return $nodes;
 }

@@ -104,7 +104,7 @@ function _file_resource_create($file) {
   $dir = file_default_scheme() . '://';
   // Build the destination folder tree if it doesn't already exists.
   if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
-    return services_error("Could not create destination directory for file.", 500);
+    return services_error(t("Could not create destination directory for file."), 500);
   }
 
   $file->filemime = file_get_mimetype($file->filename);
@@ -118,7 +118,7 @@ function _file_resource_create($file) {
 
   // Write the file
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
-    return services_error("Could not write file to destination", 500);
+    return services_error(t("Could not write file to destination"), 500);
   }
 
   // Required to be able to reference this file.
@@ -179,7 +179,7 @@ function _file_resource_access($op = 'view', $args = array()) {
     $file = file_load($args[0]);
   }
   if (empty($file)) {
-    return services_error('There is no file with the given ID: ' . $args[0], 406);
+    return services_error(t('There is no file with ID @fid', array('@fid' => $args[0])), 406);
   }
   switch ($op) {
     case 'view':
