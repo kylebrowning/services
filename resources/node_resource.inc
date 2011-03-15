@@ -153,7 +153,11 @@ function _node_resource_retrieve($nid) {
   $node = node_load($nid);
 
   if ($node) {
-    $node->uri = services_resource_uri(array('node', $node->nid));
+    $uri = entity_uri('node', $node);
+    $node->path = url($uri['path'], array('absolute' => TRUE));
+    // Unset uri as it has complete entity and this
+    // cause never ending recursion in rendering.
+    unset($node->uri);
   }
   return $node;
 }
