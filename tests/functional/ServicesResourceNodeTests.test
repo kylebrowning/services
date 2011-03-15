@@ -199,7 +199,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
 
     $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, array('node' => $node_update));
     // Load node not from cache.
-    $nodeAfterUpdate = node_load($responseArray['body'], NULL, TRUE);
+    $nodeAfterUpdate = node_load($responseArray['body']['nid'], NULL, TRUE);
     $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
     $this->assertEqual($nodeAfterUpdate->title, $node_update->title, t('Title is the same'), 'NodeResource: Update');
     $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update->body[LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
