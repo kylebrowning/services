@@ -166,6 +166,10 @@ function _file_resource_create($file) {
   //The filepath that ends up in the node must contain the filename
   $file->filepath .= '/'. $file->filename;
 
+  // Update the timestamp to the current time, otherwise the file could
+  // get deleted on the next cron run if its status is set to 0.
+  $file->timestamp = time();
+
   // Write the file
   if (!file_save_data(base64_decode($file->file), $file->filepath)) {
     return services_error("Could not write file to destination");
