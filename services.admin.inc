@@ -527,7 +527,7 @@ function services_edit_form_endpoint_authentication_submit($form, $form_state) {
   $endpoint = $form_state['values']['endpoint_object'];
 
   foreach (array_keys($endpoint->authentication) as $module) {
-    $endpoint->authentication[$module] = $form_state['values'][$module];
+    $endpoint->authentication[$module] = $form_state['input'][$module];
   }
 
   drupal_set_message(t('Your authentication options have been saved.'));
