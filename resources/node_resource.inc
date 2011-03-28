@@ -237,7 +237,7 @@ function _node_resource_update($nid, $node) {
     drupal_execute($old_node->type . '_node_form', $form_state, $old_node);
 
     if ($errors = form_get_errors()) {
-      return services_error(implode("\n", $errors), 406);
+      return services_error(implode(" ", $errors), 406);
     }
   }
   else {

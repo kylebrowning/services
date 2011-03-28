@@ -234,7 +234,7 @@ function _comment_resource_update($cid, $comment) {
     drupal_execute('comment_form', $form_state, $old_comment);
 
     if ($errors = form_get_errors()) {
-      return services_error(implode("\n", $errors), 406);
+      return services_error(implode(" ", $errors), 406);
     }
   }
   else {
