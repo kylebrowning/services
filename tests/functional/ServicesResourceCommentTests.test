@@ -34,7 +34,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     // Set up endpoint.
     $this->endpoint =  $this->saveNewEndpoint();
     // Set up privileged user and login.
-    $this->privileged_user = $this->drupalCreateUser(array('administer nodes', 'administer comments'));
+    $this->privileged_user = $this->drupalCreateUser();
     $this->drupalLogin($this->privileged_user);
 
   }
@@ -57,7 +57,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $path = $this->endpoint->path;
 
     // Create node with commenting.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
@@ -68,13 +68,27 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     );
     $response = $this->servicesPost($path . '/comment', array('comment' => $comment));
 
-    $cid = $response['body']->cid;
+    $cid = $response['body']['cid'];
     $comment['cid'] = $cid;
 
     $comment_load = (array)_comment_load($cid);
     $comment_intersect = array_intersect_assoc($comment_load, $comment);
 
     $this->assertEqual($comment, $comment_intersect, t('Comment created properly.'), 'CommentResource: Create');
+
+    // Try to create node with not allowed filter.
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+      // Full HTML format.
+      'format' => 2,
+    );
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+
+    $new_comment = _comment_load($response_array['body']['cid']);
+    $this->assertNotEqual($new_comment->format, $comment->format, t('Full HTML format has not been applied.'), 'CommentResource: Create');
   }
 
   /**
@@ -84,7 +98,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $path = $this->endpoint->path;
 
     // Create node with commenting.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
@@ -113,7 +127,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $path = $this->endpoint->path;
 
     // Create node with commenting.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
@@ -146,7 +160,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $path = $this->endpoint->path;
 
     // Create node with commenting.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
@@ -173,7 +187,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $path = $this->endpoint->path;
 
     // Create node with commenting.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
     $nid = $node->nid;
 
@@ -194,7 +208,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $comments = array_reverse($comments);
 
     // Generate some comments for another node.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node2 = $this->drupalCreateNode($settings);
     for ($i = 0; $i < 5; $i++) {
       $comment = array(
@@ -209,7 +223,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
 
     // Load all comments of the first node.
     $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
-    $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
+    $this->assertEqual(array_slice($comments, 0, 10), $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
 
     // Load only 5 comments of the first node.
     $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5));
@@ -226,7 +240,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
   function testCommentCountAll() {
     $path = $this->endpoint->path;
     // Generate comments.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
     for ($i = 0; $i < 5; $i++) {
       $comment = array(
@@ -248,7 +262,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
   function testCommentCountNew() {
     $path = $this->endpoint->path;
     // Generate comments.
-    $settings = array('comment' => 1);
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
     $node = $this->drupalCreateNode($settings);
     for ($i = 0; $i < 5; $i++) {
       $comment = array(
