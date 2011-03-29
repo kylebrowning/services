@@ -37,6 +37,7 @@ class ServicesModuleTests extends DrupalWebTestCase {
     // Create and logi in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
+      'administer site configuration'
     ));
     $this->drupalLogin($this->privilegedUser);
   }
@@ -105,51 +106,6 @@ class ServicesModuleTests extends DrupalWebTestCase {
 
 
   /**
-   * Test hook_menu implementation.
-   */
-  public function testHookMenu() {
-    // see how many with no endpoints
-    $items = services_menu() ;
-
-    $message = t('There should be 13 menu items') ;
-    $this->assertEqual(count($items), 13, $message) ;
-
-    $menuItem = 'admin/build/services' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/list' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/add' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/edit' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/authentication' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menutItem = 'admin/build/services/%services_endpoint/resources' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/export' ;
-    $this->helpMenuItem($menutItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/delete' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/disable' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/%services_endpoint/enable' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-    $menuItem = 'admin/build/services/ahah/security-options' ;
-    $this->helpMenuItem($menuItem, $items) ;
-
-  } // function
-
-  /**
    * Test thta adding a menu endpoint creates an menu path for that item.
    */
   public function testEndpointMenu() {
@@ -163,7 +119,9 @@ class ServicesModuleTests extends DrupalWebTestCase {
     );
 
     $this->drupalPost('admin/build/services/add', $endpointSettings,
-      t('Save and proceed'));
+      t('Save'));
+    cache_clear_all();
+    menu_rebuild();
     $this->assertResponse('200', t('Failed to create endpoint.'));
 
     // Check path.
@@ -186,36 +144,7 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $this->assertResponse('200', t('Failed to access endpoint delete path.')) ;
   }
 
-  /*
-   * Helper function to test the values of a menu item from a hook_menu call.
-   *
-   * Checks only the common menu parameters.
-   *
-   * @param $menu_item
-   * The path to the menu item.
-   *
-   * @param $items
-   * The array from the callback to services_menu (hook_menu).
-   *
-   * @return
-   * Void. Feedback is given through the test harness via assertions.
-   */
-  protected function helpMenuItem($menuItem, $items) {
-    $message = t('%menuItem should exist', array('%menuItem' => $menuItem));
-    $this->assertTrue(isset($items[$menuItem]), $message);
 
-    $message = t('%menuItem value should be an array', array('%menuItem' => $menuItem));
-    $this->assertTrue(gettype($items[$menuItem]) == 'array', $message);
-
-    $message = t("%menuItem should have 'access arguments' set to 'administer services'", array('%menuItem' => $menuItem));
-    $this->assertEqual($items[$menuItem]['access arguments'][0], 'administer services', $message);
-
-    $message = t("%menuItem should have 'file' to 'services.admin.inc'", array('%menuItem' => $menuItem));
-    $this->assertEqual($items[$menuItem]['file'], 'services.admin.inc', $message);
-
-    $message = t("%menuItem should have a 'page callback'", array('%menuItem' => $menuItem));
-    $this->assertTrue(isset($items[$menuItem]['page callback']), $message);
-  } // function
 
   /**
    * Test that services_access_menu() returns TRUE.
@@ -265,11 +194,4 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $this->assertTrue(property_exists($results, 'server'), t($string . 'server.'));
     $this->assertTrue(property_exists($results, 'path'  ), t($string . 'path.'));
   }
-
-  /**
-   * Test services_controller_get().
-   */
-//  public function testServicesControllerGet() {
-//
-//  }
 } // class
