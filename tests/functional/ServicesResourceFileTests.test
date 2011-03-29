@@ -32,6 +32,8 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     $this->privileged_user = $this->drupalCreateUser(array(
       'get own binary files',
       'save file information',
+      'administer services',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privileged_user);
     // Get a test file.

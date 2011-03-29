@@ -91,6 +91,9 @@ function _services_build_resources($endpoint_name = '') {
  * @return void
  */
 function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
+  if(is_array($endpoint) && isset($endpoint['build_info'])) {
+    $endpoint = $endpoint['build_info']['args'][0];
+  }
   foreach ($resources as $name => &$resource) {
     $cres = ($endpoint && isset($endpoint->resources[$name])) ? $endpoint->resources[$name] : array();
     $resource['endpoint'] = $cres;

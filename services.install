@@ -75,6 +75,7 @@ function services_schema() {
     'export' => array(
       'key' => 'name',
       'identifier' => 'endpoint',
+      'primary key' => 'name',
       'api' => array(
         'owner' => 'services',
         'api' => 'services',
@@ -120,4 +121,27 @@ function services_update_7301() {
  */
 function services_update_7302() {
   db_drop_field('services_endpoint', 'status');
+}
+
+/**
+ * Implements hook_requirements().
+ *
+ * Check version of ctools.
+ */
+function services_requirements($phase) {
+  $t = get_t();
+  $requirements = array();
+  $ctools_info = db_query('SELECT info FROM {system} WHERE name = :ctools', array(':ctools' => 'ctools'))->fetchField();
+  $ctools_info = unserialize($ctools_info);
+  // Check whether version of ctools is minimum alpha3
+  // as we need patch applied from http://drupal.org/node/933946
+  if ($ctools_info['datestamp'] < 1300395967) {
+    $requirements['ctools'] = array(
+      'title' => 'CTools',
+      'value' => $ctools_info['version'],
+      'severity' => REQUIREMENT_ERROR,
+      'description' => $t('Please update CTools module to latest stable version (minimum 7.x-1.0-alpha3).'),
+    );
+  }
+  return $requirements;
 }

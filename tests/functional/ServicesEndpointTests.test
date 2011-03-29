@@ -20,9 +20,10 @@ class ServicesEndpointTests extends ServicesWebTestCase {
 // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
     $this->drupalGet($edit['path']);
   }
 
@@ -34,16 +35,16 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer content types',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
     $this->assertResponse('200', t('expected 200'));
-    $this->drupalGet('admin/config/services/services/list');
+    $this->drupalGet('admin/structure/services');
     $this->assertResponse('200', t('expected 200'));
 
-    $this->assertText($edit['title'], t('Endpoint path appears'));
-    $this->assertText('rest_server', t('Server is rest server'));
-    $this->assertText('In database', t('Storage is in database'));
+    $this->assertText($edit['name'], t('Endpoint path appears'));
+    $this->assertText('Normal', t('Storage is in database'));
   }
 
   /**
@@ -55,9 +56,10 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer content types',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
     $this->assertResponse('200', 'expected 200');
 
     $this->assertText('Path to endpoint field is required.',
@@ -77,9 +79,10 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer content types',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/config/services/services/add', $edit, t('Save and proceed'));
+    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
     $this->assertResponse('200', 'expected 200');
 
     $this->assertText('Endpoint title field is required.',
@@ -99,10 +102,10 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer content types',
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/config/services/services/add', $edit,
-      t('Save and proceed'));
+    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
     $this->assertResponse('200', 'expected 200');
 
     $this->assertText('Server field is required.',
