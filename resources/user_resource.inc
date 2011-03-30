@@ -198,16 +198,6 @@ function _user_resource_create($account) {
   // with drupal_execute().
   module_load_include('inc', 'user', 'user.pages');
 
-  // Any logged in user is by default authenticated,
-  // and leaving this role set in the user's roles array
-  // causes big problems because of a FAPI hack that controls
-  // this checkbox on the user create and edit form (and thus
-  // causes problems with drupal_execute()). Therefore we just
-  // force it to 0 here.
-  if (isset($account->roles[2])) {
-    $account->roles[2] = 0;
-  }
-
   // register a new user
   $form_state['values'] = (array) $account;
   $form_state['values']['pass'] = array(
