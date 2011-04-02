@@ -31,8 +31,8 @@ function _user_resource_definition() {
         'args' => array(
           array(
             'name' => 'account',
-            'type' => 'struct',
-            'description' => 'The user object',
+            'type' => 'array',
+            'description' => 'The user data',
             'source' => 'data',
             'optional' => FALSE,
           ),
@@ -56,8 +56,8 @@ function _user_resource_definition() {
           ),
           array(
             'name' => 'data',
-            'type' => 'struct',
-            'description' => 'The user object with updated information',
+            'type' => 'array',
+            'description' => 'The user data with updated information',
             'source' => 'data',
             'optional' => FALSE,
           ),
@@ -73,9 +73,9 @@ function _user_resource_definition() {
         'access arguments append' => TRUE,
         'args' => array(
           array(
-            'name' => 'nid',
+            'name' => 'uid',
             'type' => 'int',
-            'description' => 'The id of the note to delete',
+            'description' => 'The id of the user to delete',
             'source' => array('path' => '0'),
             'optional' => FALSE,
           ),
@@ -104,7 +104,7 @@ function _user_resource_definition() {
           array(
             'name' => 'parameters',
             'optional' => TRUE,
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'Parameters',
             'default value' => NULL,
             'source' => array('param' => 'parameters'),
@@ -199,10 +199,10 @@ function _user_resource_create($account) {
   module_load_include('inc', 'user', 'user.pages');
 
   // register a new user
-  $form_state['values'] = (array) $account;
+  $form_state['values'] = $account;
   $form_state['values']['pass'] = array(
-    'pass1' => $account->pass,
-    'pass2' => $account->pass,
+    'pass1' => $account['pass'],
+    'pass2' => $account['pass'],
   );
   $form_state['values']['op'] = t('Create new account');
 
@@ -212,9 +212,7 @@ function _user_resource_create($account) {
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
   }
-  else {
-    return $form_state['user'];
-  }
+  return $form_state['user'];
 }
 
 /**
@@ -232,7 +230,7 @@ function _user_resource_create($account) {
  *   The modified user object.
  */
 function _user_resource_update($uid, $account) {
-  $account->uid = $uid;
+  $account['uid'] = $uid;
 
   // Load the required includes for saving profile information
   // with drupal_execute().
@@ -244,16 +242,16 @@ function _user_resource_update($uid, $account) {
   // this checkbox on the user create and edit form (and thus
   // causes problems with drupal_execute()). Therefore we just
   // force it to 0 here.
-  if (isset($account->roles[2])) {
-    $account->roles[2] = 0;
+  if (isset($account['roles'][2])) {
+    $account['roles'][2] = 0;
   }
 
   // If a profile category was passed in, use it. Otherwise default
   // to 'account' (for saving core user data.)
   $category = 'account';
-  if (isset($account->category)) {
-    $category = $account->category;
-    unset($account->category);
+  if (isset($account['category'])) {
+    $category = $account['category'];
+    unset($account['category']);
   }
 
   // Drop any passed in values into the $account var. Anything
@@ -264,17 +262,16 @@ function _user_resource_update($uid, $account) {
 
   $form_state['values']['op'] = 'Save';
   $form_state['values']['_category'] = $category;
-  $form_state['values']['_account'] = $account;
+  $form_state['values']['_account'] = (object)$account;
 
-  $ret = drupal_execute('user_profile_form', $form_state, $account, $category);
+  $ret = drupal_execute('user_profile_form', $form_state, (object)$account, $category);
 
   // Error if needed.
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
   }
-  else {
-    return $account;
-  }
+
+  return $account;
 }
 
 /**

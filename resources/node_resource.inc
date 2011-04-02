@@ -27,8 +27,8 @@ function _node_resource_definition() {
             'name' => 'node',
             'optional' => FALSE,
             'source' => 'data',
-            'description' => 'The node object to create',
-            'type' => 'struct',
+            'description' => 'The node array to create',
+            'type' => 'array',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -96,9 +96,9 @@ function _node_resource_definition() {
           array(
             'name' => 'parameters',
             'optional' => TRUE,
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'Parameters',
-            'default value' => NULL,
+            'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
         ),
@@ -141,9 +141,7 @@ function _node_resource_retrieve($nid) {
     $node->uri = services_resource_uri(array('node', $node->nid));
     return $node;
   }
-  else {
-    return services_error('Node nid '. $nid .' not found', 404);
-  }
+  return services_error('Node nid '. $nid .' not found', 404);
 }
 
 /**
@@ -162,9 +160,7 @@ function _node_resource_retrieve($nid) {
  * @see drupal_execute()
  */
 function _node_resource_create($node) {
-  $node = (object)$node;
-
-  if (!isset($node->type)) {
+  if (!isset($node['type'])) {
     return services_error('Missing node type', 406);
   }
 
@@ -172,22 +168,21 @@ function _node_resource_create($node) {
   module_load_include('inc', 'node', 'node.pages');
   $nid = NULL;
   if (module_exists('content') && variable_get('services_use_content_permissions', TRUE)) {
-    $fields = content_fields(NULL, $node->type);
+    $fields = content_fields(NULL, $node['type']);
     foreach ($fields as $field_name => $field_info) {
-      if (isset($node->$field_name)) {
-        $access = module_invoke_all('field_access', 'view', $field_info, $user, $node);
+      if (isset($node[$field_name])) {
+        $access = module_invoke_all('field_access', 'view', $field_info, $user, (object)$node);
         if (in_array(FALSE, $access)) {
-          unset($node->$field_name);
+          unset($node[$field_name]);
         }
       }
     }
   }
   // Setup form_state
-  $values = (array)$node;
   $form_state = array();
-  $form_state['values'] = $values;
+  $form_state['values'] = $node;
   $form_state['values']['op'] = t('Save');
-  $ret = drupal_execute($node->type . '_node_form', $form_state, $node);
+  $ret = drupal_execute($node['type'] . '_node_form', $form_state, (object)$node);
 
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
@@ -219,18 +214,16 @@ function _node_resource_create($node) {
  * @see drupal_execute()
  */
 function _node_resource_update($nid, $node) {
-  $node = (object)$node;
-  $node->nid = $nid;
+  $node['nid'] = $nid;
 
-  $old_node = node_load($node->nid);
+  $old_node = node_load($nid);
   if ($old_node->nid) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
 
     // Setup form_state.
-    $values = (array)$node;
     $form_state = array();
-    $form_state['values'] = $values;
+    $form_state['values'] = $node;
     $form_state['values']['op'] = t('Save');
     $form_state['node'] = (array)$old_node;
 
@@ -244,7 +237,6 @@ function _node_resource_update($nid, $node) {
     return services_error(t('Node not found'), 404);
   }
 
-  $nid = $node->nid;
   $node = array('nid' => $nid);
   if ($uri = services_resource_uri(array('node', $nid))) {
     $node['uri'] = $uri;
@@ -291,8 +283,7 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  */
-function _node_resource_index($page = 0, $fields = '*', $parameters = array()) {
-  $parameters = (array) $parameters;
+function _node_resource_index($page, $fields, $parameters) {
   $schema = drupal_get_schema('node');
   $where = array();
   $fields = db_escape_string($fields);

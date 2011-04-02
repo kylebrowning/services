@@ -24,8 +24,8 @@ function _file_resource_definition() {
         'args' => array(
           array(
             'name' => 'file',
-            'type' => 'struct',
-            'description'    => t('An object representing a file.'),
+            'type' => 'array',
+            'description'    => t('An array representing a file.'),
             'source' => 'data',
             'optional' => FALSE,
           ),
