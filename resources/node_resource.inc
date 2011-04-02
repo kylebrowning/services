@@ -98,7 +98,7 @@ function _node_resource_definition() {
             'optional' => TRUE,
             'type' => 'array',
             'description' => 'Parameters',
-            'default value' => NULL,
+            'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
         ),
@@ -300,7 +300,7 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  */
-function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
+function _node_resource_index($page, $fields, $parameters) {
   $node_select = db_select('node', 'n')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
