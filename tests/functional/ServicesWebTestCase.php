@@ -332,6 +332,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     );
     $endpoint->debug = 1;
     $endpoint->status = 1;
+    $endpoint->export_type = FALSE;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
     $this->assertTrue($endpoint->name == $edit['name'], t('Endpoint successfully created'));
