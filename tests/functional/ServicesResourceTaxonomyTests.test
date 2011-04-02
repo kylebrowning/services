@@ -46,7 +46,7 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
   function testVocabularyCreate() {
     $path = $this->endpoint->path;
 
-    $vocabulary = (object)array(
+    $vocabulary = array(
       'name'        => $this->randomName(),
       'machine_name'=> $this->randomName(),
       'description' => $this->randomString(),
@@ -59,13 +59,13 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
 
     $query = db_select('taxonomy_vocabulary', 'v')
       ->fields('v', array('vid'))
-      ->condition('v.name', $vocabulary->name);
+      ->condition('v.name', $vocabulary['name']);
     $vid = $query->execute()->fetchField();
 
     $vocabulary_load = (array)taxonomy_vocabulary_load($vid);
-    $vocabulary_intersect = array_intersect_assoc((array)$vocabulary, $vocabulary_load);
+    $vocabulary_intersect = array_intersect_assoc($vocabulary, $vocabulary_load);
 
-    $this->assertEqual((array)$vocabulary, $vocabulary_intersect, t('Taxonomy vocabulary created properly.'), 'TaxonomyVocabularyResource: Create');
+    $this->assertEqual($vocabulary, $vocabulary_intersect, t('Taxonomy vocabulary created properly.'), 'TaxonomyVocabularyResource: Create');
   }
 
   /**

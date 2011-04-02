@@ -28,7 +28,7 @@ function _node_resource_definition() {
             'optional' => FALSE,
             'source' => 'data',
             'description' => 'The node object to create',
-            'type' => 'struct',
+            'type' => 'array',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -51,7 +51,7 @@ function _node_resource_definition() {
             'optional' => FALSE,
             'source' => 'data',
             'description' => 'The node data to update',
-            'type' => 'struct',
+            'type' => 'array',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -96,7 +96,7 @@ function _node_resource_definition() {
           array(
             'name' => 'parameters',
             'optional' => TRUE,
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'Parameters',
             'default value' => NULL,
             'source' => array('param' => 'parameters'),
@@ -178,30 +178,27 @@ function _node_resource_retrieve($nid) {
  * @see drupal_execute()
  */
 function _node_resource_create($node) {
-  $node = (object)$node;
-
-  if (!isset($node->type)) {
+  if (!isset($node['type'])) {
     return services_error(t('Missing node type'), 406);
   }
 
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
-  $nid = NULL;
   // Setup form_state
-  $values = (array)$node;
   $form_state = array();
-  $form_state['values'] = $values;
+  $form_state['values'] = $node;
   $form_state['values']['op'] = t('Save');
 
-  //Wanted to return a gracefull error instead of a blank nid, this should allow for that.
+  // Wanted to return a gracefull error instead of a blank nid, this should
+  // allow for that.
   $types = node_type_get_types();
-  if (array_key_exists($node->type, $types)) {
-    drupal_form_submit($node->type . '_node_form', $form_state, $node);
+  $node_type = $node['type'];
+  if (isset($types[$node_type])) {
+    drupal_form_submit($node_type . '_node_form', $form_state, (object)$node);
   }
   else {
-    return services_error(t('Node type @type does not exist.', array('@type' => $node->type)), 406);
+    return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
   }
-
 
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
@@ -233,22 +230,20 @@ function _node_resource_create($node) {
  * @see drupal_execute()
  */
 function _node_resource_update($nid, $node) {
-  $node = (object)$node;
-  $node->nid = $nid;
+  $node['nid'] = $nid;
 
-  $old_node = node_load($node->nid);
+  $old_node = node_load($nid);
   node_object_prepare($old_node);
   if ($old_node->nid) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
 
     // Setup form_state.
-    $values = (array)$node;
     $form_state = array();
-    $form_state['values'] = $values;
+    $form_state['values'] = $node;
     $form_state['values']['op'] = t('Save');
     $form_state['node'] = $old_node;
-    drupal_form_submit($node->type . '_node_form', $form_state, $old_node);
+    drupal_form_submit($node['type'] . '_node_form', $form_state, $old_node);
 
 
     if ($errors = form_get_errors()) {
@@ -259,7 +254,6 @@ function _node_resource_update($nid, $node) {
     return services_error(t('Node @nid not found', array('@nid' => $old_node->nid)), 404);
   }
 
-  $nid = $node->nid;
   $node = array('nid' => $nid);
   if ($uri = services_resource_uri(array('node', $nid))) {
     $node['uri'] = $uri;
@@ -325,10 +319,8 @@ function _node_resource_index($page = 0, $fields = '*', $parameters = NULL) {
     $node_select->condition('status', 1);
   }
 
-  if (is_object($parameters)) {
-    foreach ($parameters as $parameter => $parameter_value) {
-      $node_select->condition($parameter, $parameter_value, '=');
-    }
+  foreach ($parameters as $parameter => $parameter_value) {
+    $node_select->condition($parameter, $parameter_value, '=');
   }
 
   $result = $node_select->execute();

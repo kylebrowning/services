@@ -213,20 +213,9 @@ class RESTServer {
                 $arguments[$i] = $sources[$info['source']][$info['name']];
               }
           }
-          // Convert arrays to objects and objects to arrays to be more tolerant
-          // towards client. Not all formats and languages handle arrays &
-          // objects as php does.
-          switch ($info['type']) {
-            case 'struct':
-              if (isset($arguments[$i]) && is_array($arguments[$i])) {
-                $arguments[$i] = (object)$arguments[$i];
-              }
-              break;
-            case 'array':
-              if (is_object($arguments[$i])) {
-                $arguments[$i] = get_object_vars($arguments[$i]);
-              }
-              break;
+          // Convert to array if argument expected to be array.
+          if ($info['type'] == 'array' && isset($arguments[$i])) {
+            $arguments[$i] = (array)$arguments[$i];
           }
         }
         // When argument isn't set, insert default value if provided or

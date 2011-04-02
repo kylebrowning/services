@@ -31,7 +31,7 @@ function _user_resource_definition() {
         'args' => array(
           array(
             'name' => 'account',
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'The user object',
             'source' => 'data',
             'optional' => FALSE,
@@ -56,7 +56,7 @@ function _user_resource_definition() {
           ),
           array(
             'name' => 'data',
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'The user object with updated information',
             'source' => 'data',
             'optional' => FALSE,
@@ -104,7 +104,7 @@ function _user_resource_definition() {
           array(
             'name' => 'parameters',
             'optional' => TRUE,
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'Parameters',
             'default value' => array(),
             'source' => array('param' => 'parameters'),
@@ -199,10 +199,10 @@ function _user_resource_create($account) {
   module_load_include('inc', 'user', 'user.pages');
 
   // register a new user
-  $form_state['values'] = (array) $account;
+  $form_state['values'] = $account;
   $form_state['values']['pass'] = array(
-    'pass1' => $account->pass,
-    'pass2' => $account->pass,
+    'pass1' => $account['pass'],
+    'pass2' => $account['pass'],
   );
   $form_state['values']['op'] = t('Create new account');
 
@@ -236,14 +236,10 @@ function _user_resource_create($account) {
  *   The modified user object.
  */
 function _user_resource_update($uid, $account) {
-  $account = (object)$account;
-  $account->uid = $uid;
+  $account['uid'] = $uid;
 
   $account_loaded = user_load($uid);
 
-  if (!isset($account->roles)) {
-    $account->roles = $account_loaded->roles;
-  }
   // Load the required includes for saving profile information
   // with drupal_form_submit().
   module_load_include('inc', 'user', 'user.pages');
@@ -251,22 +247,25 @@ function _user_resource_update($uid, $account) {
   // If a profile category was passed in, use it. Otherwise default
   // to 'account' (for saving core user data.)
   $category = 'account';
-  if (isset($account->category)) {
-    $category = $account->category;
-    unset($account->category);
+  if (isset($account['category'])) {
+    $category = $account['category'];
+    unset($account['category']);
   }
 
   // Drop any passed in values into the $account var. Anything
   // unused by the form just gets ignored. We handle roles and
   // password separately.
-  foreach ((array)$account as $key => $value) {
+  foreach ($account as $key => $value) {
     if ($key != 'pass' || $key != 'roles') {
       $form_state['values'][$key] = $value;
     }
   }
 
   // Prepare values of roles.
-  foreach ($account->roles as $key => $value) {
+  if (!isset($account['roles'])) {
+    $account['roles'] = $account_loaded->roles;
+  }
+  foreach ($account['roles'] as $key => $value) {
     if (!empty($value)) {
       $form_state['values']['roles'][$key] = $key;
     }
@@ -274,9 +273,9 @@ function _user_resource_update($uid, $account) {
   unset($form_state['values']['roles'][2]);
 
   // Prepare values for password.
-  if (isset($account->pass)) {
-    $form_state['values']['pass']['pass1'] = $account->pass;
-    $form_state['values']['pass']['pass2'] = $account->pass;
+  if (isset($account['pass'])) {
+    $form_state['values']['pass']['pass1'] = $account['pass'];
+    $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
   $form_state['values']['op'] = t('Save');

@@ -56,11 +56,12 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
    */
   public function testResourceFileCreate() {
     // Create file argument with data.
-    $file = new stdClass();
-    $file->filesize = filesize($this->testfile->uri);
-    $file->filename = $this->testfile->filename;
-    $file->file = base64_encode(file_get_contents($this->testfile->uri));
-    $file->uid = $this->privileged_user->uid;
+    $file = array(
+      'filesize' => filesize($this->testfile->uri),
+      'filename' => $this->testfile->filename,
+      'file' => base64_encode(file_get_contents($this->testfile->uri)),
+      'uid' => $this->privileged_user->uid,
+    );
 
     // Create file with call.
     $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));

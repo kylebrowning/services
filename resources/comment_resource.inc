@@ -17,7 +17,7 @@ function _comment_resource_definition() {
         'args' => array(
           array(
             'name' => 'comment',
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'The comment object',
             'source' => 'data',
             'optional' => FALSE,
@@ -60,7 +60,7 @@ function _comment_resource_definition() {
           ),
           array(
             'name' => 'data',
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'The comment object with updated information',
             'source' => 'data',
             'optional' => FALSE,
@@ -177,13 +177,11 @@ function _comment_resource_definition() {
  */
 
 function _comment_resource_create($comment) {
-  $comment = (object)$comment;
-
-  $form_state['values'] = (array)$comment;
+  $form_state['values'] = $comment;
   $form_state['values']['op'] = t('Save');
 
-  $comment_empty = (object)array(
-    'nid' => $comment->nid,
+  $comment_empty = (object) array(
+    'nid' => $comment['nid'],
     'cid' => NULL,
   );
 
@@ -225,18 +223,15 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
 function _comment_resource_update($cid, $comment) {
-  $comment = (object)$comment;
+  $comment['cid'] = $cid;
 
-  $comment->cid = $cid;
-
-  $old_comment = comment_load($comment->cid);
+  $old_comment = comment_load($cid);
   if (empty($old_comment)) {
-    return services_error(t('Comment @cid not found', array('@cid' => $comment->cid)), 404);
+    return services_error(t('Comment @cid not found', array('@cid' => $cid), 404));
   }
-
   // Setup form_state.
   $form_state = array();
-  $form_state['values'] = (array) $comment;
+  $form_state['values'] = $comment;
   $form_state['values']['op'] = t('Save');
   $form_state['comment'] = $old_comment;
 
@@ -246,7 +241,7 @@ function _comment_resource_update($cid, $comment) {
     return services_error(implode(" ", $errors), 406);
   }
 
-  return $comment->cid;
+  return $cid;
 }
 
 /**

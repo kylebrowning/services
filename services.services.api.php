@@ -71,7 +71,7 @@
   *     array containing the following keys:
   *
   *     - name: The name of this argument.
-  *     - type: The data type of this argument (int, string, array, struct)
+  *     - type: The data type of this argument (int, string, array)
   *     - description: Text describing this argument's usage.
   *     - optional: A boolean indicating whether or not this argument is optional.
   *     - source: Where this argument should be retrieved from. This can be
@@ -113,7 +113,7 @@ function hook_services_resources() {
             'optional' => FALSE,
             'source' => 'data',
             'description' => 'The node object to create',
-            'type' => 'struct',
+            'type' => 'array',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -136,7 +136,7 @@ function hook_services_resources() {
             'optional' => FALSE,
             'source' => 'data',
             'description' => 'The node data to update',
-            'type' => 'struct',
+            'type' => 'array',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -181,7 +181,7 @@ function hook_services_resources() {
           array(
             'name' => 'parameters',
             'optional' => TRUE,
-            'type' => 'struct',
+            'type' => 'array',
             'description' => 'Parameters',
             'default value' => NULL,
             'source' => array('param' => 'parameters'),
