@@ -4,7 +4,7 @@
  * @file
  *  Provides a generic but powerful API for web services.
  */
- 
+
 /**
  * Minimum CTools version needed.
  */
@@ -199,12 +199,10 @@ function services_endpoint_load($name) {
   if (isset($result[$name])) {
     return $result[$name];
   }
-  else {
-    $result = db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
-    $matches = array();
-    while ($endpoint = db_fetch_object($result)) {
-      return $endpoint;
-    }
+  $result = db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
+  $matches = array();
+  while ($endpoint = db_fetch_object($result)) {
+    return $endpoint;
   }
   return FALSE;
 }
@@ -234,7 +232,7 @@ function services_endpoint_load_all() {
  * @return void
  */
 function services_endpoint_save($endpoint) {
-  if(is_array($endpoint) && isset($endpoint['build_info'])) {
+  if (is_array($endpoint) && isset($endpoint['build_info'])) {
     $endpoint = $endpoint['build_info']['args'][0];
   }
   ctools_export_crud_save('services_endpoint', $endpoint);

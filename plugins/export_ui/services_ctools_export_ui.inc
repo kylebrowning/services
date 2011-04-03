@@ -121,10 +121,16 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
       $auth_options[$module] = $info['title'];
     }
 
+    $default_values = array();
+    foreach ($endpoint->authentication as $auth_module => $settings) {
+      if (!empty($settings)) {
+        $default_values[] = $auth_module;
+      }
+    }
     $form['authentication'] = array(
       '#type'          => 'checkboxes',
       '#options'       => $auth_options,
-      '#default_value' => array_keys($endpoint->authentication),
+      '#default_value' => $default_values,
       '#title'         => t('Authentication'),
       '#description'   => t('Choose which authentication schemes that should ' .
         'be used with your endpoint. If no authentication method is selected ' .
@@ -172,36 +178,21 @@ function services_ctools_export_ui_form_validate(&$form, &$form_state) {
 function services_ctools_export_ui_form_submit(&$form, &$form_state) {
   $endpoint = $form_state['values']['endpoint_object'];
 
-  $endpoint->name           = $form_state['values']['name'];
-  $endpoint->title          = $form_state['values']['title'];
-  $endpoint->server         = $form_state['values']['server'];
-  $endpoint->path           = $form_state['values']['path'];
-  $endpoint->debug          = $form_state['values']['debug'];
+  $endpoint->name   = $form_state['values']['name'];
+  $endpoint->title  = $form_state['values']['title'];
+  $endpoint->server = $form_state['values']['server'];
+  $endpoint->path   = $form_state['values']['path'];
+  $endpoint->debug  = $form_state['values']['debug'];
 
   // Set the authentication modules, and preserve the settings for modules
   // that already exist.
   $auth = array();
   if (isset($form_state['values']['authentication'])) {
-    foreach (array_keys($form_state['values']['authentication']) as $module) {
-      if (isset($endpoint->authentication[$module])) {
-        $auth[$module] = $endpoint->authentication[$module];
-      }
-      else {
-        $auth[$module] = array();
-      }
+    // Save settings of enabled authentication methods.
+    foreach (array_filter($form_state['values']['authentication']) as $module) {
+      $auth[$module] = $endpoint->authentication[$module];
     }
   }
   $endpoint->authentication = $auth;
-
-/*
-  if (empty($endpoint->eid)) {
-    drupal_set_message(t('Your new endpoint %title has been saved.', array('%title' => $endpoint->title)));
-    services_endpoint_save($endpoint);
-    $form_state['values']['eid'] = $endpoint->eid;
-  }
-  else {
-    drupal_set_message(t('Your changes have been saved.'));
-    services_endpoint_save($endpoint);
-  }
-*/
+  services_endpoint_save($endpoint);
 }
