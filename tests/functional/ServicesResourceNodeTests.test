@@ -23,6 +23,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
    */
   public function setUp() {
     parent::setUp(
+      'taxonomy',
       'autoload',
       'ctools',
       'services',
@@ -150,6 +151,55 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $nodeResourceUpdateReturn = $responseArray['body'];
     $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
     $this->assertTrue(strpos($responseArray['status'], 'Title field is required.'), t('Node was not created without title. '), 'NodeResource: Created');
+  }
+
+  /**
+   * Create node with taxonomy terms added.
+   */
+  public function testEndpointResourceNodeCreateWithTaxonomyTerms() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+      'administer nodes',
+      'administer taxonomy',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+
+    // Create vocabulary.
+    $edit = array(
+      'name' => $this->randomName(),
+      'multiple' => 1,
+      'nodes[page]' => 1,
+    );
+    $this->drupalPost('admin/content/taxonomy/add/vocabulary', $edit, t('Save'));
+
+    // Create three terms.
+    for ($i = 0; $i < 3; $i++) {
+      $term = array(
+        'name' => $this->randomName(),
+      );
+      $this->drupalPost('admin/content/taxonomy/1/add/term', $term, t('Save'));
+    }
+
+    $node = array(
+      'nid' => NULL,
+      'title' => $this->randomString(),
+      'body' => $this->randomString(),
+      'name' => $this->privilegedUser->name,
+      'type' => 'page',
+      'taxonomy' => array(1 => array(
+        1 => 1,
+        2 => 2,
+      )),
+    );
+
+    $response = $this->servicesPost($this->endpoint->path . '/node', array('node' => $node));
+
+    // Get number of attached taxonomy terms from this node. We do it manually
+    // as we cannot get terms on node_load as as empty array is statically
+    // cached in taxonomy_node_get_terms() and we cannot clear the cache.
+    $terms_number = db_result(db_query('SELECT COUNT(*) result FROM {term_node} r INNER JOIN {node} n ON n.vid = r.vid WHERE n.nid = %d', $response['body']['nid']));
+    $this->assertTrue($terms_number == 2, t('Node with two terms was successfully created.'), 'NodeResource: Create');
   }
 
   /**
