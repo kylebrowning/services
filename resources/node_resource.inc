@@ -27,7 +27,7 @@ function _node_resource_definition() {
             'name' => 'node',
             'optional' => FALSE,
             'source' => 'data',
-            'description' => 'The node object to create',
+            'description' => 'The node data to create',
             'type' => 'array',
           ),
         ),
@@ -97,7 +97,7 @@ function _node_resource_definition() {
             'name' => 'parameters',
             'optional' => TRUE,
             'type' => 'array',
-            'description' => 'Parameters',
+            'description' => 'Parameters array',
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
@@ -149,7 +149,6 @@ function _node_resource_definition() {
  * @see node_load()
  */
 function _node_resource_retrieve($nid) {
-  global $user;
   $node = node_load($nid);
 
   if ($node) {
@@ -271,7 +270,7 @@ function _node_resource_update($nid, $node) {
  */
 function _node_resource_delete($nid) {
   node_delete($nid);
-  return 1;
+  return TRUE;
 }
 
 /**
@@ -289,7 +288,7 @@ function _node_resource_delete($nid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An object containing fields and values used to build a sql WHERE clause indicating
+ *   An array containing fields and values used to build a sql WHERE clause indicating
  *   what items should be deleted.
  * @return
  *   An array of node objects.
