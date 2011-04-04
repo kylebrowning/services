@@ -22,6 +22,8 @@ class services_ctools_export_ui extends ctools_export_ui {
     drupal_set_title($this->get_page_title('authentication', $item));
     return drupal_get_form('services_edit_form_endpoint_authentication', $item);
   }
+  // Avoid standard submit of edit form by ctools.
+  function edit_save_form($form_state) { }
 }
 
 /**
@@ -38,34 +40,44 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
     '#type'  => 'value',
     '#value' => $endpoint,
   );
-
   if (empty($auth_modules)) {
     $form['message'] = array(
       '#type'          => 'item',
-      '#title'         => t('No installed authentication modules'),
+      '#title'         => t('Authentication'),
       '#description'   => t('No authentication modules are installed, standard ' .
         'Drupal session based security will be used.'),
     );
+    return $form;
   }
-  elseif (empty($endpoint->authentication)) {
+  if (empty($endpoint->authentication)) {
     $form['message'] = array(
       '#type'          => 'item',
-      '#title'         => t('No enabled authentication modules'),
-      '#value'   => t('No authentication modules are enabled, standard ' .
+      '#title'         => t('Authentication'),
+      '#description'   => t('No authentication modules are enabled, standard ' .
         'Drupal session based security will be used.'),
     );
+    return $form;
   }
-  else {
-    // Add configuration fieldsets for the authentication modules
-    foreach ($endpoint->authentication as $module => $settings) {
-      $info = services_authentication_info($module);
-      if ($info) {
-        $form[$module] = array(
-          '#type' => 'fieldset',
-          '#title' => $info['title'],
-          '#tree' => TRUE,
-        ) + services_auth_invoke($module, 'security_settings', $settings);
-      }
+  // Add configuration fieldsets for the authentication modules
+  foreach ($endpoint->authentication as $module => $settings) {
+    $info = services_authentication_info($module);
+    if (empty($info)) {
+      continue;
+    }
+    $form[$module] = array(
+      '#type' => 'fieldset',
+      '#title' => isset($info['title']) ? $info['title'] : $module,
+      '#tree' => TRUE,
+    );
+    $module_settings_form = services_auth_invoke($module, 'security_settings', $settings);
+    if (!empty($module_settings_form) && $settings == $module || is_array($settings)) {
+      $form[$module] += $module_settings_form;
+    }
+    else {
+      $form[$module]['message'] = array(
+        '#type'   => 'item',
+        '#value'  => t('@module has no settings available.', array('@module' => $module)),
+      );
     }
   }
 
@@ -79,9 +91,11 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
 
 function services_edit_form_endpoint_authentication_submit($form, $form_state) {
   $endpoint = $form_state['values']['endpoint_object'];
-
+  
   foreach (array_keys($endpoint->authentication) as $module) {
-    $endpoint->authentication[$module] = $form_state['values'][$module];
+    if (isset($form_state['values'][$module])) {
+      $endpoint->authentication[$module] = $form_state['values'][$module];
+    }
   }
 
   drupal_set_message(t('Your authentication options have been saved.'));

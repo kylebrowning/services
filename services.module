@@ -261,7 +261,7 @@ function services_endpoint_load_all() {
  * @return void
  */
 function services_endpoint_save($endpoint) {
-  if(is_array($endpoint) && isset($endpoint['build_info'])) {
+  if (is_array($endpoint) && isset($endpoint['build_info'])) {
     $endpoint = $endpoint['build_info']['args'][0];
   }
   ctools_export_crud_save('services_endpoint', $endpoint);
