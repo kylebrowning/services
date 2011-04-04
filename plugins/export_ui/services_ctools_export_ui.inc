@@ -188,9 +188,21 @@ function services_ctools_export_ui_form_submit(&$form, &$form_state) {
   // that already exist.
   $auth = array();
   if (isset($form_state['values']['authentication'])) {
-    // Save settings of enabled authentication methods.
-    foreach (array_filter($form_state['values']['authentication']) as $module) {
-      $auth[$module] = $endpoint->authentication[$module];
+    foreach (array_keys($form_state['values']['authentication']) as $module) {
+      //if module's checkbox is checked, add to empty
+      $auth_module = $form_state['values']['authentication'][$module];
+      if ($module === $auth_module) {
+        //If existing settings are set, persist them
+        if (isset($endpoint->authentication[$module]) &&  is_array($endpoint->authentication[$module])) {
+          $auth[$module] = $endpoint->authentication[$module];
+        } 
+        else {
+          $auth[$module] = $auth_module;
+        }
+      } 
+      elseif ($auth_module == 0) {
+        unset($auth[$module]);
+      }
     }
   }
   $endpoint->authentication = $auth;
