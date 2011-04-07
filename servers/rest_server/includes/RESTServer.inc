@@ -21,6 +21,9 @@ class RESTServer {
 
     // Determine the request method
     $method = $_SERVER['REQUEST_METHOD'];
+    if ($method=='POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+      $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+    }
     if ($method=='POST' && (isset($_GET['_method']) && $_GET['_method'])) {
       $method = $_GET['_method'];
     }
