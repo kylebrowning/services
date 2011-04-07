@@ -27,7 +27,7 @@ function _node_resource_definition() {
             'name' => 'node',
             'optional' => FALSE,
             'source' => 'data',
-            'description' => 'The node array to create',
+            'description' => 'The node data to create',
             'type' => 'array',
           ),
         ),
@@ -97,7 +97,7 @@ function _node_resource_definition() {
             'name' => 'parameters',
             'optional' => TRUE,
             'type' => 'array',
-            'description' => 'Parameters',
+            'description' => 'Parameters array',
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
@@ -254,7 +254,7 @@ function _node_resource_update($nid, $node) {
  */
 function _node_resource_delete($nid) {
   node_delete($nid);
-  return 1;
+  return TRUE;
 }
 
 /**
