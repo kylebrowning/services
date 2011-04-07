@@ -195,6 +195,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
         ),
+        'relationships' => array(
+          'comments' => array(
+            'enabled' => 1,
+          ),
+        )
       ),
       'system' => array(
         'alias' => '',
@@ -299,9 +304,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           ),
         ),
         'actions' => array(
-          'loadNodeComments' => array(
-            'enabled' => 1,
-          ),
           'countAll' => array(
             'enabled' => 1,
           ),
@@ -432,5 +434,27 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $message = t('!method @url returned @status (!length).', $message_vars);
     $this->assertTrue($this->drupalGetContent() !== FALSE, $message, t('Browser'));
     return $this->drupalGetContent();
+  }
+    /**
+   * Default values of comment for creating.
+   */
+  public function getCommentValues($nid) {
+    return array(
+      'subject' => $this->randomString(),
+      'comment_body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => $this->randomString(),
+            'format' => filter_default_format(),
+          )
+        )
+      ),
+      'name' => $this->privileged_user->name,
+      'language' => LANGUAGE_NONE,
+      'nid' => $nid,
+      'uid' => $this->privileged_user->uid,
+      'cid' => NULL,
+      'pid' => 0,
+    );
   }
 }

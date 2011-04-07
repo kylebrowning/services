@@ -170,43 +170,6 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
     $this->assertTrue(empty($comment_load), t('Comment deleted properly.'), 'CommentResource: Delete');
   }
 
-  /**
-   * Test loadNodeComments method.
-   */
-  function testCommentLoadNodeComments() {
-    $path = $this->endpoint->path;
-
-    // Create node with commenting.
-    $node = $this->drupalCreateNode();
-    $nid = $node->nid;
-
-    // Generate 15 comments for node.
-    $comments = array();
-    for ($i = 0; $i < 15; $i++) {
-      $comment = (object)$this->getCommentValues($nid);
-      comment_save($comment);
-      $comments[] = comment_load($comment->cid);
-    }
-
-    // Generate some comments for another node.
-    $node2 = $this->drupalCreateNode();
-    for ($i = 0; $i < 5; $i++) {
-      $comment = (object)$this->getCommentValues($node2->nid);
-      comment_save($comment);
-    }
-
-    // Load all comments of the first node.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
-    $this->assertEqual(array_slice($comments, 0, 10), $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
-
-    // Load only 5 comments of the first node.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5));
-    $this->assertEqual(array_slice($comments, 0, 5), $response['body'], t('Received last 5 comments.'), 'CommentResource: loadNodeComments');
-
-    // Load only 5 comments of the first node starting from fifth comment.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5, 'start' => 5));
-    $this->assertEqual(array_slice($comments, 5, 5), $response['body'], t('Received 5 comments starting from fifth comment.'), 'CommentResource: loadNodeComments');
-  }
 
   /**
    * Test countAll method.
@@ -247,28 +210,5 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
 
     $response = $this->servicesPost($path . '/comment/countNew', array('nid' => $node->nid, 'since' => $since));
     $this->assertEqual($response['body'], 2, t('Received number of new comments.'), 'CommentResource: countNew');
-  }
-
-  /**
-   * Default values of comment for creating.
-   */
-  public function getCommentValues($nid) {
-    return array(
-      'subject' => $this->randomString(),
-      'comment_body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => $this->randomString(),
-            'format' => filter_default_format(),
-          )
-        )
-      ),
-      'name' => $this->privileged_user->name,
-      'language' => LANGUAGE_NONE,
-      'nid' => $nid,
-      'uid' => $this->privileged_user->uid,
-      'cid' => NULL,
-      'pid' => 0,
-    );
   }
 }
