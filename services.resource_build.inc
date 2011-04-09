@@ -34,7 +34,7 @@ function _services_build_resources($endpoint_name = '') {
   // Process the resources, and collect all controllers in the process
   $controllers = array();
   foreach ($resources as $name => &$resource) {
-    _services_process_resource($name, $resource, $controllers);
+    $controllers = _services_process_resource($name, $resource, $controllers);
   }
 
   // Make sure that we got a access callback for all resources
@@ -142,7 +142,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
  *  An that will be fillew with all the controllers for the resource.
  * @return void
  */
-function _services_process_resource($name, &$resource, &$controllers) {
+function _services_process_resource($name, &$resource, $controllers) {
   $resource['name'] = $name;
 
   $keys = array('retrieve', 'create', 'update', 'delete');
@@ -158,41 +158,22 @@ function _services_process_resource($name, &$resource, &$controllers) {
 
   if (isset($resource['relationships'])) {
     foreach ($resource['relationships'] as $relname => $rel) {
-      // Run some inheritance logic
-      if (isset($resource['retrieve'])) {
-        if (empty($rel['args']) || $rel['args'][0]['name'] !== $resource['retrieve']['args'][0]['name']) {
-          array_unshift($rel['args'], $resource['retrieve']['args'][0]);
-        }
-        $resource['relationships'][$relname] = array_merge($resource['retrieve'], $rel);
-      }
       $controllers[$name . '/relationship/' . $relname] = &$resource['relationships'][$relname];
     }
   }
 
   if (isset($resource['actions'])) {
     foreach ($resource['actions'] as $actname => $act) {
-      // Run some inheritance logic
-      if (isset($resource['update'])) {
-        $up = $resource['update'];
-        unset($up['args']);
-        $resource['actions'][$actname] = array_merge($up, $act);
-      }
       $controllers[$name . '/action/' . $actname] = &$resource['actions'][$actname];
     }
   }
 
   if (isset($resource['targeted actions'])) {
     foreach ($resource['targeted actions'] as $actname => $act) {
-      // Run some inheritance logic
-      if (isset($resource['update'])) {
-        if (empty($act['args']) || $act['args'][0]['name'] !== $resource['update']['args'][0]['name']) {
-          array_unshift($act['args'], $resource['update']['args'][0]);
-        }
-        $resource['targeted actions'][$actname] = array_merge($resource['update'], $act);
-      }
       $controllers[$name . '/targeted_action/' . $actname] = &$resource['actions'][$actname];
     }
   }
+  return $controllers;
 }
 
 /**
