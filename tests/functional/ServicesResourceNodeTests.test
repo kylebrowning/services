@@ -23,7 +23,8 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     parent::setUp(
       'ctools',
       'services',
-      'rest_server'
+      'rest_server',
+      'comment'
     );
     // Set up endpoint.
     $this->endpoint =  $this->saveNewEndpoint();
@@ -106,7 +107,44 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $responseArray = $this->servicesGet($this->endpoint->path . '/node/99');
     $this->assertTrue($responseArray['code'] == '404', t('Successfully was rejected to non existent node'), 'NodeResource: Retrieve');
   }
+  /**
+   * Test loadNodeComments method.
+   */
+  function testCommentLoadNodeComments() {
+    $path = $this->endpoint->path;
+    $this->privileged_user = $this->drupalCreateUser();
+    $this->drupalLogin($this->privileged_user);
+    
+    // Create node with commenting.
+    $node = $this->drupalCreateNode();
+    $nid = $node->nid;
 
+    // Generate 15 comments for node.
+    $comments = array();
+    for ($i = 1; $i <= 15; $i++) {
+      $comment = (object)$this->getCommentValues($nid);
+      comment_save($comment);
+      $comments[$i] = comment_load($comment->cid);
+    }
+
+    // Generate some comments for another node.
+    $node2 = $this->drupalCreateNode();
+    for ($i = 1; $i <= 5; $i++) {
+      $comment = (object)$this->getCommentValues($node2->nid);
+      comment_save($comment);
+    }
+  
+    // Load all comments of the first node.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments');
+    $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'NodeResource: comments');
+
+    // Load only 5 comments of the first node.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5));
+    $this->assertEqual(array_slice($comments, 0, 5), array_slice($response['body'], 0, 5), t('Received last 5 comments.'), 'NodeResource: comments');
+    // Load only 5 comments of the first node starting from fifth comment.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5, 'offset' => 5));
+    $this->assertEqual(array_slice($comments, 5, 5), array_merge(array(),$response['body']), t('Received 5 comments starting from fifth comment.'), 'NodeResource: comments');
+  }
   /**
    * testing node_resource Create
    */
