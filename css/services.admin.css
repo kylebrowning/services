@@ -1,37 +1,62 @@
-#services-list-endpoint tr.services-endpoint-disabled {
-  background-color: #fcc;
-  border-color: #ebb;
+/* Resource Table */
+#resource-form-table th.select-all {
+  width: 1em;
 }
-#services-list-endpoint tr.services-endpoint-debug {
-  background-color: #ffd;
-  border-color: #eeb;
+th.resource_test {
+  width: 16em;
 }
-#services-list-endpoint tr.services-endpoint-enabled {
-  background-color: #dfd;
-  border-color: #beb;
+
+.resource-image {
+  display: inline-block;
+  cursor: pointer;
+  width: 1em;
 }
-#services-help-legend .services-endpoint-disabled {
-  background-color: #fcc;
-  border-color: #ebb;
-  display:inline;
-  padding: 5px;
+.resource-group-label label {
+  display: inline;
+  font-weight: bold;
 }
-#services-help-legend .services-endpoint-debug {
-  background-color: #ffd;
-  border-color: #eeb;
-  display:inline;
-  padding: 5px;
+.resource-test-label label {
+  margin-left: 1em; /* LTR */
 }
-#services-help-legend .services-endpoint-enabled {
-  background-color: #dfd;
-  border-color: #beb;
-  display:inline;
-  padding: 5px;
+.resource-test-description .description {
+  margin: 0;
 }
-#services-help-legend {
-  position:  relative;
-  display:inline;
+#resource-form-table tr td {
+  background-color: white;
+  color: #494949;
 }
-#services-help-legend div{
-  border: 1px solid;
+#resource-form-table tr.resource-group td {
+  background-color: #EDF5FA;
+  color: #494949;
+}
+
+table#resource-form-table tr.resource-group label {
+  display: inline;
+}
+
+div.message > div.item-list {
+  font-weight: normal;
+}
+a.resource-collapse {
+  height: 0;
+  width: 0;
+  top: -99em;
+  position: absolute;
+}
+a.resource-collapse:focus,
+a.resource-collapse:hover {
+  font-size: 80%;
+  top: 0px;
+  height: auto;
+  width: auto;
+  overflow: visible;
+  position: relative;
+  z-index: 1000;
+}
+td.resource-group-alias {
+  width:130px;
+}
+/* Zebra colors for resources admin table */
+#resource-form-table tr.resource-even td {
+  background: none repeat scroll 0 0 #F3F4EE;
 }

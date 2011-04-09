@@ -17,6 +17,7 @@ $plugin = array(
         'load arguments' => array('services_ctools_export_ui'),
         'access arguments' => array('administer services'),
         'type' => MENU_LOCAL_TASK,
+
       ),
       'authentication' => array(
         'path' => 'list/%ctools_export_ui/authentication',
@@ -26,15 +27,20 @@ $plugin = array(
         'load arguments' => array('services_ctools_export_ui'),
         'access arguments' => array('administer services'),
         'type' => MENU_LOCAL_TASK,
+        'weight' => -1,
       ),
     ),
   ),
   // Add our custom operations.
   'allowed operations' => array(
-    'resources'  => array('title' => t('Resources')),
-    'authentication' => array('title' => t('Authentication')),
+    'resources'  => array('title' => t('Edit Resources')),
+    'authentication' => array('title' => t('Edit Authentication')),
   ),
-
+  'form' => array(
+    'settings' => 'services_ctools_export_ui_form',
+    'validate' => 'services_ctools_export_ui_form_validate',
+    'submit' => 'services_ctools_export_ui_form_submit',
+  ),
   'handler' => array(
     'class' => 'services_ctools_export_ui',
     'parent' => 'ctools_export_ui',

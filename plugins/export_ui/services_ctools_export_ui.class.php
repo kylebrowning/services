@@ -12,7 +12,7 @@ class services_ctools_export_ui extends ctools_export_ui {
    */
   function resources_page($js, $input, $item) {
     drupal_set_title($this->get_page_title('resources', $item));
-    return services_edit_endpoint_resources($item);
+    return drupal_get_form('services_edit_form_endpoint_resources', $item);
   }
 
   /**
@@ -91,7 +91,7 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
 
 function services_edit_form_endpoint_authentication_submit($form, $form_state) {
   $endpoint = $form_state['values']['endpoint_object'];
-  
+
   foreach (array_keys($endpoint->authentication) as $module) {
     if (isset($form_state['values'][$module])) {
       $endpoint->authentication[$module] = $form_state['values'][$module];
@@ -115,7 +115,7 @@ function services_edit_endpoint_resources($endpoint) {
     $endpoint = services_endpoint_load($endpoint);
   }
   if ($endpoint && !empty($endpoint->title)) {
-    drupal_set_title(check_plain($endpoint->title));
+    drupal_set_title($endpoint->title);
   }
   return drupal_get_form('services_edit_form_endpoint_resources', $endpoint);
 }
@@ -137,6 +137,15 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
     '#value' => $endpoint,
   );
 
+  $form['#attached']['js'] = array(
+    'misc/tableselect.js',
+    drupal_get_path('module', 'services') . '/js/services.admin.js',
+  );
+
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'services') . '/css/services.admin.css',
+  );
+
   $ops = array(
     'create'   => t('Create'),
     'retrieve' => t('Retrieve'),
@@ -152,84 +161,86 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
   // are preserved.
   _services_apply_endpoint($resources, $endpoint, FALSE);
 
-  $res = array(
-    '#tree' => TRUE,
-  );
+  $form['resources'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Resources'),
+    '#description' => t('Select the resource(s) or resource group(s) you would like to enable, and click <em>Save</em>.'),
+   );
 
-  foreach ($resources as $name => $resource) {
-    $rc = $resource['endpoint'];
-    $res_set = array(
-      '#type'        => 'fieldset',
-      '#title'       => t('!name resource', array(
-        '!name' => preg_replace('/[_-]+/', ' ', $name),
-      )),
-      '#collapsible' => TRUE,
-      '#collapsed'   => TRUE,
-      '#tree'        => TRUE,
-      '#attributes'  => array(
-        'class' => array('resource'),
-      ),
+  $form['resources']['table'] = array(
+    '#theme' => 'services_resource_table',
+   );
+
+  $ignoreArray = array('actions', 'relationships', 'endpoint', 'name', 'file');
+  // Generate the list of methods arranged by resource.
+  foreach ($resources as $resource => $methods) {
+    $form['resources']['table'][$resource] = array(
+      '#collapsed' => TRUE,
     );
 
-    $res_set['alias'] = array(
-      '#type'          => 'textfield',
-      '#title'         => t('Alias'),
-      '#description'   => t('The alias you enter here will be used instead of the resource name.'),
-      '#size'          => 40,
-      '#maxlength'     => 255,
-      '#default_value' => isset($rc['alias']) ? $rc['alias'] : '',
-    );
-
-    $res_set['operations'] = array(
-      '#tree' => TRUE,
-    );
-    foreach ($ops as $op => $title) {
-      if (isset($resource[$op])) {
-        $res_set['operations'][$op] = array(
-          '#type'        => 'fieldset',
-          '#title'       => $title,
-          '#collapsible' => TRUE,
-          '#collapsed'   => FALSE,
-        );
-        _services_resource_operation_settings($res_set['operations'][$op], $endpoint, $resource, $op);
-      }
+    $alias = '';
+    if (isset($endpoint['build_info']['args'][0]->resources[$resource]['alias'])) {
+      $alias = $endpoint['build_info']['args'][0]->resources[$resource]['alias'];
+    }
+    elseif (isset($endpoint['input'][$resource . '/alias'])) {
+      $alias = $endpoint['input'][$resource . '/alias'];
     }
 
-    $classes = array(
-      'actions'          => 'actions',
-      'targeted_actions' => 'targeted actions',
-      'relationships'    => 'relationships',
+    $form['resources']['table'][$resource]['alias'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $alias,
+      '#name' => $resource .'/alias',
+      '#size' => 20,
     );
-    foreach ($classes as $element => $class) {
-      if (!empty($resource[$class])) {
-        $res_set[$element] = array(
-          '#type'  => 'fieldset',
-          '#title' => t($class),
-          '#tree'  => TRUE,
-        );
-        foreach ($resource[$class] as $action => $definition) {
-          $res_set[$element][$action] = array(
-            '#type'        => 'fieldset',
-            '#title'       => $action,
-            '#collapsible' => TRUE,
-            '#collapsed'   => FALSE,
-          );
-          _services_resource_operation_settings($res_set[$element][$action], $endpoint, $resource, $class, $action);
+    foreach ($methods as $class => $info) {
+      if (!in_array($class, $ignoreArray)) {
+        if (!isset($info['help'])) {
+          $description = t('No description is available');
+        } else {
+          $description = $info['help'];
         }
+        if (isset($endpoint['build_info']['args'][0]->resources[$resource]['operations'][$class])) {
+          $default_value = $endpoint['build_info']['args'][0]->resources[$resource]['operations'][$class]['enabled'];
+        }
+        else {
+          $default_value = 0;
+        }
+        $form['resources']['table'][$resource][$resource .'/'. $class] = array(
+          '#type' => 'checkbox',
+          '#title' => $class,
+          '#description' => $description,
+          '#default_value' => $default_value,
+         );
       }
-    }
+      elseif($class == 'actions' || $class == 'relationships' || $class == 'targeted_actions') {
+        foreach($info as $key=>$action) {
+          if (!isset($action['help'])) {
+            $description = t('No description is available');
+          }
+          else {
+            $description = $action['help'];
+          }
+          if (isset($endpoint['build_info']['args'][0]->resources[$resource][$class][$key])) {
+            $default_value = $endpoint['build_info']['args'][0]->resources[$resource][$class][$key]['enabled'];
+          }
+          else {
+            $default_value = 0;
+          }
+          $form['resources']['table'][$resource][$resource .'/'. $key .'/'. $class] = array(
+            '#type' => 'checkbox',
+            '#title' => $key,
+            '#description' => $description,
+            '#default_value' => $default_value,
+          );
+         }
+       }
+     }
+   }
 
-    drupal_alter('services_resource_settings', $res_set, $resource);
-
-    $res[$name] = $res_set;
-  }
-
-  $form['resources'] = $res;
-
-  $form['save'] = array(
-    '#type'  => 'submit',
-    '#value' => t('Save'),
-  );
+   $form['save'] = array(
+     '#type'  => 'submit',
+     '#value' => t('Save'),
+   );
   return $form;
 }
 
@@ -241,157 +252,56 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
  * @return void
  */
 function services_edit_form_endpoint_resources_validate($form, $form_state) {
-  $res = $form_state['values']['resources'];
-  // Validate aliases
-  foreach ($res as $name => $resource) {
-    if (!empty($resource['alias'])) {
-      if (!preg_match('/^[a-z-]+$/', $resource['alias'])) {
-        form_set_error("resources][{$name}][alias", t("The alias for the !name may only contain lower case a-z and dashes.", array(
-          '!name' => $form['resources'][$name]['#title'],
-        )));
-      }
+  $input = $form_state['values']['endpoint_object']['input'];
+
+  // Validate aliases.
+  foreach ($input as $key => $value) {
+    if (strpos($key, '/alias') !== FALSE && !empty($value) && !preg_match('/^[a-z-]+$/', $value)) {
+      list($resource_name,) = explode('/', $key);
+      // Still this doesn't highlight needed form element.
+      form_set_error("resources][table][$resource_name][alias", t("The alias for the !name resource may only contain lower case a-z and dashes.", array(
+        '!name' => $resource_name,
+      )));
     }
   }
 }
 
 /**
- * services_edit_form_endpoint_resources_submit function.
+ * Resources form submit function.
  *
  * @param array $form
  * @param array $form_state
  * @return void
  */
 function services_edit_form_endpoint_resources_submit($form, $form_state) {
-  $resources = $form_state['input']['resources'];
-  $endpoint  = $form_state['build_info']['args'][0];
-  //Loop through submitted resources and build the final resource for submission
-  foreach ($resources as $name => $resource) {
-    $used = FALSE;
-    $final_resource = isset($endpoint->resources[$name]) ? $endpoint->resources[$name] : array();
-    //Add the alias that was submitted
-    $final_resource['alias'] = $resource['alias'];
-    //Check if operations were submitted
-    if (isset($resource['operations'])) {
-      //Loop through operations that were submitted and add them to our final resource structure
-      foreach ($resource['operations'] as $op => $def) {
-        $cop = isset($final_resource['operations'][$op]) ? $final_resource['operations'][$op] : array();
-        //take old value and overwrite it
-        $cop = array_merge($cop, $def);
-        //If were still enabled set the operation method to enabled
-        if ($cop['enabled']) {
-          $final_resource['operations'][$op] = $cop;
-          $used = $used || TRUE;
-        }
-        //Since it wasnt used, IE, null unset this value
-        else {
-          unset($final_resource['operations'][$op]);
-        }
-      }
-    }
-    $classes = array(
-      'actions' => 'actions',
-      'targeted_actions' => 'targeted actions',
-      'relationships' => 'relationships',
-    );
-    foreach ($classes as $element => $class) {
-      $class_used = FALSE;
-      if (!empty($resource[$element])) {
-        foreach ($resource[$element] as $act => $def) {
-          $cop = isset($final_resource[$class][$act]) ? $final_resource[$class][$act] : array();
-          $cop = array_merge($cop, $def);
-          if ($cop['enabled']) {
-            $final_resource[$class][$act] = $cop;
-            $class_used = $class_used || TRUE;
-          }
-          else {
-            unset($final_resource[$class][$act]);
-          }
-        }
-        if (!$class_used) {
-          unset($final_resource[$class]);
-        }
-        $used = $class_used || $used;
-      }
-    }
+  $endpoint  = $form_state['values']['endpoint_object'];
+  $existing_resources = _services_build_resources();
+  // Apply the endpoint in a non-strict mode, so that the non-active resources
+  // are preserved.
+  _services_apply_endpoint($existing_resources, $endpoint, FALSE);
+  $resources = $endpoint['input'];
+  $endpoint = $endpoint['build_info']['args'][0];
 
-    if ($used) {
-      $endpoint->resources[$name] = $final_resource;
+  foreach ($resources as $path => $state) {
+    if (strpos($path, '/') === FALSE || empty($state)) {
+      continue;
     }
-    else {
-      unset($endpoint->resources[$name]);
+    $split_path = explode('/', $path);
+    $resource = $split_path[0];
+    $method = $split_path[1];
+    // If method is alias.
+    if ($method == 'alias') {
+      $final_resource[$resource]['alias'] = $state;
+      continue;
     }
+    // If it is action, relationship, or targeted action.
+    if (isset($split_path[2])) {
+      $final_resource[$resource][$split_path[2]][$method]['enabled'] = 1;
+      continue;
+    }
+    // If it is operation.
+    $final_resource[$resource]['operations'][$method]['enabled'] = 1;
   }
-  drupal_set_message(t('Your resources have been saved.'));
+  $endpoint->resources = $final_resource;
   services_endpoint_save($endpoint);
-}
-
-/**
- * Returns information about a resource operation given it's class and name.
- *
- * @return array
- *  Information about the operation, or NULL if no matching
- *  operation was found.
- */
-function services_get_resource_operation_info($resource, $class, $name = NULL) {
-  $op = NULL;
-
-  if (isset($resource[$class])) {
-    $op = $resource[$class];
-    if (!empty($name)) {
-      $op = isset($op[$name]) ? $op[$name] : NULL;
-    }
-  }
-
-  return $op;
-}
-/**
- * Constructs the settings form for resource operation.
- *
- * @param array $settings
- *  The root element for the settings form.
- * @param string $resource
- *  The resource information array.
- * @param string $class
- *  The class of the operation. Can be 'create', 'retrieve', 'update',
- *  'delete', 'index', 'actions' or 'targeted actions' or 'relationships'.
- * @param string $name
- *  Optional. The name parameter is only used for actions, targeted actions
- *  and relationship.
- */
-function _services_resource_operation_settings(&$settings, $endpoint, $resource, $class, $name = NULL) {
-  module_load_include('runtime.inc', 'services');
-  if ($rop = services_get_resource_operation_info($resource, $class, $name)) {
-    $settings['enabled'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Enabled'),
-      '#default_value' => !empty($rop['endpoint']) && $rop['endpoint']['enabled'],
-    );
-
-    if (!empty($rop['endpoint']['preprocess'])) {
-      $settings['preprocess'] = array(
-        '#type' => 'item',
-        '#title' => t('Preprocess function'),
-        '#value' => $rop['endpoint']['preprocess'],
-      );
-    }
-
-    if (!empty($rop['endpoint']['postprocess'])) {
-      $settings['preprocess'] = array(
-        '#type' => 'item',
-        '#title' => t('Postprocess function'),
-        '#value' => $rop['endpoint']['Postprocess'],
-      );
-    }
-
-    // Let authentication modules add their configuration options
-    if(isset($endpoint->authentication))
-    foreach ($endpoint->authentication as $auth_module => $auth_settings) {
-      $settings_form = services_auth_invoke($auth_module, 'controller_settings', $auth_settings, $rop, $endpoint, $class, $name);
-      if (!empty($settings_form)) {
-        $settings[$auth_module] = $settings_form;
-      }
-    }
-
-    drupal_alter('services_resource_operation_settings', $settings, $endpoint, $resource, $class, $name);
-  }
 }

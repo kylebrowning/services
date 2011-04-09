@@ -139,6 +139,10 @@ function services_theme() {
       'template'  => 'services_endpoint_index',
       'arguments' => array('endpoints' => NULL),
     ),
+    'services_resource_table' => array(
+     'render element' => 'table',
+      'file' => 'services.admin.inc',
+    ),
   );
 }
 
