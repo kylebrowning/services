@@ -34,7 +34,7 @@ function _services_build_resources($endpoint_name = '') {
   // Process the resources, and collect all controllers in the process
   $controllers = array();
   foreach ($resources as $name => &$resource) {
-    _services_process_resource($name, $resource, $controllers);
+    $controllers = _services_process_resource($name, $resource, $controllers);
   }
 
   // Make sure that we got a access callback for all resources
@@ -145,7 +145,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
  *  An that will be fillew with all the controllers for the resource.
  * @return void
  */
-function _services_process_resource($name, &$resource, &$controllers) {
+function _services_process_resource($name, &$resource, $controllers) {
   $resource['name'] = $name;
 
   $keys = array('retrieve', 'create', 'update', 'delete');
@@ -176,6 +176,7 @@ function _services_process_resource($name, &$resource, &$controllers) {
       $controllers[$name . '/targeted_action/' . $actname] = &$resource['actions'][$actname];
     }
   }
+  return $controllers;
 }
 
 /**
