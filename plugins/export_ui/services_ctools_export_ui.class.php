@@ -24,6 +24,18 @@ class services_ctools_export_ui extends ctools_export_ui {
   }
   // Avoid standard submit of edit form by ctools.
   function edit_save_form($form_state) { }
+    
+  function set_item_state($state, $js, $input, $item) {
+    ctools_export_set_object_status($item, $state);
+
+    menu_rebuild();
+    if (!$js) {
+      drupal_goto(ctools_export_ui_plugin_base_path($this->plugin));
+    }
+    else {
+      return $this->list_page($js, $input);
+    }
+  }
 }
 
 /**
