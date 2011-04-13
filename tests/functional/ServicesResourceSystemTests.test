@@ -99,4 +99,24 @@ class ServicesResourceSystemTests extends ServicesWebtestCase {
 
     $this->assertEqual($value, $variable, t('Variable set value.'), 'SystemResource: set_variable');
   }
+
+  /**
+   * Test set_variable method.
+   */
+  function testSystemDelVariable() {
+    $path = $this->endpoint->path;
+
+    // Set a random variable.
+    $name = $this->randomName();
+    $value = $this->randomString();
+    variable_set($name, $value);
+
+    // Delete the variable via del_variable.
+    $response = $this->servicesPost($path . '/system/del_variable', array('name' => $name));
+
+    // We can't use variable_get as variables get cached to global variable.
+    $newvalue = $this->randomString();
+    $response = $this->servicesPost($path . '/system/get_variable', array('name' => $name, 'default' => $newvalue));
+    $this->assertEqual($newvalue, $response['body'], t('Variable deleted.'), 'SystemResource: get_variable');
+  }
 }
