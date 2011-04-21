@@ -108,7 +108,7 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
     $endpoint = services_endpoint_load($endpoint_name);
 
     foreach ($endpoint->authentication as $auth_module => $settings) {
-      if ($settings && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args, $auth_args)) {
+      if (isset($settings) && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args, $auth_args)) {
         return services_error($auth_error, 401);
       }
     }
