@@ -13,7 +13,6 @@
 function _file_resource_definition() {
   return array(
     'file' => array(
-
       'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
       'create' => array(
         'help' => 'Creates a file',
@@ -31,7 +30,6 @@ function _file_resource_definition() {
           ),
         ),
       ),
-
       'retrieve' => array(
         'help' => 'Retrieves a file',
         'callback' => '_file_resource_retrieve',
@@ -56,7 +54,6 @@ function _file_resource_definition() {
           ),
         ),
       ),
-
       'delete' => array(
         'help' => 'Deletes a file',
         'callback' => '_file_resource_delete',
@@ -72,6 +69,39 @@ function _file_resource_definition() {
             'optional' => FALSE,
           ),
         ),
+      ),
+      'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
+        'callback' => '_file_resource_index',
+        'args' => array(
+          array(
+            'name' => 'page',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'The zero-based index of the page to get, defaults to 0.',
+            'default value' => 0,
+            'source' => array('param' => 'page'),
+          ),
+          array(
+            'name' => 'fields',
+            'optional' => TRUE,
+            'type' => 'string',
+            'description' => 'The fields to get.',
+            'default value' => '*',
+            'source' => array('param' => 'fields'),
+          ),
+          array(
+            'name' => 'parameters',
+            'optional' => TRUE,
+            'type' => 'array',
+            'description' => 'Parameters',
+            'default value' => NULL,
+            'source' => array('param' => 'parameters'),
+          ),
+        ),
+        'access callback' => '_file_resource_access',
+        'access arguments' => array('index'),
+        'access arguments append' => TRUE,
       ),
     ),
   );
@@ -171,6 +201,40 @@ function _file_resource_delete($fid) {
 }
 
 /**
+ * Return an array of optionally paged fids baed on a set of criteria.
+ *
+ * An example request might look like
+ *
+ * http://domain/endpoint/file?fields=fid,filename&parameters[fid]=7&parameters[uid]=1
+ *
+ * This would return an array of objects with only fid and filename defined, where
+ * fid = 7 and uid = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned.
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
+ * @return
+ *   An array of file objects.
+ *
+ * @see _node_resource_index() for more notes
+ **/
+function _file_resource_index($page, $fields, $parameters) {
+  $file_select = db_select('file_managed', 't')
+    ->orderBy('timestamp', 'DESC');
+
+  services_resource_build_index_query($file_select, $page, $fields, $parameters);
+
+  $results = $file_select->execute();
+
+  // Put together array of matching files to return.
+  return services_resource_build_index_list($results, 'file', 'fid');
+}
+
+/**
  * Access check callback for file controllers.
  */
 function _file_resource_access($op = 'view', $args = array()) {
@@ -182,7 +246,7 @@ function _file_resource_access($op = 'view', $args = array()) {
   else {
     $file = file_load($args[0]);
   }
-  if (empty($file)) {
+  if (empty($file) && $op != 'index') {
     return services_error(t('There is no file with ID @fid', array('@fid' => $args[0])), 406);
   }
   switch ($op) {
@@ -196,6 +260,10 @@ function _file_resource_access($op = 'view', $args = array()) {
     case 'delete':
       return $file->uid == $user->uid && user_access('save file information');
       break;
+    case 'index':
+      if (user_access('get any binary files')) {
+        return TRUE;
+      }
   }
 
   return FALSE;

@@ -414,29 +414,14 @@ function _user_resource_logout() {
  * @see _node_resource_index() for more notes
  */
 function _user_resource_index($page, $fields, $parameters) {
-  $user_select = db_select('users', 'u');
-  if ($fields == '*') {
-    $user_select->fields('u');
-  }
-  else {
-    $fields = explode(',', $fields);
-    $user_select->fields('u', $fields);
-  }
-  foreach ($parameters as $key => $value) {
-    $user_select->condition('u.' . $key, $value, '=');
-  }
-  $user_select->orderBy('created', 'DESC');
-  $user_select->range($page * 20, 20);
+  $user_select = db_select('users', 't')
+    ->orderBy('created', 'DESC');
 
-  $result = $user_select->execute();
-  $users = array();
-  foreach ($result as $user) {
-    if ($uri = services_resource_uri(array('user', $user->uid))) {
-      $user->uri = $uri;
-    }
-    $users[] = $user;
-  }
-  return $users;
+  services_resource_build_index_query($user_select, $page, $fields, $parameters);
+
+  $results = $user_select->execute();
+
+  return services_resource_build_index_list($results, 'user', 'uid');
 }
 
 /**

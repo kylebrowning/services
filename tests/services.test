@@ -233,6 +233,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           'delete' => array(
             'enabled' => 1,
           ),
+          'index' => array(
+            'enabled' => 1,
+          ),
         ),
         'actions' => array(
           'selectNodes' => array(
@@ -253,6 +256,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
           'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
             'enabled' => 1,
           ),
         ),
@@ -305,6 +311,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           'delete' => array(
             'enabled' => 1,
           ),
+          'index' => array(
+            'enabled' => 1,
+          )
         ),
         'actions' => array(
           'countAll' => array(
@@ -325,6 +334,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
           'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
             'enabled' => 1,
           ),
         ),

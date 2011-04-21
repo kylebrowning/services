@@ -39,6 +39,99 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
      'group'       => t('Services'),
    );
   }
+    public function testTaxonomyVocabularyIndex() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+
+
+    // Create a set of taxonomy vocabularys. The taxonomy resource returns 20 vocabularys at a time,
+    // so we create two pages and a half worth.
+    $vocabularys = array();
+    $count = 50;
+    for ($i = 0; $i < $count; $i++) {
+      $vocabulary = $this->createVocabulary();
+      $vocabularys[$vocabulary['vid']] = $vocabulary;
+    }
+    $vocabulary = taxonomy_vocabulary_load(1);
+    $vocabularys[1] = (array)$vocabulary;
+    // Get the content.
+    $page_count = ceil(count($vocabularys) / 20);
+    $retrieved_terms = array();
+    for ($page = 0; $page < $page_count; $page++) {
+      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_vocabulary', array('page' => $page));
+      $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
+
+      // Store the returned comment IDs.
+      foreach ($responseArray['body'] as $vocabulary) {
+        if (isset($retrieved_vocabularys[$vocabulary->vid])) {
+          $this->fail(t('Duplicate vocabulary @vid returned.', array('@vid' => $vocabulary->tid)));
+        }
+        $retrieved_vocabularys[$vocabulary->vid] = TRUE;
+
+        $this->assertTrue($vocabularys[$vocabulary->vid]['name'] == $vocabulary->name, t('Successfully received vocabulary Name info'), 'TaxonomyVocabularyResource: Index');
+      }
+    }
+    // We should have got all the comments.
+    $expected_vids = array_keys($vocabularys);
+    sort($expected_vids);
+    $retrieved_vids = array_keys($retrieved_vocabularys);
+    sort($retrieved_vids);
+    $this->assertEqual($expected_vids, $retrieved_vids, t('Retrieved all vocabularys'));
+
+    // The n+1 page should be empty.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_vocabulary', array('page' => $page_count + 1));
+    $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
+  }
+  public function testTaxonomyTermIndex() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+
+
+    // Create a set of taxonomy terms. The taxonomy resource returns 20 terms at a time,
+    // so we create two pages and a half worth.
+    $terms = array();
+    $count = 50;
+    $vocabulary = $this->createVocabulary();
+    for ($i = 0; $i < $count; $i++) {
+      $term = $this->createTerm($vocabulary['vid']);
+      $terms[$term['tid']] = $term;
+    }
+    
+    // Get the content.
+    $page_count = ceil(count($terms) / 20);
+    $retrieved_terms = array();
+    for ($page = 0; $page < $page_count; $page++) {
+      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_term', array('page' => $page));
+      $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
+
+      // Store the returned comment IDs.
+      foreach ($responseArray['body'] as $term) {
+        if (isset($retrieved_terms[$term->tid])) {
+          $this->fail(t('Duplicate term @tid returned.', array('@tid' => $term->tid)));
+        }
+        $retrieved_terms[$term->tid] = TRUE;
+
+        $this->assertTrue($terms[$term->tid]['name'] == $term->name, t('Successfully received Term Name info'), 'TaxonomyTermResource: Index');
+      }
+    }
+    // We should have got all the comments.
+    $expected_tids = array_keys($terms);
+    sort($expected_tids);
+    $retrieved_tids = array_keys($retrieved_terms);
+    sort($retrieved_tids);
+    $this->assertEqual($expected_tids, $retrieved_tids, t('Retrieved all terms'));
+
+    // The n+1 page should be empty.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_term', array('page' => $page_count + 1));
+    $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
+    taxonomy_vocabulary_delete($vocabulary['vid']);
+  }
 
   /**
    * Test taxonomy vocabulary create method.

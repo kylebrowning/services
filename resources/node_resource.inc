@@ -335,39 +335,21 @@ function _node_resource_delete($nid) {
  *       for index requests more straightforward?
  */
 function _node_resource_index($page, $fields, $parameters) {
-  $node_select = db_select('node', 'n')
+  module_load_include('inc', 'services', 'services.module');
+  $node_select = db_select('node', 't')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
-    ->orderBy('created', 'DESC')
-    ->range($page * 20, 20);
+    ->orderBy('created', 'DESC');
 
-  if ($fields == '*') {
-    $node_select->fields('n');
-  }
-  else {
-    $fields = explode(',', $fields);
-    $node_select->fields('n', $fields);
-  }
+  services_resource_build_index_query($node_select, $page, $fields, $parameters);
 
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);
   }
 
-  foreach ($parameters as $parameter => $parameter_value) {
-    $node_select->condition($parameter, $parameter_value, '=');
-  }
+  $results = $node_select->execute();
 
-  $result = $node_select->execute();
-
-  $nodes = array();
-  foreach ($result as $node) {
-    if ($uri = services_resource_uri(array('node', $node->nid))) {
-      $node->uri = $uri;
-    }
-    $nodes[] = $node;
-  }
-
-  return $nodes;
+  return services_resource_build_index_list($results, 'node', 'nid');
 }
 
 /**

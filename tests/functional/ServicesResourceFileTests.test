@@ -30,14 +30,15 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     $this->endpoint =  $this->saveNewEndpoint();
     // Create and log in our privileged user.
     $this->privileged_user = $this->drupalCreateUser(array(
-      'get own binary files',
+      'get any binary files',
       'save file information',
       'administer services',
       'administer site configuration',
     ));
     $this->drupalLogin($this->privileged_user);
     // Get a test file.
-    $this->testfile = current($this->drupalGetTestFiles('text'));
+    $this->testfiles = $this->drupalGetTestFiles('text');
+    $this->testfile = current($this->testfiles);
   }
 
   /**
@@ -51,6 +52,45 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     );
   }
 
+
+  public function testIndexFiles() {
+    // Create a set of files to test with
+    $files = array();
+    foreach($this->testfiles as $file) {
+      file_save($file);
+      $files[$file->fid] = $file;
+    }
+    debug($files);
+    // Get the content.
+    $page_count = ceil(count($files) / 20);
+    $retrieved_files = array();
+    for ($page = 0; $page < $page_count; $page++) {
+      $responseArray = $this->servicesGet($this->endpoint->path . '/file', array('page' => $page));
+      $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
+
+      // Store the returned file IDs.
+      foreach ($responseArray['body'] as $file) {
+        if (isset($retrieved_files[$file->fid])) {
+          $this->fail(t('Duplicate files @fid returned.', array('@fid' => $file->fid)));
+        }
+        $retrieved_files[$file->fid] = TRUE;
+
+        $this->assertTrue($files[$file->fid]->filename == $file->filename, t('Successfully received File info'), 'FileResource: Index');
+      }
+    }
+    // We should have got all the files.
+    $expected_fids = array_keys($files);
+    sort($expected_fids);
+    $retrieved_fids = array_keys($retrieved_files);
+    sort($retrieved_fids);
+    
+    $this->assertEqual($expected_fids, $retrieved_fids, t('Retrieved all files'));
+
+    // The n+1 page should be empty.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/file', array('page' => $page_count + 1));
+    $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
+  }
+  
   /**
    * Test create method.
    */

@@ -43,7 +43,56 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
      'group'       => t('Services'),
    );
   }
+  public function testCommentIndex() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
 
+
+    // Create a set of comments. The comment resource returns 20 comments at a time,
+    // so we create two pages and a half worth.
+    $comments = array();
+    $count = 50;
+    $node = $this->drupalCreateNode();
+    $nid = $node->nid;
+    for ($i = 0; $i < $count; $i++) {
+      $comment = (object)$this->getCommentValues($nid);
+      $comment->created = REQUEST_TIME + $i;
+      comment_save($comment);
+      $comments[$comment->cid] = $comment;
+    }
+
+    // Get the content.
+    $page_count = ceil(count($comments) / 20);
+    $retrieved_comments = array();
+    for ($page = 0; $page < $page_count; $page++) {
+      $responseArray = $this->servicesGet($this->endpoint->path . '/comment', array('page' => $page));
+      $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
+
+      // Store the returned comment IDs.
+      foreach ($responseArray['body'] as $comment) {
+        if (isset($retrieved_comments[$comment->cid])) {
+          $this->fail(t('Duplicate comment @cid returned.', array('@cid' => $comment->cid)));
+        }
+        $retrieved_comments[$comment->cid] = TRUE;
+
+        $this->assertTrue($comments[$comment->cid]->subject == $comment->subject, t('Successfully received Comment info'), 'CommentResource: Index');
+      }
+    }
+    // We should have got all the comments.
+    $expected_cids = array_keys($comments);
+    sort($expected_cids);
+    $retrieved_cids = array_keys($retrieved_comments);
+    sort($retrieved_cids);
+    
+    $this->assertEqual($expected_cids, $retrieved_cids, t('Retrieved all comments'));
+
+    // The n+1 page should be empty.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/comment', array('page' => $page_count + 1));
+    $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
+  }
   /**
    * Test create comment.
    */
