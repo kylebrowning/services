@@ -112,15 +112,17 @@ function services_uninstall() {
  * Update 7301 adds debugging to each endopint to facilitate easier development
  */
 function services_update_7301() {
-  db_add_field('services_endpoint', 'debug', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
-  db_add_field('services_endpoint', 'status', array('type' => 'int', 'not null' => TRUE, 'default' => 1));
+  $table = 'services_endpoint';
+  db_add_field($table, 'debug', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+  db_add_field($table, 'status', array('type' => 'int', 'not null' => TRUE, 'default' => 1));
 }
 
 /**
  * Update 7302 restores the usage of Chaos tools to check for enable/disable-status
  */
 function services_update_7302() {
-  db_drop_field('services_endpoint', 'status');
+  $table = 'services_endpoint';
+  db_drop_field($table, 'status');
 }
 
 /**
