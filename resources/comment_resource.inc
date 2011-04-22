@@ -347,8 +347,9 @@ function _comment_resource_access($op = 'view', $args = array()) {
   else {
     $comment = comment_load($args[0]);
   }
-  if(isset($comment->nid))
-  $node = node_load($comment->nid);
+  if(isset($comment->nid)) {
+    $node = node_load($comment->nid);
+  }
 
   switch ($op) {
     case 'view':
