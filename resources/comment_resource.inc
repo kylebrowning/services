@@ -329,10 +329,6 @@ function _comment_resource_count_new($nid, $since = 0) {
  * Access check callback for comment controllers.
  */
 function _comment_resource_access($op = 'view', $args = array()) {
-  if (user_access('administer comments')) {
-    return TRUE;
-  }
-
   if ($op == 'view' && !isset($args[0])) {
     return user_access('access comments');
   }
@@ -345,10 +341,15 @@ function _comment_resource_access($op = 'view', $args = array()) {
   }
 
   // If the submitted comment does not contain a nid, then return an error.
-  if (!isset($comment->nid)) {
-    return services_error(t("No node specified."));
+  if(isset($comment->nid)) {
+    $node = node_load($comment->nid);
+    if($op == 'create' && !$node->nid) {
+      return services_error(t('Node nid: @nid does not exist.', array('@nid' => $comment->nid)), 406);
+    }
   }
-
+  if (user_access('administer comments')) {
+    return TRUE;
+  }
   switch ($op) {
     case 'view':
       // Check if the user has access to comments
