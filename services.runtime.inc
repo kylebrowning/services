@@ -159,7 +159,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // Check if the result should be post-processed
   if (!empty($controller['endpoint']['postprocess'])) {
     foreach ($controller['endpoint']['postprocess'] as $callable) {
-      $result = call_user_func_array($callable, array($args, $controller, $result));
+      call_user_func_array($callable, array(&$args, $controller));
     }
   }
 
