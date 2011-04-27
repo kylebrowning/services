@@ -146,7 +146,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // Check if the arguments should be preprocessed
   if (!empty($controller['endpoint']['preprocess'])) {
     foreach ($controller['endpoint']['preprocess'] as $callable) {
-      $result = call_user_func_array($callable, array($args, $controller, $result));
+      call_user_func_array($callable, array(&$args, $controller));
     }
   }
 
@@ -159,7 +159,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   // Check if the result should be post-processed
   if (!empty($controller['endpoint']['postprocess'])) {
     foreach ($controller['endpoint']['postprocess'] as $callable) {
-      call_user_func_array($callable, array(&$args, $controller));
+      $result = call_user_func_array($callable, array($args, $controller, $result));
     }
   }
 
