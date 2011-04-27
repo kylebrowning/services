@@ -139,9 +139,8 @@ function services_edit_endpoint_resources($endpoint) {
  * @param object $endpoint
  * @return Form
  */
-function services_edit_form_endpoint_resources($form_state, $endpoint) {
+function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
   module_load_include('resource_build.inc', 'services');
-
   $form = array();
 
   $form['endpoint_object'] = array(
@@ -191,11 +190,11 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
     );
 
     $alias = '';
-    if (isset($endpoint['build_info']['args'][0]->resources[$resource]['alias'])) {
-      $alias = $endpoint['build_info']['args'][0]->resources[$resource]['alias'];
+    if (isset($form_state['build_info']['args'][0]->resources[$resource]['alias'])) {
+      $alias = $form_state['build_info']['args'][0]->resources[$resource]['alias'];
     }
-    elseif (isset($endpoint['input'][$resource . '/alias'])) {
-      $alias = $endpoint['input'][$resource . '/alias'];
+    elseif (isset($form_state['input'][$resource . '/alias'])) {
+      $alias = $form_state['input'][$resource . '/alias'];
     }
 
     $form['resources']['table'][$resource]['alias'] = array(
@@ -211,8 +210,8 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
         } else {
           $description = $info['help'];
         }
-        if (isset($endpoint['build_info']['args'][0]->resources[$resource]['operations'][$class])) {
-          $default_value = $endpoint['build_info']['args'][0]->resources[$resource]['operations'][$class]['enabled'];
+        if (isset($form_state['build_info']['args'][0]->resources[$resource]['operations'][$class])) {
+          $default_value = $form_state['build_info']['args'][0]->resources[$resource]['operations'][$class]['enabled'];
         }
         else {
           $default_value = 0;
@@ -225,15 +224,15 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
          );
       }
       elseif($class == 'actions' || $class == 'relationships' || $class == 'targeted_actions') {
-        foreach($info as $key=>$action) {
+        foreach($info as $key => $action) {
           if (!isset($action['help'])) {
             $description = t('No description is available');
           }
           else {
             $description = $action['help'];
           }
-          if (isset($endpoint['build_info']['args'][0]->resources[$resource][$class][$key])) {
-            $default_value = $endpoint['build_info']['args'][0]->resources[$resource][$class][$key]['enabled'];
+          if (isset($form_state['build_info']['args'][0]->resources[$resource][$class][$key])) {
+            $default_value = $form_state['build_info']['args'][0]->resources[$resource][$class][$key]['enabled'];
           }
           else {
             $default_value = 0;
@@ -264,7 +263,7 @@ function services_edit_form_endpoint_resources($form_state, $endpoint) {
  * @return void
  */
 function services_edit_form_endpoint_resources_validate($form, $form_state) {
-  $input = $form_state['values']['endpoint_object']['input'];
+  $input = $form_state['values']['endpoint_object'];
 
   // Validate aliases.
   foreach ($input as $key => $value) {
@@ -291,8 +290,8 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
   // Apply the endpoint in a non-strict mode, so that the non-active resources
   // are preserved.
   _services_apply_endpoint($existing_resources, $endpoint, FALSE);
-  $resources = $endpoint['input'];
-  $endpoint = $endpoint['build_info']['args'][0];
+  $resources = $form_state['input'];
+  $endpoint = $form_state['build_info']['args'][0];
 
   foreach ($resources as $path => $state) {
     if (strpos($path, '/') === FALSE || empty($state)) {
@@ -316,4 +315,5 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
   }
   $endpoint->resources = $final_resource;
   services_endpoint_save($endpoint);
+  drupal_set_message('Resources have been saved');
 }
