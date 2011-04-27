@@ -145,7 +145,13 @@ class RESTServer {
       }
     }
 
-    $result = services_controller_execute($controller, $arguments);
+    try {
+      $result = services_controller_execute($controller, $arguments);
+    } catch (ServicesException $e) {
+      $errors = $this->handleException($e);
+      drupal_alter('rest_server_exectue_errors', $errors, $controller, $arguments);
+      $result = $errors;
+    }
     $formatter = $formats[$response_format];
 
     // Set the content type and render output
@@ -561,6 +567,31 @@ class RESTServer {
     elseif ($pc >= 2 && $method == 'POST') {
       $action = $resource['targeted actions'][$path[1]];
       return $action;
+    }
+  }
+  function handleException($exception){
+    $code = $exception->getCode();
+    switch ($code) {
+      case 401:
+        drupal_add_http_header('HTTP/1.0 401 Unauthorized', $exception->getMessage());
+      break;
+      case 404:
+        drupal_add_http_header('HTTP/1.0 404 Not found', $exception->getMessage());
+      break;
+      case 406:
+        drupal_add_http_header('HTTP/1.0 406 Not Acceptable', $exception->getMessage());
+      break;
+      default:
+        if ($code >= 400 && $code < 600) {
+          drupal_add_http_header('HTTP/1.0 ' . $code, $exception->getMessage());
+        }
+        else {
+          drupal_add_http_header('HTTP/1.0 500 An error occurred: (' . $code . ')',  $exception->getMessage());
+        }
+      break;
+    }
+    if(method_exists($exception,'getData')){
+      return $exception->getData();
     }
   }
 }

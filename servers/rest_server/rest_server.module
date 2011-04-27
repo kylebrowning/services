@@ -26,26 +26,7 @@ function rest_server_server() {
     return $server->handle($canonical_path, $endpoint_path);
   }
   catch (Exception $e) {
-    $code = $e->getCode();
-    switch ($code) {
-      case 401:
-        drupal_add_http_header('HTTP/1.0 401 Unauthorized', $e->getMessage());
-      break;
-      case 404:
-        drupal_add_http_header('HTTP/1.0 404 Not found', $e->getMessage());
-      break;
-      case 406:
-        drupal_add_http_header('HTTP/1.0 406 Not Acceptable', $e->getMessage());
-      break;
-      default:
-        if ($code >= 400 && $code < 600) {
-          drupal_add_http_header('HTTP/1.0 ' . $code, $e->getMessage());
-        }
-        else {
-          drupal_add_http_header('HTTP/1.0 500 An error occurred: (' . $code . ')',  $e->getMessage());
-        }
-      break;
-    }
+    $server->handleException($e);
   }
 }
 

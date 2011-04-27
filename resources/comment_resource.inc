@@ -189,7 +189,7 @@ function _comment_resource_create($comment) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
 
   $comment = $form_state['comment'];
@@ -238,7 +238,7 @@ function _comment_resource_update($cid, $comment) {
   drupal_form_submit('comment_form', $form_state, $old_comment);
 
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
 
   return $cid;

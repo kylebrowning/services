@@ -312,10 +312,12 @@ function services_server_info_object($reset = FALSE) {
  * @param int $code
  *  Optional. Error code. This often maps to the HTTP status codes. Defaults
  *  to 0.
+ * @param mixed $data
+ *  Optional. Information that can be used by the server to return information about the error. Defaults to null.
  * @return mixed
  */
-function services_error($message, $code = 0) {
-  throw new ServicesException($message, $code);
+function services_error($message, $code = 0, $data = NULL) {
+  throw new ServicesException($message, $code, $data);
 }
 
 /**
