@@ -342,12 +342,11 @@ function _user_resource_login($username, $password) {
     return services_error(t('Already logged in as !user.', array('!user' => $user->name)), 406);
   }
 
-  $user = user_authenticate(array('name' => $username, 'pass' => $password));
+  user_authenticate(array('name' => $username, 'pass' => $password));
 
   if (isset($user->uid) && $user->uid) {
     // Regenerate the session ID to prevent against session fixation attacks.
     sess_regenerate();
-    module_invoke_all('user', 'login', NULL, $user);
 
     $return = new stdClass();
     $return->sessid = session_id();
