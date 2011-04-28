@@ -143,6 +143,23 @@ function _user_resource_definition() {
           'callback' => '_user_resource_logout',
           'access callback' => 'services_access_menu',
         ),
+        'register' => array(
+          'help' => 'Register a user',
+          'callback' => '_user_resource_create',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('register'),
+          'access arguments append' => FALSE,
+          'args' => array(
+            array(
+              'name' => 'account',
+              'type' => 'array',
+              'description' => 'The user object',
+              'source' => 'data',
+              'optional' => FALSE,
+            ),
+          ),
+        ),
       ),
     ),
   );
@@ -436,5 +453,9 @@ function _user_resource_access($op = 'view', $args = array()) {
         return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
       }
       return user_access('administer users');
+    case 'register':
+      if (!$user->uid && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_ADMINISTRATORS_ONLY) {
+        return TRUE;
+      }
   }
 }
