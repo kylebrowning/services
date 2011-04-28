@@ -79,6 +79,39 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
   }
 
   /**
+   * Test register method.
+   *
+   * Register user, load user.
+   */
+  function testRegisterUser() {
+    // Create user.
+    $user = array();
+    $user['name']   = $this->randomName();
+    $user['mail']   = $user['name'] . '@example.com';
+    $user['pass']   = user_password();
+    $user['status'] = 1;
+
+    $response = $this->servicesPost($this->endpoint->path . '/user/register', array('account' => $user));
+    
+    //Verify logged in users cannnot create accounts
+    $code = $response['code'];
+    $this->assertEqual($code, '401', t('Verify permission denied 401'), 'UserResource: Create');
+
+    //Verify logged out state can create users
+    $this->drupalLogout();
+
+    $response = $this->servicesPost($this->endpoint->path . '/user/register', array('account' => $user));
+    $account = $response['body'];
+
+    $this->assertTrue(!empty($account['uid']), t('User has been create successfully.'), 'UserResource: Create');
+
+    // Load user.
+    $user_load = user_load($account['uid']);
+    $this->assertTrue(!empty($user_load), t('Newly created user has been loaded successfully.'), 'UserResource: Create');
+    $this->drupalLogin($this->privileged_user);
+  }
+
+  /**
    * Test retrieve method.
    */
   function testRetrieveUser() {

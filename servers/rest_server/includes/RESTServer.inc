@@ -231,7 +231,7 @@ class RESTServer {
           elseif (!isset($info['optional']) || !$info['optional']) {
             return services_error(t('Missing required argument !arg', array(
               '!arg' => $info['name'],
-            )), 401);
+            )), 406);
           }
           else {
               $arguments[$i] = NULL;

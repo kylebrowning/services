@@ -272,6 +272,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           'logout' => array(
             'enabled' => 1,
           ),
+          'register' => array(
+            'enabled' => 1,
+          ),
         ),
       ),
       'comment' => array(

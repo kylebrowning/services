@@ -38,7 +38,6 @@ function _user_resource_definition() {
           ),
         ),
       ),
-
       'update' => array(
         'help' => 'Updates a user',
         'callback' => '_user_resource_update',
@@ -142,6 +141,24 @@ function _user_resource_definition() {
           'help' => 'Logout a user session',
           'callback' => '_user_resource_logout',
           'access callback' => 'services_access_menu',
+        ),
+
+        'register' => array(
+          'help' => 'Registers a user. (anonymous only)',
+          'callback' => '_user_resource_create',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('register'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'account',
+              'type' => 'array',
+              'description' => 'The user data',
+              'source' => 'data',
+              'optional' => FALSE,
+            ),
+          ),
         ),
       ),
     ),
@@ -441,6 +458,14 @@ function _user_resource_access($op = 'view', $args = array()) {
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
       return user_access('administer users');
+    case 'register':
+      //Verify user is not logged in, and verify that visitors can create accounts.
+      if (!$user->uid && variable_get('user_register', 1) != 0) {
+        return TRUE;
+      }
+      else {
+        return FALSE;
+      }
     case 'delete':
       $account = user_load($args[0]);
       if (!$account->uid) {
