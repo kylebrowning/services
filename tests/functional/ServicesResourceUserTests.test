@@ -63,10 +63,10 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     $response = $this->servicesPost($this->endpoint->path . '/user', array('account' => $user));
     $account = $response['body'];
-    $this->assertTrue(!empty($account->uid), t('User has been create successfully.'), 'UserResource: Create');
+    $this->assertTrue(!empty($account['uid']), t('User has been create successfully.'), 'UserResource: Create');
 
     // Load user.
-    $user_load = user_load($account->uid);
+    $user_load = user_load($account['uid']);
     $this->assertTrue(!empty($user_load), t('Newly created user has been loaded successfully.'), 'UserResource: Create');
 
     // Try to create user without email.

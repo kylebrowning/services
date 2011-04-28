@@ -205,12 +205,6 @@ function _user_resource_create($account) {
     'pass2' => $account['pass'],
   );
   $form_state['values']['op'] = t('Create new account');
-  
-  // reset to anonymous user
-  global $user;
-  $orig_user = $user;
-  session_save_session(FALSE);
-  $user = user_load(array('uid' => 0));
 
   // execute the register form
   drupal_execute('user_register', $form_state);
@@ -218,13 +212,16 @@ function _user_resource_create($account) {
   // find and store the new user into the form_state
   $form_state['user'] = user_load(array('name' => $form_state['values']['name']));
 
-  // revert back to the original user.
-  $user = $orig_user;
-  session_save_session(TRUE);
 
   // Error if needed.
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
+  } else {
+    $user = array('uid' => $form_state['user']->uid);
+    if ($uri = services_resource_uri(array('user', $user['uid']))) {
+      $user['uri'] = $uri;
+    }
+    return $user;
   }
   return $form_state['user'];
 }
