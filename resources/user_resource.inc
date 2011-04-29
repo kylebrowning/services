@@ -226,10 +226,6 @@ function _user_resource_create($account) {
   // execute the register form
   drupal_execute('user_register', $form_state);
 
-  // find and store the new user into the form_state
-  $form_state['user'] = user_load(array('name' => $form_state['values']['name']));
-
-
   // Error if needed.
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406);
