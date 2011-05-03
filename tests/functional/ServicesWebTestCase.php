@@ -200,6 +200,9 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           'set_variable' => array(
             'enabled' => 1,
           ),
+          'del_variable' => array(
+            'enabled' => 1,
+          ),
         ),
       ),
       'taxonomy_term' => array(
