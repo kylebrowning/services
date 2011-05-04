@@ -109,8 +109,12 @@ function services_access_menu() {
 function services_theme() {
   return array(
     'services_endpoint_index' => array(
-      'template'  => 'services_endpoint_index',
-      'arguments' => array('endpoints' => NULL),
+      'template'       => 'services_endpoint_index',
+      'arguments'      => array('endpoints' => NULL),
+    ),
+    'services_resource_table' => array(
+      'render element' => 'table',
+      'file'           => 'services.admin.inc',
     ),
   );
 }
