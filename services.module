@@ -51,19 +51,20 @@ function services_perm() {
 function services_menu() {
   $items = array();
   // Add menu items for the different endpoints
-  $endpoints = services_endpoint_load_all();
-  foreach ($endpoints as $endpoint) {
-    if (empty($endpoint->disabled)) {
-      $items[$endpoint->path] = array(
-        'title'             => 'Services endpoint',
-        'access callback'   => 'services_access_menu',
-        'page callback'     => 'services_endpoint_callback',
-        'page arguments'    => array($endpoint->name),
-        'type'              => MENU_CALLBACK,
-      );
+  if (module_exists('ctools')) {
+    $endpoints = services_endpoint_load_all();
+    foreach ($endpoints as $endpoint) {
+      if (empty($endpoint->disabled)) {
+        $items[$endpoint->path] = array(
+          'title'             => 'Services endpoint',
+          'access callback'   => 'services_access_menu',
+          'page callback'     => 'services_endpoint_callback',
+          'page arguments'    => array($endpoint->name),
+          'type'              => MENU_CALLBACK,
+        );
+      }
     }
   }
-
   return $items;
 }
 
