@@ -56,18 +56,18 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
       $vocabularys[$vocabulary['vid']] = $vocabulary;
     }
     $vocabulary = taxonomy_vocabulary_load(1);
-    $vocabularys[1] = (array)$vocabulary;
+    $vocabularys[1] = (array) $vocabulary;
     // Get the content.
     $page_count = ceil(count($vocabularys) / 20);
     $retrieved_terms = array();
     for ($page = 0; $page < $page_count; $page++) {
-      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_vocabulary', array('page' => $page));
+      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_vocabulary', array('page' => $page, 'fields' => 'vid,name'));
       $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
 
       // Store the returned comment IDs.
       foreach ($responseArray['body'] as $vocabulary) {
         if (isset($retrieved_vocabularys[$vocabulary->vid])) {
-          $this->fail(t('Duplicate vocabulary @vid returned.', array('@vid' => $vocabulary->tid)));
+          $this->fail(t('Duplicate vocabulary @vid returned.', array('@vid' => $vocabulary->vid)));
         }
         $retrieved_vocabularys[$vocabulary->vid] = TRUE;
 
@@ -107,7 +107,7 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
     $page_count = ceil(count($terms) / 20);
     $retrieved_terms = array();
     for ($page = 0; $page < $page_count; $page++) {
-      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_term', array('page' => $page));
+      $responseArray = $this->servicesGet($this->endpoint->path . '/taxonomy_term', array('page' => $page, 'fields' => 'tid,name'));
       $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
 
       // Store the returned comment IDs.

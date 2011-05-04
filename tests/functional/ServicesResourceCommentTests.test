@@ -68,7 +68,7 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
     $page_count = ceil(count($comments) / 20);
     $retrieved_comments = array();
     for ($page = 0; $page < $page_count; $page++) {
-      $responseArray = $this->servicesGet($this->endpoint->path . '/comment', array('page' => $page));
+      $responseArray = $this->servicesGet($this->endpoint->path . '/comment', array('page' => $page, 'fields' => 'cid,subject'));
       $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
 
       // Store the returned comment IDs.

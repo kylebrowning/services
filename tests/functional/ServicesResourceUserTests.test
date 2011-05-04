@@ -166,7 +166,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     $accounts_copy = $accounts;
 
-    $response = $this->servicesGet($this->endpoint->path . '/user');
+    $response = $this->servicesGet($this->endpoint->path . '/user', array('fields' => 'uid,name,mail'));
     $response_accounts = $response['body'];
 
     foreach ($response_accounts as $response_account) {

@@ -65,7 +65,7 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     $page_count = ceil(count($files) / 20);
     $retrieved_files = array();
     for ($page = 0; $page < $page_count; $page++) {
-      $responseArray = $this->servicesGet($this->endpoint->path . '/file', array('page' => $page));
+      $responseArray = $this->servicesGet($this->endpoint->path . '/file', array('page' => $page, 'fields' => 'fid,filename'));
       $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
 
       // Store the returned file IDs.
