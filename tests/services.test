@@ -48,7 +48,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     // Otherwise Services will reject arguments.
     $headers = array("Content-type: application/x-www-form-urlencoded");
     // Prepare arguments.
-    $post = http_build_query($data, '', '&');
+    $post = drupal_http_build_query($data, '', '&');
 
     $content = $this->curlExec(array(
       CURLOPT_URL => $url,
@@ -80,7 +80,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $headers = array("Content-type: application/vnd.php.serialized; charset=iso-8859-1");
 
     // Emulate file.
-    $putData = fopen('php://memory', 'rw+');
+    $putData = fopen('php://temp', 'rw+');
     fwrite($putData, $serialize_args);
     fseek($putData, 0);
 
