@@ -64,7 +64,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $page_count = ceil(count($nodes) / 20);
     $retrieved_nodes = array();
     for ($page = 0; $page < $page_count; $page++) {
-      $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('page' => $page));
+      $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('page' => $page, 'fields' => 'nid,title'));
       $this->assertTrue(count($responseArray['body']) <= 20, t('Correct number of items returned'));
 
       // Store the returned node IDs.

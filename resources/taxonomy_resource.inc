@@ -101,7 +101,7 @@ function _taxonomy_resource_definition() {
             'optional' => TRUE,
             'type' => 'array',
             'description' => 'Parameters',
-            'default value' => NULL,
+            'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
         ),
