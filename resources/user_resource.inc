@@ -228,7 +228,7 @@ function _user_resource_create($account) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   } else {
     $user = array('uid' => $form_state['user']->uid);
     if ($uri = services_resource_uri(array('user', $user['uid']))) {
@@ -292,7 +292,7 @@ function _user_resource_update($uid, $account) {
 
   // Error if needed.
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
 
   return $account;

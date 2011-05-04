@@ -185,7 +185,7 @@ function _node_resource_create($node) {
   $ret = drupal_execute($node['type'] . '_node_form', $form_state, (object)$node);
 
   if ($errors = form_get_errors()) {
-    return services_error(implode(" ", $errors), 406);
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
   // Fetch $nid out of $form_state
   $nid = $form_state['nid'];
@@ -230,7 +230,7 @@ function _node_resource_update($nid, $node) {
     drupal_execute($old_node->type . '_node_form', $form_state, $old_node);
 
     if ($errors = form_get_errors()) {
-      return services_error(implode(" ", $errors), 406);
+      return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
     }
   }
   else {

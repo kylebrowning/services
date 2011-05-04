@@ -148,7 +148,13 @@ class RESTServer {
       }
     }
 
-    $result = services_controller_execute($controller, $arguments, $auth_arguments);
+    try {
+      $result = services_controller_execute($controller, $arguments);
+    } catch (ServicesException $e) {
+      $errors = $this->handleException($e);
+      drupal_alter('rest_server_exectue_errors', $errors, $controller, $arguments);
+      $result = $errors;
+    }
     $formatter = $formats[$response_format];
 
     // Set the content type and render output
@@ -519,6 +525,31 @@ class RESTServer {
     }
   }
 
+  function handleException($e){
+    $code = $e->getCode();
+    switch ($code) {
+      case 401:
+        drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
+      break;
+      case 404:
+        drupal_set_header('HTTP/1.0 404 Not found: ' . $e->getMessage());
+      break;
+      case 406:
+        drupal_set_header('HTTP/1.0 406 Not Acceptable: ' . $e->getMessage());
+      break;
+      default:
+        if ($code >= 400 && $code < 600) {
+          drupal_set_header('HTTP/1.0 ' . $code . ' ' . $e->getMessage());
+        }
+        else {
+          drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
+        }
+      break;
+    }
+    if(method_exists($e,'getData')){
+      return $e->getData();
+    }
+  }
   private function resolveController($resource, $method, $path) {
     $pc = count($path);
     // Use the index handler for all empty path request, except on POST
