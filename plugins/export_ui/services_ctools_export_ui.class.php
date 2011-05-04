@@ -140,7 +140,7 @@ function services_edit_endpoint_resources($endpoint) {
  * @param object $endpoint
  * @return Form
  */
-function services_edit_form_endpoint_resources($form_state, $endpoint) {
+function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
   module_load_include('resource_build.inc', 'services');
 
   $form = array();
