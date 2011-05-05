@@ -355,9 +355,7 @@ function _user_resource_login($username, $password) {
   if ($uid) {
     $user = user_load($uid);
     if ($user->uid) {
-      // Regenerate the session ID to prevent against session fixation attacks.
-      drupal_session_regenerate();
-      module_invoke_all('user', 'login', NULL, $user);
+      user_login_finalize();
 
       $return = new stdClass();
       $return->sessid = session_id();
@@ -386,7 +384,7 @@ function _user_resource_logout() {
 
   // Destroy the current session:
   session_destroy();
-  module_invoke_all('user', 'logout', NULL, $user);
+  module_invoke_all('user_logout', $user);
 
   // Load the anonymous user
   $user = drupal_anonymous_user();
