@@ -140,7 +140,7 @@ function services_edit_endpoint_resources($endpoint) {
  * @param object $endpoint
  * @return Form
  */
-function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
+function services_edit_form_endpoint_resources($form, &$form_state) {
   module_load_include('resource_build.inc', 'services');
 
   $form = array();
@@ -148,7 +148,7 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
   drupal_add_js('misc/tableselect.js');
   drupal_add_js(drupal_get_path('module', 'services') . '/js/services.admin.js');
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
-
+  $endpoint = $form_state;
   $form['endpoint_object'] = array(
     '#type'  => 'value',
     '#value' => $endpoint,
@@ -190,9 +190,6 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
     $alias = '';
     if (isset($endpoint->resources[$resource]['alias'])) {
       $alias = $endpoint->resources[$resource]['alias'];
-    }
-    elseif (isset($form_state['values'][$resource . '-alias'])) {
-      $alias = $form_state['values'][$resource . '-alias'];
     }
 
     $form['resources']['table'][$resource][$resource . '-alias'] = array(
