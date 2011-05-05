@@ -104,6 +104,33 @@ function _node_resource_definition() {
         ),
         'access arguments' => array('access content'),
       ),
+      'relationships' => array(
+        'nodeFiles' => array(
+          'help'   => t('This method returns the files on a given node.'),
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'access callback' => '_node_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'callback' => '_node_resource_load_node_files',
+          'args'     => array(
+            array(
+              'name'         => 'nid',
+              'type'         => 'int',
+              'description'  => t('The node id to load files for.'),
+              'source'       => 'data',
+              'optional'     => FALSE,
+            ),
+            array(
+              'name'         => 'file_contents',
+              'type'         => 'int',
+              'description'  => t('To return file contents or not.'),
+              'source'       => 'data',
+              'optional'     => FALSE,
+              'default value' => TRUE,
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }
@@ -319,6 +346,49 @@ function _node_resource_index($page, $fields, $parameters) {
   }
 
   return $nodes;
+}
+
+/**
+ * Generates an array of base64 encoded files attached to a node
+ *
+ * @param $nid
+ *   Number. Node ID
+ * @param $include_file_contents
+ *   Bool Whether or not to include the base64_encoded version of the file.
+ * @return
+ *   Array. A list of all files from the given node
+ */
+function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
+  module_load_include('inc', 'services', 'resources/file_resource');
+  $node = node_load($nid);
+  if (!isset($node->files)) {
+    return services_error(t('There are no files on given node.'));
+  }
+
+  $return = array();
+  foreach ($node->files as $file) {
+    // Do not return files that are not listed.
+    if (!$file->list) {
+      continue;
+    }
+    $return[$file->fid] = array(
+      'filename'  => $file->filename,
+      'uid'       => $file->uid,
+      'filemime'  => $file->filemime,
+      'filesize'  => $file->filesize,
+      'status'    => $file->status,
+      'timestamp' => $file->timestamp
+    );
+    // If to add content of the file.
+    if ($file_include_contents) {
+      $filepath = file_create_path($file->filepath);
+      $binaryfile = fopen($filepath, 'rb');
+      $return[$file->fid]['file'] = base64_encode(fread($binaryfile, filesize($filepath)));
+      fclose($binaryfile);
+    }
+
+  }
+  return $return;
 }
 
 /**

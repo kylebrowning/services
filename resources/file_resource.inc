@@ -73,33 +73,6 @@ function _file_resource_definition() {
           ),
         ),
       ),
-      'actions' => array(
-        'nodeFiles' => array(
-          'help'   => t('This method returns the files on a given node.'),
-          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
-          'access callback' => '_file_resource_node_access',
-          'access arguments' => array('view'),
-          'access arguments append' => TRUE,
-          'callback' => '_file_resource_load_node_files',
-          'args'     => array(
-            array(
-              'name'         => 'nid',
-              'type'         => 'int',
-              'description'  => t('The node id to load files for.'),
-              'source'       => 'data',
-              'optional'     => FALSE,
-            ),
-            array(
-              'name'         => 'file_contents',
-              'type'         => 'int',
-              'description'  => t('To return file contents or not.'),
-              'source'       => 'data',
-              'optional'     => FALSE,
-              'default value' => TRUE,
-            ),
-          ),
-        ),
-      ),
     ),
   );
 }
