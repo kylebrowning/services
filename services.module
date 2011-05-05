@@ -418,3 +418,63 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
 
   return $method;
 }
+
+
+/**
+ * Helper function to build index queries.
+ *
+ * @param $query
+ *   Object database query object.
+ * @param $page
+ *   Integer page number we are requesting.
+ * @param $fields
+ *   Array fields to return.
+ * @param $parameter
+ *   Array parameters to add to the index query.
+ */
+function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array()) {
+  $where = array();
+  $fields = db_escape_string($fields);
+  $schema = db_escape_string($schema);
+  $table = $schema;
+  $schema = drupal_get_schema($schema);
+  // Build an array of fields with the appropriate placeholders for use in
+  // db_query().
+  if(is_array($parameters)) {
+    foreach ($parameters as $field => $value) {
+      $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
+    } 
+  }
+
+  // Now implode that array into an actual WHERE clause.
+  $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
+
+  // Run through db_rewrite_sql to make sure proper access checks are applied.
+  $sql = "SELECT $fields FROM {$table} $where ORDER BY $order";
+  $sql = db_rewrite_sql($sql);
+  $result = db_query_range($sql, $parameters, $page * 20, 20);
+  return $result;
+}
+
+/**
+ * Helper function to build a list of items satisfying the index query.
+ *
+ * @param $results
+ *   Object database query results object.
+ * @param $type
+ *   String type of index that is being processed.
+ * @param $field
+ *   String field to use for looking up uri.
+ */
+function services_resource_build_index_list($results, $type, $field) {
+  // Put together array of matching items to return.
+  $items = array();
+  foreach ($results as $result) {
+    if ($uri = services_resource_uri(array($type, $result->{$field}))) {
+      $result->uri = $uri;
+    }
+    $items[] = $result;
+  }
+
+  return $items;
+}

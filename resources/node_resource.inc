@@ -369,41 +369,19 @@ function _node_resource_delete($nid) {
  *       for index requests more straightforward?
  */
 function _node_resource_index($page, $fields, $parameters) {
-  $schema = drupal_get_schema('node');
-  $where = array();
-  $fields = db_escape_string($fields);
-
-
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
   if (!user_access('administer nodes')) {
     $parameters['status'] = 1;
   }
-
-  // Build an array of fields with the appropriate placeholders for use in
-  // db_query().
-  foreach ($parameters as $field => $value) {
-    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
-  }
-
-  // Now implode that array into an actual WHERE clause.
-  $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
-
-  // Run through db_rewrite_sql to make sure proper access checks are applied.
-  $sql = "SELECT $fields FROM {node} n $where ORDER BY sticky DESC, created DESC";
-  $sql = db_rewrite_sql($sql);
-  $result = db_query_range($sql, $parameters, $page * 20, 20);
-
+  $query = services_resource_build_index_query('node', 'sticky DESC, created DESC', $page, $fields, $parameters);
   // Put together array of matching nodes to return.
-  $nodes = array();
-  while ($node = db_fetch_object($result)) {
-    if ($uri = services_resource_uri(array('node', $node->nid))) {
-      $node->uri = $uri;
-    }
-    $nodes[] = $node;
+  $results = array();
+  while ($node = db_fetch_object($query)) {
+    $results[] = $node;
   }
 
-  return $nodes;
+  return services_resource_build_index_list($results, 'node', 'nid');
 }
 
 /**

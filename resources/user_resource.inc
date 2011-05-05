@@ -400,37 +400,17 @@ function _user_resource_logout() {
  *
  * @see _node_resource_index() for more notes
  */
-function _user_resource_index($page = 0, $fields = '*', $parameters = array()) {
-  $parameters = (array) $parameters;
-  $schema = drupal_get_schema('users');
-  $where = array();
-  $fields = db_escape_string($fields);
-
-  $parameters = (array)$parameters;
+function _user_resource_index($page, $fields, $parameters) {
   if (!user_access('administer users')) {
     $parameters['active'] = 1;
   }
+  $query = services_resource_build_index_query('users', 'created DESC', $page, $fields, $parameters);
 
-  // Build an array of fields with the appropriate placeholders for use in
-  // db_query().
-  foreach ($parameters as $field => $value) {
-    $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
+  $results = array();
+  while ($user = db_fetch_object($query)) {
+    $results[] = $user;
   }
-
-  // Now implode that array into an actual WHERE clause.
-  $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
-  $sql = "SELECT $fields FROM {users} $where";
-  $result = db_query_range($sql, $parameters, $page * 20, 20);
-
-  // Put together array of matching accounts to return.
-  $accounts = array();
-  while ($account = db_fetch_object($result)) {
-    if ($uri = services_resource_uri(array('user', $account->uid))) {
-      $account->uri = $uri;
-    }
-    $accounts[$account->uid] = $account;
-  }
-  return $accounts;
+  return services_resource_build_index_list($results, 'user', 'uid');
 }
 
 /**

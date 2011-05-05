@@ -85,6 +85,39 @@ function _comment_resource_definition() {
           ),
         ),
       ),
+      'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
+        'callback' => '_comment_resource_index',
+        'args' => array(
+          array(
+            'name' => 'page',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'The zero-based index of the page to get, defaults to 0.',
+            'default value' => 0,
+            'source' => array('param' => 'page'),
+          ),
+          array(
+            'name' => 'fields',
+            'optional' => TRUE,
+            'type' => 'string',
+            'description' => 'The fields to get.',
+            'default value' => '*',
+            'source' => array('param' => 'fields'),
+          ),
+          array(
+            'name' => 'parameters',
+            'optional' => TRUE,
+            'type' => 'array',
+            'description' => 'Parameters',
+            'default value' => NULL,
+            'source' => array('param' => 'parameters'),
+          ),
+        ),
+        'access callback' => '_comment_resource_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
+      ),
       'actions' => array(
         'countAll' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
@@ -131,6 +164,45 @@ function _comment_resource_definition() {
     ),
   );
 }
+
+
+/**
+ * Return an array of optionally paged cids baed on a set of criteria.
+ *
+ * An example request might look like
+ *
+ * http://domain/endpoint/comment?fields=cid,nid&parameters[nid]=7&parameters[uid]=2
+ *
+ * This would return an array of objects with only cid and nid defined, where
+ * nid = 7 and uid = 1.
+ *
+ * @param $page
+ *   Page number of results to return (in pages of 20).
+ * @param $fields
+ *   The fields you want returned.
+ * @param $parameters
+ *   An array of fields and values used to build a sql WHERE clause indicating
+ *   what items should be deleted.
+ * @return
+ *   An array of comment objects.
+ *
+ * @see _node_resource_index() for more notes
+ **/
+function _comment_resource_index($page, $fields, $parameters) {
+  // Limit to published nodes if user doesn't have 'administer nodes'
+  // permissions.
+  if (!user_access('administer comments')) {
+    $parameters['status'] = 1;
+  }
+  $query = services_resource_build_index_query('comments', 'timestamp DESC', $page, $fields, $parameters);
+  // Put together array of matching nodes to return.
+  $results = array();
+  while ($comments = db_fetch_object($query)) {
+    $results[] = $comments;
+  }
+  return services_resource_build_index_list($results, 'comments', 'cid');
+}
+
 
 /**
  * Adds a new comment to a node and returns the cid.
