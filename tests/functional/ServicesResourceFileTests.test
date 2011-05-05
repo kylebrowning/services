@@ -127,39 +127,7 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     $fid = db_result(db_query('SELECT fid FROM {files} WHERE fid = %d', $testfile['fid']));
     $this->assertTrue(empty($fid), t('File deleted.'), 'FileResource: Delete');
   }
-
-  /**
-   * Test nodeFiles action.
-   */
-  public function testNodeFiles() {
-    $testfile1 = $this->uploadTestFile();
-    $testfile2 = $this->uploadTestFile();
-    $testfile3 = $this->uploadTestFile();
-
-    // Needed for upload module to create new records in {upload} table.
-    // @see upload_save()
-    $testfile1['new'] = TRUE;
-    $testfile2['new'] = TRUE;
-    $testfile3['new'] = TRUE;
-    // First two files are listed. Third is not listed.
-    $testfile1['list'] = 1;
-    $testfile2['list'] = 1;
-    $testfile3['list'] = 0;
-
-    // Create node with three files.
-    $settings = array('files' => array(
-      $testfile1['fid'] => (object)$testfile1,
-      $testfile2['fid'] => (object)$testfile2,
-      $testfile3['fid'] => (object)$testfile3,
-    ));
-    $node = $this->drupalCreateNode($settings);
-
-    $result = $this->servicesPost($this->endpoint->path . '/file/nodeFiles', array('nid' => $node->nid));
-    $this->assertTrue(isset($result['body'][$testfile1['fid']]) && isset($result['body'][$testfile2['fid']]) && !isset($result['body'][$testfile3['fid']]),
-      t('Attached files listed.'), 'FileResource: nodeFiles');
-  }
-
-  /**
+    /**
    * Emulate uploaded file.
    *
    * Copy file from simpletest file samples and create record in files table.

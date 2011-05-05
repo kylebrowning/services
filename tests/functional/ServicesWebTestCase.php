@@ -187,6 +187,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
         ),
+        'relationships' => array(
+          'nodefiles' => array(
+            'enabled' => 1,
+          )  
+        ),
       ),
       'system' => array(
         'alias' => '',
@@ -318,11 +323,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
           'delete' => array(
-            'enabled' => 1,
-          ),
-        ),
-        'actions' => array(
-          'nodeFiles' => array(
             'enabled' => 1,
           ),
         ),

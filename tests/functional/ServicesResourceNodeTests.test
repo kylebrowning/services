@@ -29,7 +29,8 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'services',
       'rest_server',
       'services_sessauth',
-      'inputstream'
+      'inputstream',
+      'upload'
     );
     // Set up endpoint.
     $this->endpoint =  $this->saveNewEndpoint();
@@ -201,7 +202,45 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $terms_number = db_result(db_query('SELECT COUNT(*) result FROM {term_node} r INNER JOIN {node} n ON n.vid = r.vid WHERE n.nid = %d', $response['body']['nid']));
     $this->assertTrue($terms_number == 2, t('Node with two terms was successfully created.'), 'NodeResource: Create');
   }
+  /**
+   * Test nodeFiles action.
+   */
+  public function testNodeFiles() {
+    $this->privileged_user = $this->drupalCreateUser(array(
+      'get own binary files',
+      'save file information',
+      'administer services',
+      'administer site configuration',
+      'upload files',
+    ));
+    $this->drupalLogin($this->privileged_user);
+    $testfiles = $this->drupalGetTestFiles('text');
+    $testfile1 = $this->uploadTestFile($testfiles);
+    $testfile2 = $this->uploadTestFile($testfiles);
+    $testfile3 = $this->uploadTestFile($testfiles);
 
+    // Needed for upload module to create new records in {upload} table.
+    // @see upload_save()
+    $testfile1['new'] = TRUE;
+    $testfile2['new'] = TRUE;
+    $testfile3['new'] = TRUE;
+    // First two files are listed. Third is not listed.
+    $testfile1['list'] = 1;
+    $testfile2['list'] = 1;
+    $testfile3['list'] = 0;
+
+    // Create node with three files.
+    $settings = array('files' => array(
+      $testfile1['fid'] => (object)$testfile1,
+      $testfile2['fid'] => (object)$testfile2,
+      $testfile3['fid'] => (object)$testfile3,
+    ));
+    $node = $this->drupalCreateNode($settings);
+
+    $result = $this->servicesPost($this->endpoint->path . '/node/nodeFiles', array('nid' => $node->nid));
+    $this->assertTrue(isset($result['body'][$testfile1['fid']]) && isset($result['body'][$testfile2['fid']]) && !isset($result['body'][$testfile3['fid']]),
+      t('Attached files listed.'), 'FileResource: nodeFiles');
+  }
   /**
   * testing node_resource Update
   */
@@ -298,5 +337,37 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $responseArray = $this->servicesDelete($this->endpoint->path . '/node/' . $node->nid, $data);
 
     $this->assertFalse($responseArray['code'] == 200, t('Node was deleted. It shoudlnt have been because it doesnt exist'), 'NodeResource: Deleted');
+  }
+    /**
+   * Emulate uploaded file.
+   *
+   * Copy file from simpletest file samples and create record in files table.
+   *
+   * @return array
+   *  File data.
+   */
+  public function uploadTestFile($file = NULL) {
+    if (empty($file)) {
+      $file = next($this->testfiles);
+    }
+    $testfile =  array(
+      'fid' => NULL,
+      'uid' => $this->privileged_user->uid,
+      'filename' => trim(basename($file->filename), '.'),
+      'filepath' => $file->filename,
+      'filemime' => file_get_mimetype($file->filename),
+      'filesize' => filesize($file->filename),
+      'status' => FILE_STATUS_PERMANENT,
+      'timestamp' => time(),
+    );
+    $source = $testfile['filepath'];
+    $destination = file_directory_path() . '/' . $testfile['filepath'];
+    $dirname = dirname($destination);
+    file_check_directory($dirname, FILE_CREATE_DIRECTORY);
+    file_copy($source, $destination);
+
+    drupal_write_record('files', $testfile);
+
+    return $testfile;
   }
 }
