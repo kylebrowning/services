@@ -190,7 +190,10 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         'relationships' => array(
           'nodefiles' => array(
             'enabled' => 1,
-          )  
+          ),
+          'comments' => array(
+            'enabled' => 1,
+          ),
         ),
       ),
       'system' => array(
@@ -302,9 +305,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           ),
         ),
         'actions' => array(
-          'loadNodeComments' => array(
-            'enabled' => 1,
-          ),
           'countAll' => array(
             'enabled' => 1,
           ),

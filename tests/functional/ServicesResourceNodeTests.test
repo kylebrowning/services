@@ -30,7 +30,8 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'rest_server',
       'services_sessauth',
       'inputstream',
-      'upload'
+      'upload',
+      'comment'
     );
     // Set up endpoint.
     $this->endpoint =  $this->saveNewEndpoint();
@@ -202,6 +203,67 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $terms_number = db_result(db_query('SELECT COUNT(*) result FROM {term_node} r INNER JOIN {node} n ON n.vid = r.vid WHERE n.nid = %d', $response['body']['nid']));
     $this->assertTrue($terms_number == 2, t('Node with two terms was successfully created.'), 'NodeResource: Create');
   }
+
+  /**
+   * Test loadNodeComments method.
+   */
+  function testCommentLoadNodeComments() {
+    $path = $this->endpoint->path;
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+
+    // Create node with commenting.
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
+    $node = $this->drupalCreateNode($settings);
+
+    $nid = $node->nid;
+    $this->pass(print_r($node, 1));
+    // Generate 15 comments for node.
+    $comments = array();
+    for ($i = 0; $i < 15; $i++) {
+      $comment = array(
+        'uid' => $this->privilegedUser->uid,
+        'nid' => $nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+
+      $cid = comment_save((array) $comment);
+
+      $comments[] = _comment_load($cid);
+    }
+    $comments = array_reverse($comments);
+
+    // Generate some comments for another node.
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
+    $node2 = $this->drupalCreateNode($settings);
+    for ($i = 0; $i < 5; $i++) {
+      $comment = array(
+        'uid' => $this->privilegedUser->uid,
+        'nid' => $node2->nid,
+        'subject' => $this->randomString(),
+        'comment' => $this->randomString(),
+      );
+
+      $cid = comment_save((array) $comment);
+    }
+
+
+    // Load all comments of the first node.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments');
+    $this->pass($response);
+    $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'NodeResource: comments');
+
+    // Load only 5 comments of the first node.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5));
+    $this->assertEqual(array_slice($comments, 0, 5), array_slice($response['body'], 0, 5), t('Received last 5 comments.'), 'NodeResource: comments');
+    // Load only 5 comments of the first node starting from fifth comment.
+    $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5, 'offset' => 5));
+    $this->assertEqual(array_slice($comments, 5, 5), array_merge(array(),$response['body']), t('Received 5 comments starting from fifth comment.'), 'NodeResource: comments');
+  }
+
   /**
    * Test nodeFiles action.
    */

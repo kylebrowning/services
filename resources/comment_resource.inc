@@ -86,38 +86,6 @@ function _comment_resource_definition() {
         ),
       ),
       'actions' => array(
-        'loadNodeComments' => array(
-          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
-          'help'   => t('This method returns the number of new comments on a given node since a given timestamp.'),
-          'access callback' => '_comment_resource_access',
-          'access arguments' => array('view'),
-          'callback' => '_comment_resource_load_node_comments',
-          'args'     => array(
-            array(
-              'name'         => 'nid',
-              'type'         => 'int',
-              'description'  => t('The node id to load comments for.'),
-              'source'       => 'data',
-              'optional'     => FALSE,
-            ),
-            array(
-              'name'         => 'count',
-              'type'         => 'int',
-              'description'  => t('Number of comments to load.'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> 10,
-            ),
-            array(
-              'name'         => 'start',
-              'type'         => 'int',
-              'description'  => t('If count is set to non-zero value, you can pass also non-zero value for start. For example to get comments from 5 to 15, pass count=10 and start=5.'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'=> 0,
-            ),
-          ),
-        ),
         'countAll' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/comment_resource'),
           'help'   => t('This method returns the number of comments on a given node.'),
@@ -272,31 +240,6 @@ function _comment_resource_delete($cid) {
   // Clear the cache so an anonymous user sees that his comment was deleted.
   cache_clear_all();
   return TRUE;
-}
-
-/**
- * Returns the comments of a specified node.
- *
- * @param $nid
- *   Unique identifier for the node.
- * @param $count
- *   Number of comments to return.
- * @param $start
- *   Which comment to start with. if present, $start and $count are used together
- *   to create a LIMIT clause for selecting comments. This could be used to do paging.
- * @return
- *   An array of comment objects.
- */
-function _comment_resource_load_node_comments($nid, $count, $start) {
-  $comments = array();
-  $limit = ((int)$count > 0 ? ' LIMIT ' . (int)$start . ', ' . (int)$count . ' ' : '');
-
-  $result = db_query("SELECT cid FROM {comments} WHERE nid = %d AND status = %d ORDER BY thread DESC" . $limit, $nid, COMMENT_PUBLISHED);
-  while ($comment = db_fetch_array($result)) {
-    $comments[] = _comment_load($comment['cid']);
-  }
-
-  return $comments;
 }
 
 /**
