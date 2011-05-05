@@ -249,15 +249,17 @@ class RESTServer {
   }
 
   private function parseRequest($method, $controller) {
+    if (($method == 'POST' || $method == 'PUT') &&  isset($_SERVER['CONTENT_TYPE'])) {
+      $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+    }
     switch ($method) {
       case 'POST':
-        if ($_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded') {
+        if (isset($type['value']) && $type['value'] == 'application/x-www-form-urlencoded') {
           return $_POST;
         }
       case 'PUT':
         // Get the mime type for the request, default to form-urlencoded
-        if (isset($_SERVER['CONTENT_TYPE'])) {
-          $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        if (isset($type['value'])) {
           $mime = $type['value'];
         }
         else {
