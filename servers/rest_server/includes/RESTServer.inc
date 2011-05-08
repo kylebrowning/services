@@ -224,7 +224,7 @@ class RESTServer {
               }
           }
           // Convert to array if argument expected to be array.
-          if ($info['type'] == 'array' && isset($arguments[$i])) {
+          if (isset($info['type']) && $info['type'] == 'array' && isset($arguments[$i])) {
             $arguments[$i] = (array)$arguments[$i];
           }
         }
