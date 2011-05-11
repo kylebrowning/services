@@ -140,7 +140,7 @@ function services_edit_endpoint_resources($endpoint) {
  * @param object $endpoint
  * @return Form
  */
-function services_edit_form_endpoint_resources($form, &$form_state) {
+function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
   module_load_include('resource_build.inc', 'services');
 
   $form = array();
@@ -148,7 +148,6 @@ function services_edit_form_endpoint_resources($form, &$form_state) {
   drupal_add_js('misc/tableselect.js');
   drupal_add_js(drupal_get_path('module', 'services') . '/js/services.admin.js');
   drupal_add_css(drupal_get_path('module', 'services') . '/css/services.admin.css');
-  $endpoint = $form_state;
   $form['endpoint_object'] = array(
     '#type'  => 'value',
     '#value' => $endpoint,
@@ -258,7 +257,7 @@ function services_edit_form_endpoint_resources($form, &$form_state) {
  * @param array $form_state
  * @return void
  */
-function services_edit_form_endpoint_resources_validate($form, $form_state) {
+function services_edit_form_endpoint_resources_validate($form, &$form_state) {
   $input = $form_state['values']['endpoint_object'];
 
   // Validate aliases.
@@ -280,7 +279,7 @@ function services_edit_form_endpoint_resources_validate($form, $form_state) {
  * @param array $form_state
  * @return void
  */
-function services_edit_form_endpoint_resources_submit($form, $form_state) {
+function services_edit_form_endpoint_resources_submit($form, &$form_state) {
   $endpoint  = $form_state['values']['endpoint_object'];
 
   $existing_resources = _services_build_resources();

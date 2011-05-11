@@ -182,6 +182,9 @@ function services_ctools_export_ui_form_validate(&$form, &$form_state) {
  * Submit handler for endpoint.
  */
 function services_ctools_export_ui_form_submit(&$form, &$form_state) {
+  
+  variable_set('services_use_content_permissions', $form_state['values']['services_use_content_permissions']);
+
   $endpoint = $form_state['values']['endpoint_object'];
 
   $endpoint->name   = $form_state['values']['name'];
