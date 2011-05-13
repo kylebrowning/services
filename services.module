@@ -405,7 +405,7 @@ function services_resources_as_procedures($resource) {
  *
  * @param $resource
  *   The resource being converted (node, user, etc.)
- * @param $name
+ * @param $name 
  *   The method name (retrieve, create, etc.)
  * @param $controller
  *   Associative array defining the method's properties and callbacks.
@@ -450,7 +450,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
 
   // Run through db_rewrite_sql to make sure proper access checks are applied.
-  $sql = "SELECT $fields FROM {$table} $where ORDER BY $order";
+  $sql = "SELECT $fields FROM {{$table}} $where ORDER BY $order";
   $sql = db_rewrite_sql($sql);
   $result = db_query_range($sql, $parameters, $page * 20, 20);
   return $result;
