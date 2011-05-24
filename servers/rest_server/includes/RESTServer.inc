@@ -149,7 +149,7 @@ class RESTServer {
       $result = services_controller_execute($controller, $arguments);
     } catch (ServicesException $e) {
       $errors = $this->handleException($e);
-      drupal_alter('rest_server_exectue_errors', $errors, $controller, $arguments);
+      drupal_alter('rest_server_execute_errors', $errors, $controller, $arguments);
       $result = $errors;
     }
     $formatter = $formats[$response_format];
