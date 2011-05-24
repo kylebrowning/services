@@ -273,7 +273,7 @@ function _user_resource_update($uid, $account) {
   // unused by the form just gets ignored. We handle roles and
   // password separately.
   foreach ($account as $key => $value) {
-    if ($key != 'pass' || $key != 'roles') {
+    if ($key != 'pass' && $key != 'roles') {
       $form_state['values'][$key] = $value;
     }
   }
