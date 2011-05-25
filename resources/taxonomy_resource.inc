@@ -559,7 +559,7 @@ function taxonomy_service_select_nodes($tids, $fields, $operator, $depth, $pager
 }
 
 function _taxonomy_resource_access($op = 'view', $args = array()) {
-  if (user_access('administer taxonomy')) {
+  if (user_access('administer taxonomy') || user_access('get taxonomy tree')) {
     return TRUE;
   }
   // TODO - check perms of user to return ability to interact with terms / vocabulary

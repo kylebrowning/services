@@ -35,6 +35,7 @@ function services_help($path, $arg) {
 function services_perm() {
   return array(
     'administer services',
+    'get taxonomy tree',
     // File resource permissions
     'get any binary files',
     'get own binary files',
