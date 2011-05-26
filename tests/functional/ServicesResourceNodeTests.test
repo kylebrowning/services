@@ -114,7 +114,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $path = $this->endpoint->path;
     $this->privileged_user = $this->drupalCreateUser();
     $this->drupalLogin($this->privileged_user);
-    
+
     // Create node with commenting.
     $node = $this->drupalCreateNode();
     $nid = $node->nid;
@@ -133,7 +133,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
       $comment = (object)$this->getCommentValues($node2->nid);
       comment_save($comment);
     }
-  
+
     // Load all comments of the first node.
     $response = $this->servicesGet($path . '/node/'. $nid .'/comments');
     $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'NodeResource: comments');
@@ -311,5 +311,140 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $responseArray = $this->servicesDelete($this->endpoint->path . '/node/' . $node->nid, $data);
 
     $this->assertFalse($responseArray['code'] == 200, t('Node was deleted. It shoudlnt have been because it doesnt exist'), 'NodeResource: Deleted');
+  }
+}
+
+/**
+ * Test create node with taxonomy terms attached.
+ */
+class ServicesResourceNodeTaxonomytests extends ServicesResourceNodetests {
+  // Class variables
+  protected $admin_user = NULL ;
+  // Endpoint details.
+  protected $endpoint = NULL;
+  // Field instance.
+  protected $instance = NULL;
+
+  /**
+   * Implementation of getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Resource Node - taxonomy'),
+      'description' => t('Test the resource Node taxonomy methods and actions.'),
+      'group' => t('Services'),
+    );
+  }
+
+  /**
+   * Implementation of setUp().
+   */
+  public function setUp() {
+    parent::setUp(
+      'ctools',
+      'services',
+      'rest_server',
+      'taxonomy'
+    );
+
+    $this->admin_user = $this->drupalCreateUser(array('administer taxonomy', 'bypass node access', 'administer services'));
+    $this->drupalLogin($this->admin_user);
+    $this->vocabulary = $this->createVocabulary();
+
+    $field = array(
+      'field_name' => 'taxonomy_' . $this->vocabulary->machine_name,
+      'type' => 'taxonomy_term_reference',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $this->vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($field);
+
+    $this->instance = array(
+      'field_name' => 'taxonomy_' . $this->vocabulary->machine_name,
+      'bundle' => 'article',
+      'entity_type' => 'node',
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'taxonomy_term_reference_link',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+  }
+
+  /**
+   * Test that hook_node_$op implementations work correctly.
+   *
+   * Save & edit a node and assert that taxonomy terms are saved/loaded properly.
+   */
+  function testServicesTaxonomyNode() {
+    // Create two taxonomy terms.
+    $term1 = $this->createTerm($this->vocabulary);
+    $term2 = $this->createTerm($this->vocabulary);
+    $field_name = $this->instance['field_name'];
+
+    // Post an article.
+    $edit = array();
+    $langcode = LANGUAGE_NONE;
+    $edit['title'] = $this->randomName();
+    $edit["body[$langcode][0][value]"] = $this->randomName();
+    $edit[$field_name][$langcode][0] = $term1->tid;
+    $edit['type'] = 'page';
+    $edit['name'] = $this->admin_user->name;
+    $edit['language'] = LANGUAGE_NONE;
+    $responseArray = $this->servicesPost($this->endpoint->path . '/node', array('node' => $edit));
+
+    $nodeResourceCreateReturn = $responseArray['body'];
+    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create');
+    $newNode = node_load($nodeResourceCreateReturn['nid']);
+    $this->assertTrue($newNode->{$field_name}[$langcode][0]['tid'] =  $term1->tid, t('Term was the same'), 'Taxonomy: Create');
+
+    // Edit the node with a different term.
+    $edit[$field_name][$langcode][0] = $term2->tid;
+    $responseArray = $this->servicesPost($this->endpoint->path . '/node', array('node' => $edit));
+    $nodeResourceCreateReturn = $responseArray['body'];
+    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create');
+    $newNode = node_load($nodeResourceCreateReturn['nid']);
+    $this->assertTrue($newNode->{$field_name}[$langcode][0]['tid'] =  $term2->tid, t('Term was the same'), 'Taxonomy: updated');
+  }
+
+  /**
+   * Returns a new vocabulary with random properties.
+   */
+  function createVocabulary() {
+    // Create a vocabulary.
+    $vocabulary = new stdClass();
+    $vocabulary->name = $this->randomName();
+    $vocabulary->description = $this->randomName();
+    $vocabulary->machine_name = drupal_strtolower($this->randomName());
+    $vocabulary->help = '';
+    $vocabulary->nodes = array('article' => 'article');
+    $vocabulary->weight = mt_rand(0, 10);
+    taxonomy_vocabulary_save($vocabulary);
+    return $vocabulary;
+  }
+
+  /**
+   * Returns a new term with random properties in vocabulary $vid.
+   */
+  function createTerm($vocabulary) {
+    $term = new stdClass();
+    $term->name = $this->randomName();
+    $term->description = $this->randomName();
+    // Use the first available text format.
+    $term->format = db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField();
+    $term->vid = $vocabulary->vid;
+    taxonomy_term_save($term);
+    return $term;
   }
 }
