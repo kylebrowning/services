@@ -1,7 +1,7 @@
 <?php
 
 function _user_resource_definition() {
-  return array(
+  $definition = array(
     'user' => array(
       'retrieve' => array(
         'help' => 'Retrieves a user',
@@ -143,26 +143,15 @@ function _user_resource_definition() {
           'callback' => '_user_resource_logout',
           'access callback' => 'services_access_menu',
         ),
-        'register' => array(
-          'help' => 'Register a user',
-          'callback' => '_user_resource_create',
-          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-          'access callback' => '_user_resource_access',
-          'access arguments' => array('register'),
-          'access arguments append' => FALSE,
-          'args' => array(
-            array(
-              'name' => 'account',
-              'type' => 'array',
-              'description' => 'The user object',
-              'source' => 'data',
-              'optional' => FALSE,
-            ),
-          ),
-        ),
       ),
     ),
   );
+
+  $definition['user']['actions']['register'] = array_merge($definition['user']['create'], array(
+    'help' => 'Register a user',
+  ));
+
+  return $definition;
 }
 
 /**
@@ -223,21 +212,12 @@ function _user_resource_create($account) {
   );
   $form_state['values']['op'] = t('Create new account');
 
-  // reset to anonymous user
-  global $user;
-  $orig_user = $user;
-  session_save_session(FALSE);
-  $user = user_load(array('uid' => 0));
-
   // execute the register form
   drupal_form_submit('user_register_form', $form_state);
-
   // find and store the new user into the form_state
-  $form_state['user'] = user_load(array('name' => $form_state['values']['name']));
-
-  // revert back to the original user.
-  $user = $orig_user;
-  session_save_session(TRUE);
+  if(isset($form_state['values']['uid'])) {
+    $form_state['user'] = user_load($form_state['values']['uid']); 
+  }
 
   // Error if needed.
   if ($errors = form_get_errors()) {
@@ -458,16 +438,18 @@ function _user_resource_access($op = 'view', $args = array()) {
       }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
-      return user_access('administer users');
+    case 'register':
+      if (!$user->uid && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_ADMINISTRATORS_ONLY) {
+        return TRUE;
+      }
+      else {
+        return user_access('administer users');
+      }
     case 'delete':
       $account = user_load($args[0]);
       if (!$account->uid) {
         return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
       }
       return user_access('administer users');
-    case 'register':
-      if (!$user->uid && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) != USER_REGISTER_ADMINISTRATORS_ONLY) {
-        return TRUE;
-      }
   }
 }
