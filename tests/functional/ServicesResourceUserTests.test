@@ -87,7 +87,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $user['status'] = 1;
 
     $response = $this->servicesPost($this->endpoint->path . '/user/register', array('account' => $user));
-    
+
     //Verify logged in users cannnot create accounts
     $code = $response['code'];
     $this->assertEqual($code, '401', t('Verify permission denied 401'), 'UserResource: Create');
@@ -130,11 +130,13 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     // Update mail of the user.
     $updated_account = array(
       'mail' => $this->randomName() . '@example.com',
+      'pass' => $this->randomString(),
     );
     $response = $this->servicesPut($this->endpoint->path . '/user/' . $account->uid, array('data' => $updated_account));
 
     $user_load = user_load($account->uid);
     $this->assertEqual($updated_account['mail'], $user_load->mail, t('User details have been updated successfully'), 'UserResource: Update');
+    $this->assertTrue(user_check_password($updated_account['pass'], $user_load), t('Password check succeeds.'));
   }
 
   /**
