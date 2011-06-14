@@ -17,4 +17,4 @@ files[] = tests/functional/ServicesXMLRPCTests.test
 files[] = tests/unit/TestServicesModule.test
 files[] = tests/services.test
 
-dependencies[] = ctools
+dependencies[] = ctools (>=7.x-1.0-beta1)
