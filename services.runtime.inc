@@ -234,6 +234,13 @@ function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$
  *  Returns the formatted resource uri, or NULL if no formatter has been registered.
  */
 function services_resource_uri($path) {
+  $endpoint_name = services_get_server_info('endpoint');
+  $endpoint = services_endpoint_load($endpoint_name);
+  if (isset($endpoint) && !empty($endpoint)) {
+    if (is_array($endpoint->resources) && is_array($path) && isset($path[0])) {
+      $path[0] = $endpoint->resources[$path[0]]['alias'];
+    }
+  }
   $formatter = services_get_server_info('resource_uri_formatter');
   if ($formatter) {
     return call_user_func($formatter, $path);
