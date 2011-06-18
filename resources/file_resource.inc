@@ -237,7 +237,7 @@ function _file_resource_create($file) {
  * @return
  *   The file
  */
-function _file_resource_retrieve($fid, $file_contents =  TRUE) {
+function _file_resource_retrieve($fid, $file_contents) {
   if ($file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid))) {
     if ($file_contents) {
       $binaryfile = fopen($file['filepath'], 'rb');
@@ -247,6 +247,7 @@ function _file_resource_retrieve($fid, $file_contents =  TRUE) {
       $file['file'] = base64_encode(fread($binaryfile, filesize($file['filepath'])));
       fclose($binaryfile);
     }
+    $file['uri'] = services_resource_uri(array('file', $file['fid']));
     return $file;
   }
   return services_error(t('There is no file with the given ID.'));

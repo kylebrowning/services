@@ -105,28 +105,28 @@ function _node_resource_definition() {
         'access arguments' => array('access content'),
       ),
       'relationships' => array(
-        'nodeFiles' => array(
-          'help'   => t('This method returns the files on a given node.'),
+        'files' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'help'   => t('This method returns files associated with a node.'),
           'access callback' => '_node_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_node_resource_load_node_files',
           'args'     => array(
             array(
-              'name'         => 'nid',
-              'type'         => 'int',
-              'description'  => t('The node id to load files for.'),
-              'source'       => 'data',
-              'optional'     => FALSE,
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node whose files we are getting',
             ),
             array(
-              'name'         => 'file_contents',
-              'type'         => 'int',
+              'name' => 'file_contents',
+              'type' => 'int',
               'description'  => t('To return file contents or not.'),
-              'source'       => 'data',
-              'optional'     => FALSE,
-              'default value' => TRUE,
+              'source' => array('path' => 2),
+              'optional' => TRUE,
+              'default value' => false,
             ),
           ),
         ),
@@ -394,7 +394,7 @@ function _node_resource_index($page, $fields, $parameters) {
  * @return
  *   Array. A list of all files from the given node
  */
-function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
+function _node_resource_load_node_files($nid, $include_file_contents) {
   module_load_include('inc', 'services', 'resources/file_resource');
   $node = node_load($nid);
   if (!isset($node->files)) {
@@ -407,21 +407,7 @@ function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
     if (!$file->list) {
       continue;
     }
-    $return[$file->fid] = array(
-      'filename'  => $file->filename,
-      'uid'       => $file->uid,
-      'filemime'  => $file->filemime,
-      'filesize'  => $file->filesize,
-      'status'    => $file->status,
-      'timestamp' => $file->timestamp
-    );
-    // If to add content of the file.
-    if ($file_include_contents) {
-      $filepath = file_create_path($file->filepath);
-      $binaryfile = fopen($filepath, 'rb');
-      $return[$file->fid]['file'] = base64_encode(fread($binaryfile, filesize($filepath)));
-      fclose($binaryfile);
-    }
+    $return[$file->fid] = _file_resource_retrieve($file->fid, $include_file_contents);
 
   }
   return $return;
