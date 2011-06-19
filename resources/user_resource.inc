@@ -255,6 +255,7 @@ function _user_resource_create($account) {
  */
 function _user_resource_update($uid, $account) {
   $account['uid'] = $uid;
+  $user = user_load($uid);
 
   // Load the required includes for saving profile information
   // with drupal_execute().
@@ -287,8 +288,14 @@ function _user_resource_update($uid, $account) {
   $form_state['values']['op'] = 'Save';
   $form_state['values']['_category'] = $category;
   $form_state['values']['_account'] = (object)$account;
+  if (isset($account['pass'])) {
+    $form_state['values']['pass'] = array(
+      'pass1' => $account['pass'],
+      'pass2' => $account['pass'],
+    );
+  }
 
-  $ret = drupal_execute('user_profile_form', $form_state, (object)$account, $category);
+  $ret = drupal_execute('user_profile_form', $form_state, $user, $category);
 
   // Error if needed.
   if ($errors = form_get_errors()) {
