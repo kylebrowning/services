@@ -237,8 +237,8 @@ function services_resource_uri($path) {
   $endpoint_name = services_get_server_info('endpoint');
   $endpoint = services_endpoint_load($endpoint_name);
   if (isset($endpoint) && !empty($endpoint)) {
-    if (is_array($endpoint->resources) && is_array($path) && isset($path[0])) {
-      $path[0] = $endpoint->resources[$path[0]]['alias'];
+    if (is_array($endpoint->resources) && is_array($path) && isset($path[0]) && isset($endpoint->resources[$path[0]]['alias'])) {
+        $path[0] = $endpoint->resources[$path[0]]['alias'];
     }
   }
   $formatter = services_get_server_info('resource_uri_formatter');
