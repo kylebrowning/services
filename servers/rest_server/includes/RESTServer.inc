@@ -219,9 +219,9 @@ class RESTServer {
             }
           }
           else {
-              if (isset($sources[$info['source']][$info['name']])) {
-                $arguments[$i] = $sources[$info['source']][$info['name']];
-              }
+            if (isset($sources[$info['source']])) {
+              $arguments[$i] = $sources[$info['source']];
+            }
           }
           // Convert to array if argument expected to be array.
           if (isset($info['type']) && $info['type'] == 'array' && isset($arguments[$i])) {

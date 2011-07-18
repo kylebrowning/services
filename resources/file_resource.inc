@@ -116,6 +116,11 @@ function _file_resource_definition() {
  *   Unique identifier for the file (fid) or errors if there was a problem.
  */
 function _file_resource_create($file) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($file['file']) && count($file) == 1) {
+    $file = $file['file'];
+  }
+
   global $user;
   $file = (object) $file;
 
@@ -238,6 +243,11 @@ function _file_resource_index($page, $fields, $parameters) {
  * Access check callback for file controllers.
  */
 function _file_resource_access($op = 'view', $args = array()) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($args[0]['file']) && count($args[0]) == 1) {
+    $args[0] = $args[0]['file'];
+  }
+
   global $user;
 
   if ($op=='create') {

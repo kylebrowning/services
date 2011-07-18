@@ -107,6 +107,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $responseArray = $this->servicesGet($this->endpoint->path . '/node/99');
     $this->assertTrue($responseArray['code'] == '404', t('Successfully was rejected to non existent node'), 'NodeResource: Retrieve');
   }
+
   /**
    * Test loadNodeComments method.
    */
@@ -145,10 +146,41 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5, 'offset' => 5));
     $this->assertEqual(array_slice($comments, 5, 5), array_merge(array(),$response['body']), t('Received 5 comments starting from fifth comment.'), 'NodeResource: comments');
   }
+
   /**
-   * testing node_resource Create
+   * Testing node_resource Create.
    */
   public function testEndpointResourceNodeCreate() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+      'bypass node access',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $node = array(
+      'title' => 'testing',
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomString()))),
+      'type' => 'page',
+      'name' => $this->privilegedUser->name,
+      'language' => LANGUAGE_NONE,
+    );
+
+    $responseArray = $this->servicesPost($this->endpoint->path . '/node', $node);
+    $nodeResourceCreateReturn = $responseArray['body'];
+
+    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create');
+    $newNode = node_load($nodeResourceCreateReturn['nid']);
+    $this->assertTrue($newNode->title = $node['title'], t('Title was the same'), 'NodeResource: Create');
+    $this->assertTrue($newNode->body = $node['body'], t('Body was the same'), 'NodeResource: Create');
+  }
+
+  /**
+   * Testing node_resource Create (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  public function testEndpointResourceNodeCreateLegacy() {
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
@@ -166,10 +198,10 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $responseArray = $this->servicesPost($this->endpoint->path . '/node', array('node' => $node));
     $nodeResourceCreateReturn = $responseArray['body'];
 
-    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create');
+    $this->assertTrue(isset($nodeResourceCreateReturn['nid']), t('Node was successfully created'), 'NodeResource: Create (Legacy)');
     $newNode = node_load($nodeResourceCreateReturn['nid']);
-    $this->assertTrue($newNode->title = $node['title'], t('Title was the same'), 'NodeResource: Create');
-    $this->assertTrue($newNode->body = $node['body'], t('Body was the same'), 'NodeResource: Create');
+    $this->assertTrue($newNode->title = $node['title'], t('Title was the same'), 'NodeResource: Create (Legacy)');
+    $this->assertTrue($newNode->body = $node['body'], t('Body was the same'), 'NodeResource: Create (Legacy)');
   }
 
   /**
@@ -220,9 +252,36 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
   }
 
   /**
-  * testing node_resource Update
+  * Testing node_resource Update.
   */
   public function testEndpointResourceNodeUpdate() {
+    // Create and log in our privileged user.
+    $this->privilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+      'bypass node access',
+    ));
+    $this->drupalLogin($this->privilegedUser);
+    $node = $this->drupalCreateNode();
+
+    $node_update = (array) $node;
+    $node_update['title'] = $this->randomName();
+    $node_update['body'][LANGUAGE_NONE][0]['value'] = $this->randomName();
+
+    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update);
+    // Load node not from cache.
+    $nodeAfterUpdate = node_load($responseArray['body']['nid'], NULL, TRUE);
+    $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
+    $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update');
+    $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
+  }
+
+  /**
+   * Testing node_resource Update (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  public function testEndpointResourceNodeUpdateLegacy() {
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
@@ -238,9 +297,9 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, array('node' => $node_update));
     // Load node not from cache.
     $nodeAfterUpdate = node_load($responseArray['body']['nid'], NULL, TRUE);
-    $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
-    $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update');
-    $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
+    $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated (legacy)');
+    $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update (legacy)');
+    $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update (legacy)');
   }
 
   /**

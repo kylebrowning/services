@@ -104,12 +104,36 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     );
 
     // Create file with call.
-    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $result = $this->servicesPost($this->endpoint->path . '/file', $file);
     $this->assertEqual($result['code'], 200, t('File created.'), 'FileResource: Create');
 
     // Load file and assert that it exists.
     $file_load = file_load($result['body']['fid']);
     $this->assertTrue(is_file($file_load->uri), t('New file saved to disk.'), 'FileResource: Create');
+  }
+
+  /**
+   * Test create method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  public function testResourceFileCreateLegacy() {
+    // Create file argument with data.
+    $file = array(
+      'filesize' => filesize($this->testfile->uri),
+      'filename' => $this->testfile->filename,
+      'file' => base64_encode(file_get_contents($this->testfile->uri)),
+      'uid' => $this->privileged_user->uid,
+    );
+
+    // Create file with call.
+    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $this->assertEqual($result['code'], 200, t('File created.'), 'FileResource: Create (Legacy)');
+
+    // Load file and assert that it exists.
+    $file_load = file_load($result['body']['fid']);
+    $this->assertTrue(is_file($file_load->uri), t('New file saved to disk.'), 'FileResource: Create (Legacy)');
   }
 
   /**

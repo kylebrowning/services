@@ -131,7 +131,7 @@ function _comment_resource_definition() {
               'name'         => 'nid',
               'type'         => 'int',
               'description'  => t('The node id to count all comments.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'nid'),
               'optional'     => FALSE,
             ),
           ),
@@ -148,7 +148,7 @@ function _comment_resource_definition() {
               'name'          => 'nid',
               'type'          => 'int',
               'description'   => t('The node id to load comments for.'),
-              'source'        => 'data',
+              'source'        => array('data' => 'nid'),
               'optional'      => FALSE,
             ),
             array(
@@ -156,7 +156,7 @@ function _comment_resource_definition() {
               'type'          => 'int',
               'optional'      => TRUE,
               'description'   => t('Timestamp to count from (defaults to time of last user acces to node).'),
-              'source'        => 'data',
+              'source'        => array('data' => 'since'),
               'optional'      => TRUE,
               'default value' => 0,
             ),
@@ -177,6 +177,11 @@ function _comment_resource_definition() {
  */
 
 function _comment_resource_create($comment) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($comment['comment'])) {
+    $comment = $comment['comment'];
+  }
+
   $form_state['values'] = $comment;
   $form_state['values']['op'] = t('Save');
 
@@ -223,6 +228,11 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
 function _comment_resource_update($cid, $comment) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($comment['data'])) {
+    $comment = $comment['data'];
+  }
+
   $comment['cid'] = $cid;
 
   $old_comment = comment_load($cid);
@@ -337,6 +347,11 @@ function _comment_resource_count_new($nid, $since) {
  * Access check callback for comment controllers.
  */
 function _comment_resource_access($op = 'view', $args = array()) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($args[0]['comment']) || isset($args[0]['data'])) {
+    $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
+  }
+
   if ($op == 'create') {
     $comment = (object)$args[0];
   }

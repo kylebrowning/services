@@ -24,14 +24,14 @@ function _system_resource_definition() {
             array(
               'name' => 'name',
               'optional' => FALSE,
-              'source' => 'data',
+              'source' => array('data' => 'name'),
               'description' => t('The name of the variable to return.'),
               'type' => 'string',
             ),
             array(
               'name' => 'default',
               'optional' => TRUE,
-              'source' => 'data',
+              'source' => array('data' => 'default'),
               'description' => t('The default value to use if this variable has never been set.'),
               'type' => 'string',
             ),
@@ -47,14 +47,14 @@ function _system_resource_definition() {
             array(
               'name' => 'name',
               'optional' => FALSE,
-              'source' => 'data',
+              'source' => array('data' => 'name'),
               'description' => t('The name of the variable to set.'),
               'type' => 'string',
             ),
             array(
               'name' => 'value',
               'optional' => FALSE,
-              'source' => 'data',
+              'source' => array('data' => 'value'),
               'description' => t('The value to set.'),
               'type' => 'string',
             ),
@@ -70,7 +70,7 @@ function _system_resource_definition() {
             array(
               'name' => 'name',
               'optional' => FALSE,
-              'source' => 'data',
+              'source' => array('data' => 'name'),
               'description' => t('The name of the variable to delete.'),
               'type' => 'string',
             ),

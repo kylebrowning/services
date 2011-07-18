@@ -118,14 +118,14 @@ function _taxonomy_resource_definition() {
               'name'         => 'tid',
               'type'         => 'string',
               'description'  => t('The vocabulary ids to retrieve, separated by comma.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'tid'),
               'optional'     => FALSE,
             ),
             array(
               'name'         => 'pager',
               'type'         => 'int',
               'description'  => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
-              'source'       => 'data',
+              'source'       => array('data' => 'pager'),
               'optional'     => TRUE,
               'default value'=> TRUE,
             ),
@@ -133,7 +133,7 @@ function _taxonomy_resource_definition() {
               'name'         => 'limit',
               'type'         => 'int',
               'description'  => t('Maximum number of nodes to find.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'limit'),
               'optional'     => TRUE,
               'default value'=> FALSE,
             ),
@@ -141,7 +141,7 @@ function _taxonomy_resource_definition() {
               'name'         => 'order',
               'type'         => 'int',
               'description'  => t('The order clause for the query that retrieve the nodes.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'order'),
               'optional'     => TRUE,
               'default value'=> array('t.sticky' => 'DESC', 't.created' => 'DESC'),
             ),
@@ -255,14 +255,14 @@ function _taxonomy_resource_definition() {
               'name'         => 'vid',
               'type'         => 'int',
               'description'  => t('The vocabulary id to retrieve.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'vid'),
               'optional'     => FALSE,
             ),
             array(
               'name'         => 'parent',
               'type'         => 'int',
               'description'  => t('The term ID under which to generate the tree. If 0, generate the tree for the entire vocabulary.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'parent'),
               'default value' => 0,
               'optional'     => TRUE,
             ),
@@ -270,7 +270,7 @@ function _taxonomy_resource_definition() {
               'name'         => 'maxdepth',
               'type'         => 'int',
               'description'  => t('The number of levels of the tree to return. Leave NULL to return all levels.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'maxdepth'),
               'default value' => NULL,
               'optional'     => TRUE,
             ),
@@ -306,6 +306,11 @@ function _taxonomy_term_resource_retrieve($tid) {
  * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_create($term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+
   $term = (object)$term;
   return taxonomy_term_save($term);
 }
@@ -323,6 +328,11 @@ function _taxonomy_term_resource_create($term) {
  * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_update($tid, $term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+
   $term = (object) $term;
   $term->tid = $tid;
   return taxonomy_term_save($term);
@@ -387,6 +397,11 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @see taxonomy_vocabulary_save()
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($vocabulary['vocabulary'])) {
+    $vocabulary = $vocabulary['vocabulary'];
+  }
+
   $vocabulary = (object) $vocabulary;
   return taxonomy_vocabulary_save($vocabulary);
 }
@@ -404,6 +419,11 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @see taxonomy_vocabulary_save()
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($vocabulary['vocabulary'])) {
+    $vocabulary = $vocabulary['vocabulary'];
+  }
+
   $vocabulary = (object) $vocabulary;
   $vocabulary->vid = $vid;
   return taxonomy_vocabulary_save($vocabulary);
@@ -472,6 +492,11 @@ function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
  *   Boolean whether or not the user has access to create or edit the term.
  */
 function _taxonomy_resource_update_access($tid, $term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+  
   $term = (object) $term;
   if (!isset($term->vid)) {
     throw new ServicesArgumentException(t('Term object needs vid property.'), 'term', 0);
@@ -488,6 +513,11 @@ function _taxonomy_resource_update_access($tid, $term) {
  *   Boolean whether or not the user has access to create or edit the term.
  */
 function _taxonomy_resource_create_access($term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+
   $term = (object) $term;
   return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
 }

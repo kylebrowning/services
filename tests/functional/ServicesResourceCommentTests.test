@@ -93,6 +93,7 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
     $responseArray = $this->servicesGet($this->endpoint->path . '/comment', array('page' => $page_count + 1));
     $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
   }
+
   /**
    * Test create comment.
    */
@@ -102,7 +103,7 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
     // Create comment.
     $comment = $this->getCommentValues($node->nid);
 
-    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', $comment);
     $commentResourceCreateReturn = $response_array['body'];
     $this->assertTrue(isset($commentResourceCreateReturn['cid']), t('Comment was successfully created'), 'CommentResource: Create');
 
@@ -129,9 +130,53 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
       'cid' => NULL,
       'pid' => 0,
     );
-    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', $comment);
 
     $this->assertTrue(strpos($response_array['status'], t('An illegal choice has been detected.')), t('User cannot post comment with full_html filter chosen.'), 'CommentResource: Create');
+  }
+
+  /**
+   * Test create comment (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  public function testCommentCreateLegacy() {
+    $node = $this->drupalCreateNode();
+
+    // Create comment.
+    $comment = $this->getCommentValues($node->nid);
+
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+    $commentResourceCreateReturn = $response_array['body'];
+    $this->assertTrue(isset($commentResourceCreateReturn['cid']), t('Comment was successfully created'), 'CommentResource: Create (Legacy)');
+
+    // Assert subject and body of comment are the same as we created.
+    $newComment = comment_load($commentResourceCreateReturn['cid']);
+    $this->assertTrue($newComment->subject == $comment['subject'], t('Subject was the same'), 'CommentResource: Create (Legacy)');
+    $this->assertTrue($newComment->comment_body[LANGUAGE_NONE][0]['value'] == $comment['comment_body'][LANGUAGE_NONE][0]['value'], t('Body was the same'), 'CommentResource: Create (Legacy)');
+
+    // Try to create comment with full_html filter that is disabled by default.
+    $comment = array(
+      'subject' => $this->randomString(),
+      'comment_body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => $this->randomString(),
+            'format' => 'full_html',
+          )
+        )
+      ),
+      'name' => $this->privileged_user->name,
+      'language' => LANGUAGE_NONE,
+      'nid' => $node->nid,
+      'uid' => $this->privileged_user->uid,
+      'cid' => NULL,
+      'pid' => 0,
+    );
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+
+    $this->assertTrue(strpos($response_array['status'], t('An illegal choice has been detected.')), t('User cannot post comment with full_html filter chosen.'), 'CommentResource: Create (Legacy)');
   }
 
   /**
@@ -166,6 +211,42 @@ class ServicesResourceCommentTests extends ServicesWebTestCase {
    * Test update method.
    */
   function testCommentUpdate() {
+    $path = $this->endpoint->path;
+
+    // Create node.
+    $node = $this->drupalCreateNode();
+
+    $comment_args = $this->getCommentValues($node->nid);
+
+    $comment = (object)$comment_args;
+
+    comment_save($comment);
+    $cid = $comment->cid;
+    $comment_args['cid'] = $cid;
+
+    $comment_update = $comment_args;
+    $comment_update['subject'] = $this->randomString();
+    $comment_update['comment_body'][LANGUAGE_NONE][0]['value'] = $this->randomString();
+
+    $response = $this->servicesPut($path . '/comment/' . $cid, $comment_update);
+
+    $comment_load = (array)comment_load($cid);
+
+    $comment_intersect = array_intersect_assoc($comment_load, $comment_update);
+
+    // Unset save_value as we don't have this key in arguments.
+    unset($comment_intersect['comment_body'][LANGUAGE_NONE][0]['safe_value']);
+
+    $this->assertEqual($comment_update, $comment_intersect, t('Comment updated properly.'), 'CommentResource: Update');
+  }
+
+  /**
+   * Test update method.
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testCommentUpdateLegacy() {
     $path = $this->endpoint->path;
 
     // Create node.

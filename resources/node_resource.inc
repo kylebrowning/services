@@ -212,6 +212,11 @@ function _node_resource_retrieve($nid) {
  * @see drupal_execute()
  */
 function _node_resource_create($node) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($node['node'])) {
+    $node = $node['node'];
+  }
+
   if (!isset($node['type'])) {
     return services_error(t('Missing node type'), 406);
   }
@@ -264,6 +269,11 @@ function _node_resource_create($node) {
  * @see drupal_execute()
  */
 function _node_resource_update($nid, $node) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($node['node'])) {
+    $node = $node['node'];
+  }
+
   $node['nid'] = $nid;
 
   $old_node = node_load($nid);
@@ -364,6 +374,11 @@ function _node_resource_index($page, $fields, $parameters) {
  * @see node_access()
  */
 function _node_resource_access($op = 'view', $args = array()) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($args[0]['node'])) {
+    $args[0] = $args[0]['node'];
+  }
+
   // Make sure we have an object or this all fails, some servers can
   // mess up the types.
   if (is_array($args[0])) {
