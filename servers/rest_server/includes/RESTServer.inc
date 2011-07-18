@@ -218,16 +218,15 @@ class RESTServer {
             }
           }
           else {
-              if (isset($sources[$info['source']][$info['name']])) {
-                $arguments[$i] = $sources[$info['source']][$info['name']];
-              }
+            if (isset($sources[$info['source']])) {
+              $arguments[$i] = $sources[$info['source']];
+            }
           }
           // Convert to array if argument expected to be array.
           if ($info['type'] == 'array' && isset($arguments[$i])) {
             $arguments[$i] = (array)$arguments[$i];
           }
         }
-
         // When argument isn't set, insert default value if provided or
         // throw a exception if the argument isn't optional.
         if (!isset($arguments[$i])) {

@@ -124,14 +124,14 @@ function _taxonomy_resource_definition() {
               'name'         => 'tids',
               'type'         => 'string',
               'description'  => t('The vocabulary ids to retrieve, separated by comma.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'tids'),
               'optional'     => FALSE,
             ),
             array(
               'name'          => 'fields',
               'type'          => 'string',
               'description'   => t('The fields to retrieve, separated by comma.'),
-              'source'        => 'data',
+              'source'        => array('data' => 'fields'),
               'optional'      => TRUE,
               'default value' => array(),
             ),
@@ -139,7 +139,7 @@ function _taxonomy_resource_definition() {
               'name'          => 'operator',
               'type'          => 'string',
               'description'   => t('How to interpret multiple IDs in the array. Can be "or" or "and".'),
-              'source'        => 'data',
+              'source'        => array('data' => 'operator'),
               'optional'      => TRUE,
               'default value' => 'or',
             ),
@@ -147,7 +147,7 @@ function _taxonomy_resource_definition() {
               'name'          => 'depth',
               'type'          => 'int',
               'description'   => t('How many levels deep to traverse the taxonomy tree. Can be a nonnegative integer or "all".'),
-              'source'        => 'data',
+              'source'        => array('data' => 'depth'),
               'optional'      => TRUE,
               'default value' => 0,
             ),
@@ -155,7 +155,7 @@ function _taxonomy_resource_definition() {
               'name'          => 'pager',
               'type'          => 'int',
               'description'   => t('Whether the nodes are to be used with a pager (the case on most Drupal pages) or not (in an XML feed, for example).'),
-              'source'        => 'data',
+              'source'        => array('data' => 'pager'),
               'optional'      => TRUE,
               'default value' => TRUE,
             ),
@@ -163,7 +163,7 @@ function _taxonomy_resource_definition() {
               'name'          => 'order',
               'type'          => 'string',
               'description'   => t('The order clause for the query that retrieve the nodes.'),
-              'source'        => 'data',
+              'source'        => array('data' => 'order'),
               'optional'      => TRUE,
               'default value' => 'n.sticky DESC, n.created DESC',
             ),
@@ -286,24 +286,24 @@ function _taxonomy_resource_definition() {
               'name'         => 'vid',
               'type'         => 'int',
               'description'  => t('The vocabulary id to retrieve.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'vid'),
               'optional'     => FALSE,
             ),
             array(
-              'name'         => 'parent',
-              'type'         => 'int',
-              'description'  => t('The term ID under which to generate the tree. If 0, generate the tree for the entire vocabulary.'),
-              'source'       => 'data',
-              'default value'      => 0,
-              'optional'     => TRUE,
+              'name'          => 'parent',
+              'type'          => 'int',
+              'description'   => t('The term ID under which to generate the tree. If 0, generate the tree for the entire vocabulary.'),
+              'source'        => array('data' => 'parent'),
+              'default value' => 0,
+              'optional'      => TRUE,
             ),
             array(
-              'name'         => 'maxdepth',
-              'type'         => 'int',
-              'description'  => t('The number of levels of the tree to return. Leave NULL to return all levels.'),
-              'source'       => 'data',
-              'optional'     => TRUE,
-              'default value'      => NULL,
+              'name'          => 'maxdepth',
+              'type'          => 'int',
+              'description'   => t('The number of levels of the tree to return. Leave NULL to return all levels.'),
+              'source'        => array('data' => 'maxdepth'),
+              'default value' => NULL,
+              'optional'      => TRUE,
             ),
           ),
         ),
@@ -403,6 +403,11 @@ function _taxonomy_term_resource_retrieve($tid) {
  * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_create($term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+
   return taxonomy_save_term($term);
 }
 
@@ -419,6 +424,11 @@ function _taxonomy_term_resource_create($term) {
  * @see taxonomy_save_term()
  */
 function _taxonomy_term_resource_update($tid, $term) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($term['term'])) {
+    $term = $term['term'];
+  }
+
   $term['tid'] = $tid;
   return _taxonomy_term_resource_create($term);
 }
@@ -482,7 +492,12 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
-  return taxonomy_save_vocabulary($vocabulary);
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($vocabulary['vocabulary'])) {
+    $vocabulary = $vocabulary['vocabulary'];
+  }
+  taxonomy_save_vocabulary($vocabulary);
+  return $vocabulary;
 }
 
 /**
@@ -498,6 +513,11 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  * @see taxonomy_save_vocabulary()
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($vocabulary['vocabulary'])) {
+    $vocabulary = $vocabulary['vocabulary'];
+  }
+
   $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);
 }

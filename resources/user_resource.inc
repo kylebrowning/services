@@ -121,14 +121,14 @@ function _user_resource_definition() {
               'name' => 'username',
               'type' => 'string',
               'description' => 'A valid username',
-              'source' => 'data',
+              'source' => array('data' => 'username'),
               'optional' => FALSE,
             ),
             array(
               'name' => 'password',
               'type' => 'string',
               'description' => 'A valid password',
-              'source' => 'data',
+              'source' => array('data' => 'password'),
               'optional' => FALSE,
             ),
           ),
@@ -211,6 +211,11 @@ function _user_resource_retrieve($uid) {
  *   The user object of the newly created user.
  */
 function _user_resource_create($account) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($account['account'])) {
+    $account = $account['account'];
+  }
+
   // Load the required includes for saving profile information
   // with drupal_execute().
   module_load_include('inc', 'user', 'user.pages');
@@ -254,6 +259,11 @@ function _user_resource_create($account) {
  *   The modified user object.
  */
 function _user_resource_update($uid, $account) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($account['data'])) {
+    $account = $account['data'];
+  }
+
   $account['uid'] = $uid;
   $user = user_load($uid);
 
@@ -425,6 +435,11 @@ function _user_resource_index($page, $fields, $parameters) {
  * Access check callback for user resource.
  */
 function _user_resource_access($op = 'view', $args = array()) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($args[0]['account']) || isset($args[0]['data'])) {
+    $args[0] = $args[0]['account'] ? $args[0]['account'] : $args[0]['data'];
+  }
+
   global $user;
   switch ($op) {
     case 'view':

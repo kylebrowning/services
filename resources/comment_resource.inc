@@ -130,7 +130,7 @@ function _comment_resource_definition() {
               'name'         => 'nid',
               'type'         => 'int',
               'description'  => t('The node id to count all comments.'),
-              'source'       => 'data',
+              'source'       => array('data' => 'nid'),
               'optional'     => FALSE,
             ),
           ),
@@ -146,15 +146,15 @@ function _comment_resource_definition() {
               'name'          => 'nid',
               'type'          => 'int',
               'description'   => t('The node id to load comments for.'),
-              'source'        => 'data',
+              'source'        => array('data' => 'nid'),
               'optional'      => FALSE,
             ),
             array(
-              'name'         => 'since',
-              'type'         => 'int',
-              'optional'     => TRUE,
-              'description'  => t('Timestamp to count from (defaults to time of last user acces to node).'),
-              'source'        => 'data',
+              'name'          => 'since',
+              'type'          => 'int',
+              'optional'      => TRUE,
+              'description'   => t('Timestamp to count from (defaults to time of last user acces to node).'),
+              'source'        => array('data' => 'since'),
               'optional'      => TRUE,
               'default value' => 0,
             ),
@@ -214,6 +214,10 @@ function _comment_resource_index($page, $fields, $parameters) {
  */
 
 function _comment_resource_create($comment) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($comment['comment']) && !isset($comment['subject'])) {
+    $comment = $comment['comment'];
+  }
 
   // Setup form_state
   $form_state = array();
@@ -265,6 +269,10 @@ function _comment_resource_retrieve($cid) {
  */
 function _comment_resource_update($cid, $comment) {
   $comment['cid'] = $cid;
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($comment['data']) && !isset($comment['subject'])) {
+    $comment = $comment['data'];
+  }
 
   $old_comment = (array) _comment_load($cid);
   if (empty($old_comment)) {
@@ -344,6 +352,11 @@ function _comment_resource_count_new($nid, $since = 0) {
  * Access check callback for comment controllers.
  */
 function _comment_resource_access($op = 'view', $args = array()) {
+  // Adds backwards compatability with regression fixed in #1083242
+  if (isset($args[0]['comment']) || isset($args[0]['data'])) {
+    $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
+  }
+
   if ($op == 'view' && !isset($args[0])) {
     return user_access('access comments');
   }

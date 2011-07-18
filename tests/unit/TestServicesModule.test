@@ -64,8 +64,8 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $message = t('services_perm should return an array') ;
     $this->assertTrue(gettype($resultArray)=='array', $message) ;
 
-    $message = t('There should be 6 permission types') ;
-    $this->assertEqual(count($resultArray), 6, $message) ;
+    $message = t('There should be 7 permission types') ;
+    $this->assertEqual(count($resultArray), 7, $message) ;
 
     $permission = 'administer services' ;
     $this->helperPermExists($resultArray, $permission) ;

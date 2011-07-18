@@ -67,7 +67,7 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
       'weight'      => 0,
     );
 
-    $response = $this->servicesPost($path . '/taxonomy_vocabulary', array('vocabulary' => $vocabulary));
+    $response = $this->servicesPost($path . '/taxonomy_vocabulary', $vocabulary);
 
     $vid = db_result(db_query('SELECT vid FROM {vocabulary} WHERE name = "%s"', $vocabulary['name']));
 
@@ -75,6 +75,36 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
     $vocabulary_intersect = array_intersect_assoc($vocabulary, $vocabulary_load);
 
     $this->assertEqual($vocabulary, $vocabulary_intersect, t('Taxonomy vocabulary created properly.'), 'TaxonomyVocabularyResource: Create');
+  }
+
+  /**
+   * Test taxonomy vocabulary create method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testVocabularyCreateLegacy() {
+    $path = $this->endpoint->path;
+
+    $vocabulary = array(
+      'name'        => $this->randomName(),
+      'description' => $this->randomString(),
+      'help'        => $this->randomString(),
+      'relations'   => 1,
+      'hierarchy'   => 1,
+      'multiple'    => 1,
+      'required'    => 0,
+      'module'      => 'services',
+      'weight'      => 0,
+    );
+
+    $response = $this->servicesPost($path . '/taxonomy_vocabulary', array('vocabulary' => $vocabulary));
+
+    $vid = db_result(db_query('SELECT vid FROM {vocabulary} WHERE name = "%s"', $vocabulary['name']));
+
+    $vocabulary_load = (array)taxonomy_vocabulary_load($vid);
+    $vocabulary_intersect = array_intersect_assoc($response['body'], $vocabulary_load);
+    $this->assertEqual($vocabulary['name'], $response['body']['name'], t('Taxonomy vocabulary created properly.'), 'TaxonomyVocabularyResource: Create (Legacy)');
   }
 
   /**
@@ -106,12 +136,35 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
     $vocabulary['name'] = $this->randomName();
     $vocabulary['description'] = $this->randomString();
 
-    $response = $this->servicesPUT($path . '/taxonomy_vocabulary/' . $vid, array('vocabulary' => $vocabulary));
+    $response = $this->servicesPUT($path . '/taxonomy_vocabulary/' . $vid, $vocabulary);
 
     $vocabulary_load = (array)taxonomy_vocabulary_load($vid, TRUE);
 
     $vocabulary_intersect = array_intersect_assoc($vocabulary, $vocabulary_load);
     $this->assertEqual($vocabulary, $vocabulary_intersect, t('Taxonomy vocabulary updated properly.'), 'TaxonomyVocabularyResource: Update');
+  }
+
+  /**
+   * Test taxonomy vocabulary update (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testVocabularyUpdateLegacy() {
+    $path = $this->endpoint->path;
+
+    $vocabulary = $this->createVocabulary();
+    $vid = $vocabulary['vid'];
+
+    $vocabulary['name'] = $this->randomName();
+    $vocabulary['description'] = $this->randomString();
+
+    $response = $this->servicesPUT($path . '/taxonomy_vocabulary/' . $vid, array('vocabulary' => $vocabulary));
+
+    $vocabulary_load = (array)taxonomy_vocabulary_load($vid, TRUE);
+
+    $vocabulary_intersect = array_intersect_assoc($vocabulary, $vocabulary_load);
+    $this->assertEqual($vocabulary, $vocabulary_intersect, t('Taxonomy vocabulary updated properly.'), 'TaxonomyVocabularyResource: Update (Legacy)');
   }
 
   /**
@@ -198,7 +251,7 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
       'parent' => NULL,
     );
 
-    $response = $this->servicesPost($path . '/taxonomy_term', array('term' => $term));
+    $response = $this->servicesPost($path . '/taxonomy_term', $term);
 
     // Load term by name.
     $term_by_name = (array)current(taxonomy_get_term_by_name($term['name']));
@@ -209,6 +262,38 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
     unset($term_data['parent']);
 
     $this->assertEqual($term_data, $term_intersect, t('Taxonomy term created properly.'), 'TaxonomyTermResource: Create');
+  }
+
+  /**
+   * Test taxonomy term create method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testTermCreateLegacy() {
+    $path = $this->endpoint->path;
+
+    $vocabulary = $this->createVocabulary();
+
+    $term = array(
+      'vid' => $vocabulary['vid'],
+      'name' => $this->randomName(),
+      'description' => $this->randomString(),
+      'weight' => rand(0, 100),
+      'parent' => NULL,
+    );
+
+    $response = $this->servicesPost($path . '/taxonomy_term', array('term' => $term));
+
+    // Load term by name.
+    $term_by_name = (array)current(taxonomy_get_term_by_name($term['name']));
+    $term_intersect = array_intersect_assoc($term, $term_by_name);
+
+    // As term_intersect will not have parent, we unset this property.
+    $term_data = $term;
+    unset($term_data['parent']);
+
+    $this->assertEqual($term_data, $term_intersect, t('Taxonomy term created properly.'), 'TaxonomyTermResource: Create (Legacy)');
   }
 
   /**
@@ -241,12 +326,38 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
       'weight' => rand(0, 100),
     );
 
-    $this->servicesPut($path . '/taxonomy_term/' . $term['tid'], array('term' => $term_update_data));
+    $this->servicesPut($path . '/taxonomy_term/' . $term['tid'], $term_update_data);
 
     $term_update = (array)current(taxonomy_get_term_by_name($term_update_data['name']));
 
     // Ensure that terms have different names but same tid.
     $this->assertTrue(($term['tid'] == $term_update['tid']) && ($term['name'] != $term_update['name']), t('Taxonomy term updated properly.'), 'TaxonomyTermResource: Update');
+  }
+
+  /**
+   * Test taxonomy term update method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testTermUpdateLegacy() {
+    $path = $this->endpoint->path;
+
+    $vocabulary = $this->createVocabulary();
+    $term = $this->createTerm($vocabulary['vid']);
+
+    $term_update_data = array(
+      'name' => $this->randomName(),
+      'description' => $this->randomString(),
+      'weight' => rand(0, 100),
+    );
+
+    $this->servicesPut($path . '/taxonomy_term/' . $term['tid'], array('term' => $term_update_data));
+
+    $term_update = (array)current(taxonomy_get_term_by_name($term_update_data['name']));
+
+    // Ensure that terms have different names but same tid.
+    $this->assertTrue(($term['tid'] == $term_update['tid']) && ($term['name'] != $term_update['name']), t('Taxonomy term updated properly.'), 'TaxonomyTermResource: Update (Legacy)');
   }
 
   /**

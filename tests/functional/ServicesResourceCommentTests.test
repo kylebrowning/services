@@ -66,7 +66,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
       'subject' => $this->randomString(),
       'comment' => $this->randomString(),
     );
-    $response = $this->servicesPost($path . '/comment', array('comment' => $comment));
+    $response = $this->servicesPost($path . '/comment', $comment);
 
     $cid = $response['body']['cid'];
     $comment['cid'] = $cid;
@@ -85,10 +85,54 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
       // Full HTML format.
       'format' => 2,
     );
-    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', $comment);
 
     $new_comment = _comment_load($response_array['body']['cid']);
     $this->assertNotEqual($new_comment->format, $comment->format, t('Full HTML format has not been applied.'), 'CommentResource: Create');
+  }
+
+  /**
+   * Test create comment (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testCommentCreateLegacy() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+    $response = $this->servicesPost($path . '/comment', array('comment' => $comment));
+
+    $cid = $response['body']['cid'];
+    $comment['cid'] = $cid;
+
+    $comment_load = (array)_comment_load($cid);
+    $comment_intersect = array_intersect_assoc($comment_load, $comment);
+
+    $this->assertEqual($comment, $comment_intersect, t('Comment created properly.'), 'CommentResource: Create (Legacy)');
+
+    // Try to create node with not allowed filter.
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+      // Full HTML format.
+      'format' => 2,
+    );
+    $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
+
+    $new_comment = _comment_load($response_array['body']['cid']);
+    $this->assertNotEqual($new_comment->format, $comment->format, t('Full HTML format has not been applied.'), 'CommentResource: Create (Legacy)');
   }
 
   /**
@@ -144,13 +188,49 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $comment_update['subject'] = $this->randomString();
     $comment_update['comment'] = $this->randomString();
 
-    $response = $this->servicesPut($path . '/comment/' . $cid, array('data' => $comment_update));
+    $response = $this->servicesPut($path . '/comment/' . $cid, $comment_update);
 
     $comment_load = (array)_comment_load($cid);
 
     $comment_intersect = array_intersect_assoc($comment_load, $comment_update);
 
     $this->assertEqual($comment_update, $comment_intersect, t('Comment updated properly.'), 'CommentResource: Update');
+  }
+
+  /**
+   * Test update method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  function testCommentUpdateLegacy() {
+    $path = $this->endpoint->path;
+
+    // Create node with commenting.
+    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
+    $node = $this->drupalCreateNode($settings);
+
+    $comment = array(
+      'uid' => $this->privileged_user->uid,
+      'nid' => $node->nid,
+      'subject' => $this->randomString(),
+      'comment' => $this->randomString(),
+    );
+
+    $cid = comment_save((array) $comment);
+    $comment['cid'] = $cid;
+
+    $comment_update = $comment;
+    $comment_update['subject'] = $this->randomString();
+    $comment_update['comment'] = $this->randomString();
+
+    $response = $this->servicesPut($path . '/comment/' . $cid, array('data' => $comment_update));
+
+    $comment_load = (array)_comment_load($cid);
+
+    $comment_intersect = array_intersect_assoc($comment_load, $comment_update);
+
+    $this->assertEqual($comment_update, $comment_intersect, t('Comment updated properly.'), 'CommentResource: Update (legacy)');
   }
 
   /**
@@ -178,60 +258,6 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $comment_load = _comment_load($cid);
 
     $this->assertTrue(empty($comment_load), t('Comment deleted properly.'), 'CommentResource: Delete');
-  }
-
-  /**
-   * Test loadNodeComments method.
-   */
-  function testCommentLoadNodeComments() {
-    $path = $this->endpoint->path;
-
-    // Create node with commenting.
-    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
-    $node = $this->drupalCreateNode($settings);
-    $nid = $node->nid;
-
-    // Generate 15 comments for node.
-    $comments = array();
-    for ($i = 0; $i < 15; $i++) {
-      $comment = array(
-        'uid' => $this->privileged_user->uid,
-        'nid' => $nid,
-        'subject' => $this->randomString(),
-        'comment' => $this->randomString(),
-      );
-
-      $cid = comment_save((array) $comment);
-
-      $comments[] = _comment_load($cid);
-    }
-    $comments = array_reverse($comments);
-
-    // Generate some comments for another node.
-    $settings = array('comment' => COMMENT_NODE_READ_WRITE);
-    $node2 = $this->drupalCreateNode($settings);
-    for ($i = 0; $i < 5; $i++) {
-      $comment = array(
-        'uid' => $this->privileged_user->uid,
-        'nid' => $node2->nid,
-        'subject' => $this->randomString(),
-        'comment' => $this->randomString(),
-      );
-
-      $cid = comment_save((array) $comment);
-    }
-
-    // Load all comments of the first node.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid));
-    $this->assertEqual(array_slice($comments, 0, 10), $response['body'], t('Received all 15 comments.'), 'CommentResource: loadNodeComments');
-
-    // Load only 5 comments of the first node.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5));
-    $this->assertEqual(array_slice($comments, 0, 5), $response['body'], t('Received last 5 comments.'), 'CommentResource: loadNodeComments');
-
-    // Load only 5 comments of the first node starting from fifth comment.
-    $response = $this->servicesPost($path . '/comment/loadNodeComments', array('nid' => $nid, 'count' => 5, 'start' => 5));
-    $this->assertEqual(array_slice($comments, 5, 5), $response['body'], t('Received 5 comments starting from fifth comment.'), 'CommentResource: loadNodeComments');
   }
 
   /**

@@ -77,7 +77,7 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     );
 
     // Create file with call.
-    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $result = $this->servicesPost($this->endpoint->path . '/file', $file);
     $this->assertEqual($result['code'], 200, t('File created.'), 'FileResource: Create');
 
     // Load file and assert that it exists.
@@ -88,12 +88,47 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
 
     // Lets create another file with the same details
     // and ensure name and path are changed automatically.
-    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $result = $this->servicesPost($this->endpoint->path . '/file', $file);
     $dbresult = db_query('SELECT * FROM {files} WHERE fid = %d', $result['body']['fid']);
     $file1 = db_fetch_object($dbresult);
     $file2 = db_fetch_object($dbresult);
     $this->assertTrue($file1->filename != $file2->filename && $file1->filepath != $file2->filepath,
       t('Two identical files created end up with different names.'), 'FileResource: Create');
+  }
+
+  /**
+   * Test create method (Legacy).
+   *
+   * TODO: To be removed in future version.
+   * @see http://drupal.org/node/1083242
+   */
+  public function testResourceFileCreateLegacy() {
+    // Create file argument with data.
+    $file = array(
+      'filesize' => filesize($this->testfiles[0]->filename),
+      'filename' => $this->testfiles[0]->filename,
+      'file' => base64_encode(file_get_contents($this->testfiles[0]->filename)),
+      'uid' => $this->privileged_user->uid,
+    );
+
+    // Create file with call.
+    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $this->assertEqual($result['code'], 200, t('File created.'), 'FileResource: Create (Legacy)');
+
+    // Load file and assert that it exists.
+    //$file_load = file_load($result['body']['fid']);
+    $dbresult = db_query('SELECT * FROM {files} WHERE fid = %d', $result['body']['fid']);
+    $file_load = db_fetch_object($dbresult);
+    $this->assertTrue(is_file($file_load->filepath), t('New file saved to disk.'), 'FileResource: Create (Legacy)');
+
+    // Lets create another file with the same details
+    // and ensure name and path are changed automatically.
+    $result = $this->servicesPost($this->endpoint->path . '/file', array('file' => $file));
+    $dbresult = db_query('SELECT * FROM {files} WHERE fid = %d', $result['body']['fid']);
+    $file1 = db_fetch_object($dbresult);
+    $file2 = db_fetch_object($dbresult);
+    $this->assertTrue($file1->filename != $file2->filename && $file1->filepath != $file2->filepath,
+      t('Two identical files created end up with different names.'), 'FileResource: Create (Legacy)');
   }
 
   /**
