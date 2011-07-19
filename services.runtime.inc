@@ -94,7 +94,7 @@ class ServicesArgumentException extends ServicesException {
  *  services-specific authentication checks. Access checks will always be
  *  made.
  */
-function services_controller_execute($controller, $args = array(), $auth_args = array(), $options = array()) {
+function services_controller_execute($controller, $args = array(), $options = array()) {
   // Check for missing arguments.
   $server_info =  services_server_info_object();
   if ($server_info->debug) {
@@ -108,7 +108,7 @@ function services_controller_execute($controller, $args = array(), $auth_args = 
     $endpoint = services_endpoint_load($endpoint_name);
 
     foreach ($endpoint->authentication as $auth_module => $settings) {
-      if (isset($settings) && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args, $auth_args)) {
+      if (isset($settings) && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args)) {
         return services_error($auth_error, 401);
       }
     }
