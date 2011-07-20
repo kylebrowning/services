@@ -334,7 +334,7 @@ function _taxonomy_resource_definition() {
  * @see _node_resource_index() for more notes
  **/
 function _taxonomy_term_resource_index($page, $fields, $parameters) {
-  $query = services_resource_build_index_query('term_data', 'vid DESC, weight DESC, name DESC', $page, $fields, $parameters);
+  $query = services_resource_build_index_query('term_data', 't.vid DESC, t.weight DESC, t.name DESC', $page, $fields, $parameters, 't', 'tid');
 
   $results = array();
   while ($taxonomy = db_fetch_object($query)) {
@@ -369,7 +369,7 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  * @see _node_resource_index() for more notes
  **/
 function _taxonomy_vocabulary_resource_index($page, $fields, $parameters) {
-  $query = services_resource_build_index_query('vocabulary', 'weight DESC, name DESC', $page, $fields, $parameters);
+  $query = services_resource_build_index_query('vocabulary', 'v.weight DESC, v.name DESC', $page, $fields, $parameters, 'v', 'vid');
 
   $results = array();
   while ($taxonomy = db_fetch_object($query)) {

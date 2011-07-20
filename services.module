@@ -433,9 +433,18 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  * @param $parameter
  *   Array parameters to add to the index query.
  */
-function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array()) {
+function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field) {
   $where = array();
   $fields = db_escape_string($fields);
+
+  // need to append table prefix
+  if ($fields_array = explode(',', $fields)) {
+    foreach ($fields_array as &$field) {
+      $field = $primary_table . '.' . trim($field);
+    }
+    $fields = implode(',', $fields_array);
+  }
+
   $schema = db_escape_string($schema);
   $table = $schema;
   $schema = drupal_get_schema($schema);
@@ -443,7 +452,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   // db_query().
   if(is_array($parameters)) {
     foreach ($parameters as $field => $value) {
-      $where[] = $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
+      $where[] = $primary_table . '.' . $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
     } 
   }
 
@@ -451,8 +460,8 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
 
   // Run through db_rewrite_sql to make sure proper access checks are applied.
-  $sql = "SELECT $fields FROM {{$table}} $where ORDER BY $order";
-  $sql = db_rewrite_sql($sql);
+  $sql = "SELECT $fields FROM {{$table}} AS $primary_table $where ORDER BY $order";
+  $sql = db_rewrite_sql($sql, $primary_table, $primary_field);
   $result = db_query_range($sql, $parameters, $page * 20, 20);
   return $result;
 }

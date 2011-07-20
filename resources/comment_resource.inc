@@ -194,7 +194,7 @@ function _comment_resource_index($page, $fields, $parameters) {
   if (!user_access('administer comments')) {
     $parameters['status'] = 1;
   }
-  $query = services_resource_build_index_query('comments', 'timestamp DESC', $page, $fields, $parameters);
+  $query = services_resource_build_index_query('comments', 'c.timestamp DESC', $page, $fields, $parameters, 'c', 'cid');
   // Put together array of matching nodes to return.
   $results = array();
   while ($comments = db_fetch_object($query)) {
