@@ -171,9 +171,9 @@ function _services_process_resource($name, &$resource, $controllers) {
     }
   }
 
-  if (isset($resource['targeted actions'])) {
-    foreach ($resource['targeted actions'] as $actname => $act) {
-      $controllers[$name . '/targeted_action/' . $actname] = &$resource['actions'][$actname];
+  if (isset($resource['targeted_actions'])) {
+    foreach ($resource['targeted_actions'] as $actname => $act) {
+      $controllers[$name . '/targeted_action/' . $actname] = &$resource['targeted_actions'][$actname];
     }
   }
   return $controllers;

@@ -27,7 +27,7 @@
   *     - delete
   *     - index
   *     - actions
-  *     - targeted actions
+  *     - targeted_actions
   *     - relationships
   *
   *   The CRUD functions are pretty self-explanatory. Index is an extra CRUD-

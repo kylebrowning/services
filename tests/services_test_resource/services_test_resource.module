@@ -22,11 +22,28 @@ function services_test_resource_services_resources() {
         'access arguments append' => TRUE,
       ),
       'actions' => array(
-        'retrieve' => array(
+        'action_retrieve' => array(
           'access callback' => '_services_test_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
           'callback' => '_services_test_resource_action_retrieve',
+          'args' => array(
+            array(
+              'name' => 'arg1',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'Test argument 1.',
+            ),
+          ),
+        ),
+      ),
+      'targeted_actions' => array(
+        'test' => array(
+          'access callback' => '_services_test_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'callback' => '_services_test_resource_targeted_action_test',
           'args' => array(
             array(
               'name' => 'arg1',
@@ -46,16 +63,23 @@ function services_test_resource_services_resources() {
  * CRUD retrieve callback.
  */
 function _services_test_resource_retrieve($arg1) {
-  return 'CRUD Retrieve ' . $arg1;
+  return array('CRUD Retrieve ' . $arg1);
 }
 
 /**
  * Action retrieve callback.
  */
 function _services_test_resource_action_retrieve($arg1) {
-  return 'Action retrieve' . $arg1;
+  return array('Action retrieve' . $arg1);
 }
 
+
+/**
+ * Targeted Action test callback.
+ */
+function _services_test_resource_targeted_action_test($arg1) {
+  return array('Targeted Action test' . $arg1);
+}
 /**
  * Access callback.
  */
