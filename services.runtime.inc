@@ -93,11 +93,21 @@ class ServicesArgumentException extends ServicesException {
  *  made.
  */
 function services_controller_execute($controller, $args = array(), $options = array()) {
+  global $user;
+
   $server_info =  services_server_info_object();
   if ($server_info->debug) {
     watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
     watchdog('services', 'Passed arguments: <pre>@arguments</pre>', array('@arguments' => print_r($args, TRUE)), WATCHDOG_DEBUG);
   }
+
+  $original_user = $user;
+  $old_state = drupal_save_session();
+  drupal_save_session(FALSE);
+  $user = drupal_anonymous_user();
+
+  services_set_server_info('original_user', $original_user);
+
   // Check authentication
   if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
     $endpoint_name = services_get_server_info('endpoint');
@@ -162,7 +172,11 @@ function services_controller_execute($controller, $args = array(), $options = ar
       $result = call_user_func_array($callable, array($args, $controller, $result));
     }
   }
-
+  
+  if (drupal_save_session($user) === FALSE) {
+    $user = $original_user;
+    drupal_save_session($old_state);  
+  }
   return $result;
 }
 

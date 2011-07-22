@@ -332,6 +332,27 @@ function services_services_resources() {
 }
 
 /**
+ * Implementation of hook_services_authentication().
+ */
+function services_services_authentication_info() {
+  return array(
+    'title'             => t('Session authentication'),
+    'description'       => t("Uses Drupal's built in sessions to authenticate."),
+    'authenticate_call' => '_services_sessions_authenticate_call',
+  );
+}
+
+/**
+ * Authenticates a call using Drupal's built in sessions
+ *
+ * @return void
+ */
+function _services_sessions_authenticate_call() {
+  global $user;
+  $user = services_get_server_info('original_user');
+}
+
+/**
  * Returns all the controller names for a endpoint.
  *
  * @param string $endpoint

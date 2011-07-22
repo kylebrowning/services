@@ -16,6 +16,15 @@ class services_ctools_export_ui extends ctools_export_ui {
   }
 
   /**
+   * Page callback for the server page.
+   */
+  function server_page($js, $input, $item) {
+    drupal_set_title($this->get_page_title('server', $item));
+    return drupal_get_form('services_edit_form_endpoint_server', $item);
+  }
+
+
+  /**
    * Page callback for the authentication page.
    */
   function authentication_page($js, $input, $item) {
@@ -56,8 +65,7 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
     $form['message'] = array(
       '#type'          => 'item',
       '#title'         => t('Authentication'),
-      '#description'   => t('No authentication modules are installed, standard ' .
-        'Drupal session based security will be used.'),
+      '#description'   => t('No authentication modules are installed, all requests will be anonymous.'),
     );
     return $form;
   }
@@ -65,8 +73,7 @@ function services_edit_form_endpoint_authentication($form, &$form_state) {
     $form['message'] = array(
       '#type'          => 'item',
       '#title'         => t('Authentication'),
-      '#description'   => t('No authentication modules are enabled, standard ' .
-        'Drupal session based security will be used.'),
+      '#description'   => t('No authentication modules are enabled, all requests will be anonymous.'),
     );
     return $form;
   }
@@ -115,6 +122,78 @@ function services_edit_form_endpoint_authentication_submit($form, $form_state) {
   services_endpoint_save($endpoint);
 }
 
+function services_edit_form_endpoint_server($form, &$form_state) {
+  list($endpoint) = $form_state['build_info']['args'];
+  $servers = services_get_servers();
+
+  $server = !empty($servers[$endpoint->server]) ? $servers[$endpoint->server] : FALSE;
+
+  $form['endpoint_object'] = array(
+    '#type'  => 'value',
+    '#value' => $endpoint,
+  );
+
+  if (!$server) {
+    $form['message'] = array(
+      '#type'          => 'item',
+      '#title'         => t('Unknown server @name', array('@name' => $endpoint->server)),
+      '#description'   => t('No server matching the one used in the endpoint.'),
+    );
+  }
+  else if (empty($server['settings'])) {
+    $form['message'] = array(
+      '#type'          => 'item',
+      '#title'         => t('@name has no settings', array('@name' => $endpoint->server)),
+      '#description'   => t("The server doesn't have any settings that needs to be configured."),
+    );
+  }
+  else {
+    $definition = $server['settings'];
+
+    $settings = isset($endpoint->server_settings[$endpoint->server]) ? $endpoint->server_settings[$endpoint->server] : array();
+
+    if (!empty($definition['file'])) {
+      call_user_func_array('module_load_include', $definition['file']);
+    }
+
+    $form[$endpoint->server] = array(
+      '#type' => 'fieldset',
+      '#title' => $server['name'],
+      '#tree' => TRUE,
+    );
+    call_user_func_array($definition['form'], array(&$form[$endpoint->server], $endpoint, $settings));
+
+    $form['submit'] = array(
+      '#type'  => 'submit',
+      '#value' => 'Save',
+    );
+  }
+
+  return $form;
+}
+
+function services_edit_form_endpoint_server_submit($form, $form_state) {
+  $endpoint = $form_state['values']['endpoint_object'];
+  $servers = services_get_servers();
+  $definition = $servers[$endpoint->server]['settings'];
+
+  $values = $form_state['values'][$endpoint->server];
+
+  // Allow the server to alter the submitted values before they're stored
+  // as settings.
+  if (!empty($definition['submit'])) {
+    if (!empty($definition['file'])) {
+      call_user_func_array('module_load_include', $definition['file']);
+    }
+    $values = call_user_func($definition['submit'], $endpoint, $values);
+  }
+
+  // Store the settings in the endpoint
+  $endpoint->server_settings[$endpoint->server] = $values;
+  services_endpoint_save($endpoint);
+
+  drupal_set_message(t('Your server settings have been saved.'));
+}
 
 /**
  * services_edit_endpoint_resources function.

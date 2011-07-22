@@ -83,7 +83,32 @@ class ServicesXMLRPCTestCase extends DrupalWebTestCase {
     $endpoint->title = $edit['title'];
     $endpoint->server = $edit['server'];
     $endpoint->path = $edit['path'];
-    $endpoint->authentication = array();
+    $endpoint->authentication = array(
+      'services' => 'services',
+    );
+    $endpoint->server_settings = array(
+      'rest_server' => array(
+        'formatters' => array(
+          'json' => TRUE,
+          'bencode' => TRUE,
+          'rss' => TRUE,
+          'plist' => TRUE,
+          'xmlplist' => TRUE,
+          'php' => TRUE,
+          'yaml' => TRUE,
+          'jsonp' => FALSE,
+          'xml' => FALSE,
+        ),
+        'parsers' => array(
+          'application/x-yaml' => TRUE,
+          'application/json' => TRUE,
+          'application/vnd.php.serialized' => TRUE,
+          'application/plist' => TRUE,
+          'application/plist+xml' => TRUE,
+          'application/x-www-form-urlencoded' => TRUE,
+        ),
+      ),
+    );
     $endpoint->resources = array(
       'system' => array(
         'alias' => '',

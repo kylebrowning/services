@@ -53,6 +53,14 @@ class RESTServer {
     }
 
     $endpoint = services_get_server_info('endpoint', '');
+    $endpoint_definition = services_endpoint_load($endpoint);
+
+    // Get the server settings from the endpoint.
+    $this->settings = !empty($endpoint_definition->server_settings['rest_server']) ? $endpoint_definition->server_settings['rest_server'] : array();
+    // Normalize the settings so that we get the expected structure
+    // and sensible defaults.
+    $this->settings = rest_server_setup_settings($this->settings);
+
     $resources = services_get_resources($endpoint);
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
@@ -80,8 +88,6 @@ class RESTServer {
     // Negotiate response format based on accept-headers if we
     // don't have a response format
     if (empty($response_format)) {
-      module_load_include('php', 'rest_server', 'lib/mimeparse');
-
       $mime_candidates = array();
       $mime_map = array();
       // Add all formatters that accepts raw data, or supports the format model
@@ -96,7 +102,7 @@ class RESTServer {
 
       // Get the best matching format, default to json
       if (isset($_SERVER['HTTP_ACCEPT'])) {
-        $mime = new Mimeparse();
+        $mime = $this->mimeParse();
         $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
       }
 
@@ -249,15 +255,11 @@ class RESTServer {
   }
 
   private function parseRequest($method, $controller) {
-    if (($method == 'POST' || $method == 'PUT') &&  isset($_SERVER['CONTENT_TYPE'])) {
-      $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
-    }
     switch ($method) {
       case 'POST':
-        if (isset($type['value']) && $type['value'] == 'application/x-www-form-urlencoded') {
-          return $_POST;
-        }
       case 'PUT':
+        $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+
         // Get the mime type for the request, default to form-urlencoded
         if (isset($type['value'])) {
           $mime = $type['value'];
@@ -267,7 +269,7 @@ class RESTServer {
         }
 
         // Get the parser for the mime type
-        $parser = $this->requestParsers($mime, $controller);
+        $parser = $this->requestParser($mime, $controller);
         if (!$parser) {
           throw new ServicesException(t('Unsupported request content type !mime', array(
               '!mime' => $mime,
@@ -401,32 +403,35 @@ class RESTServer {
     return $view->render();
   }
 
-  private function requestParsers($mime=NULL, $controller=NULL) {
-    static $parsers;
-
+  private function requestParser($mime = NULL, $controller = NULL) {
+    // Check if the controller has declared support for parsing the mime type.
     if ($mime && $controller && !empty($controller['rest request parsers'])) {
-      $parser = $this->matchParser($mime, $controller['rest request parsers']);
+      $parser = $this->matchParser($mime, $controller['rest request parsers'], TRUE);
       if ($parser) {
         return $parser;
       }
     }
 
-    if (!$parsers) {
-      $parsers = array(
-        'application/x-www-form-urlencoded' => 'RESTServer::parseURLEncoded',
-        'application/x-yaml' => 'RESTServer::parseYAML',
-        'application/json' => 'RESTServer::parseJSON',
-        'application/vnd.php.serialized' => 'RESTServer::parsePHP',
-      );
-      drupal_alter('rest_server_request_parsers', $parsers);
-    }
-
     if ($mime) {
+      $parsers = rest_server_request_parsers();
+
+      // Remove parsers that have been disabled for this endpoint.
+      foreach (array_keys($parsers) as $key) {
+        if (!$this->settings['parsers'][$key]) {
+          unset($parsers[$key]);
+        }
+      }
+
       return $this->matchParser($mime, $parsers);
     }
-    return $parsers;
+    return FALSE;
   }
 
+  /**
+   * Create a instance of the Mimeparse utility class.
+   *
+   * @return Mimeparse
+   */
   private function mimeParse() {
     static $mimeparse;
     if (!$mimeparse) {
@@ -436,12 +441,23 @@ class RESTServer {
     return $mimeparse;
   }
 
-  private function matchParser($mime, $parsers) {
+  /**
+   * Matches a mime-type against a set of parsers.
+   *
+   * @param string $mime
+   *  The mime-type of the request.
+   * @param array $parsers
+   *  An associative array of parser callbacks keyed by mime-type.
+   * @param bool $allow_all_parsers
+   *  Pass TRUE to bypass the settings for allowed parsers.
+   * @return mixed
+   *  Returns a parser callback or FALSE if no match was found.
+   */
+  private function matchParser($mime, $parsers, $allow_all_parsers = FALSE) {
     $mimeparse = $this->mimeParse();
     $mime_type = $mimeparse->best_match(array_keys($parsers), $mime);
-    if ($mime_type) {
-      return $parsers[$mime_type];
-    }
+
+    return ($mime_type) ? $parsers[$mime_type] : FALSE;
   }
 
   public static function parseURLEncoded($handle) {
@@ -463,52 +479,19 @@ class RESTServer {
   }
 
   private function responseFormatters($format=NULL) {
-    static $formatters;
+    $formatters = rest_server_response_formatters();
 
-    if (!$formatters) {
-      $formatters = array(
-        'xml' => array(
-          'mime types' => array('application/xml', 'text/xml'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'xml'),
-        ),
-        'json' => array(
-          'mime types' => array('application/json'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'json'),
-        ),
-        'jsonp' => array(
-          'mime types' => array('text/javascript', 'application/javascript'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'jsonp'),
-        ),
-        'php' => array(
-          'mime types' => array('application/vnd.php.serialized'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'php'),
-        ),
-        'yaml' => array(
-          'mime types' => array('text/plain', 'application/x-yaml', 'text/yaml'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'yaml'),
-        ),
-        'bencode' => array(
-          'mime types' => array('application/x-bencode'),
-          'view' => 'RESTServerViewBuiltIn',
-          'view arguments' => array('format' => 'bencode'),
-        ),
-        'rss' => array(
-          'model' => 'ResourceFeedModel',
-          'mime types' => array('text/xml'),
-          'view' => 'RssFormatView',
-        ),
-      );
-      drupal_alter('rest_server_response_formatters', $formatters);
+    // Remove formatters that have been disabled for this endpoint.
+    foreach (array_keys($formatters) as $key) {
+      if (!$this->settings['formatters'][$key]) {
+        unset($formatters[$key]);
+      }
     }
 
     if ($format) {
       return isset($formatters[$format]) ? $formatters[$format] : FALSE;
     }
+
     return $formatters;
   }
 

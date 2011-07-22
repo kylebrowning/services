@@ -13,8 +13,9 @@ files[] = tests/functional/ServicesResourceCommentTests.test
 files[] = tests/functional/ServicesResourceTaxonomyTests.test
 files[] = tests/functional/ServicesResourceFileTests.test
 files[] = tests/functional/ServicesEndpointTests.test
+files[] = tests/functional/ServicesParserTests.test
 files[] = tests/functional/ServicesXMLRPCTests.test
 files[] = tests/unit/TestServicesModule.test
 files[] = tests/services.test
 
-dependencies[] = ctools (>=7.x-1.0-beta1)
+dependencies[] = ctools
