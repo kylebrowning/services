@@ -558,7 +558,7 @@ class RESTServer {
     }
     // Detect action requests targeted at specific resources
     elseif ($pc >= 2 && $method == 'POST') {
-      $action = $resource['targeted actions'][$path[1]];
+      $action = $resource['targeted_actions'][$path[1]];
       return $action;
     }
   }

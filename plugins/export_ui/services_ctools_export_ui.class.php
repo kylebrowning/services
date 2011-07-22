@@ -257,7 +257,7 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
     '#theme' => 'services_resource_table',
    );
 
-  $ignoreArray = array('actions', 'relationships', 'endpoint', 'name', 'file');
+  $ignoreArray = array('actions', 'relationships', 'endpoint', 'name', 'file', 'targeted_actions');
   // Generate the list of methods arranged by resource.
   foreach ($resources as $resource => $methods) {
     $form['resources']['table'][$resource] = array(

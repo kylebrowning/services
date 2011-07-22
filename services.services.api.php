@@ -18,7 +18,7 @@
   * @return
   *   An associative array which defines available resources.
   *
-  *   The associative array which defines services has six possible top
+  *   The associative array which defines services has seven possible top
   *   level keys:
   *
   *     - create
@@ -26,10 +26,12 @@
   *     - update
   *     - delete
   *     - actions
-  *     - targeted actions
+  *     - targeted_actions
+  *     - relationships
+  *
   *
   *   The first four (the CRUD functions) define the indvidual service
-  *   callbacks for each function. However 'actions' and 'targeted actions'
+  *   callbacks for each function. However 'actions' and 'targeted_actions'
   *   can contain multiple callbacks.
   *
   *   For those familiar with Services 2.x, these callbacks are created

@@ -110,7 +110,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
         }
       }
 
-      $classes = array('targeted actions', 'actions', 'relationships');
+      $classes = array('targeted_actions', 'actions', 'relationships');
       foreach ($classes as $class) {
         if (!empty($resource[$class])) {
           foreach ($resource[$class] as $op => $def) {
@@ -168,9 +168,9 @@ function _services_process_resource($name, &$resource, $controllers) {
     }
   }
 
-  if (isset($resource['targeted actions'])) {
-    foreach ($resource['targeted actions'] as $actname => $act) {
-      $controllers[$name . '/targeted_action/' . $actname] = &$resource['actions'][$actname];
+  if (isset($resource['targeted_actions'])) {
+    foreach ($resource['targeted_actions'] as $actname => $act) {
+      $controllers[$name . '/targeted_actions/' . $actname] = &$resource['actions'][$actname];
     }
   }
   return $controllers;
