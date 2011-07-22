@@ -471,8 +471,8 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
 function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
   $result = taxonomy_select_nodes($tid, (bool)$pager, $limit, $order);
   foreach ($result as $nid) {
+    $node = node_load($nid);
     if ($uri = services_resource_uri(array('node', $nid))) {
-      $node = node_load($nid);
       $node->uri = $uri;
     }
     $nodes[] = $node;
