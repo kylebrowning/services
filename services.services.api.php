@@ -64,57 +64,171 @@
   *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
   */
 function hook_services_resources() {
-  return array(
-    'user' => array(
-      'file' => array('type' => 'inc', 'module' => 'user_resource'),
+$node_resource = array(
+    'node' => array(
       'retrieve' => array(
-        'help' => 'Retrieves a user',
-        'callback' => '_user_resource_retrieve',
-        'access arguments' => array('access user profiles'), // this is probably not enough, doesn't block things like pass and email
-        'access arguments append' => TRUE,
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_retrieve',
         'args' => array(
           array(
-            'name' => 'uid',
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
             'type' => 'int',
-            'description' => 'The uid of the user to retrieve.',
-            'source' => array('path' => '0'),
-            'optional' => FALSE,
-            'default value' => NULL,
+            'description' => 'The nid of the node to get',
           ),
         ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
       ),
-    ),
-
-    'actions' => array(
-      'login' => array(
-        'help' => 'Login a user for a new session',
-        'callback' => '_user_resource_login',
+      'create' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_create',
         'args' => array(
           array(
-            'name' => 'username',
-            'type' => 'string',
-            'description' => 'A valid username',
-            'source' => array('data'),
+            'name' => 'node',
             'optional' => FALSE,
-          ),
-          array(
-            'name' => 'password',
-            'type' => 'string',
-            'description' => 'A valid password',
-            'source' => array('data'),
-            'optional' => FALSE,
+            'source' => 'data',
+            'description' => 'The node data to create',
+            'type' => 'array',
           ),
         ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('create'),
+        'access arguments append' => TRUE,
       ),
-
-      'logout' => array(
-        'help' => 'Logout a user session',
-        'callback' => '_user_resource_logout',
+      'update' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_update',
         'args' => array(
           array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+            'description' => 'The nid of the node to get',
+          ),
+          array(
+            'name' => 'node',
+            'optional' => FALSE,
+            'source' => 'data',
+            'description' => 'The node data to update',
+            'type' => 'array',
+          ),
+        ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('update'),
+        'access arguments append' => TRUE,
+      ),
+      'delete' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_delete',
+        'args' => array(
+          array(
+            'name' => 'nid',
+            'optional' => FALSE,
+            'source' => array('path' => 0),
+            'type' => 'int',
+          ),
+        ),
+        'access callback' => '_node_resource_access',
+        'access arguments' => array('delete'),
+        'access arguments append' => TRUE,
+      ),
+      'index' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+        'callback' => '_node_resource_index',
+        'args' => array(
+          array(
+            'name' => 'page',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'The zero-based index of the page to get, defaults to 0.',
+            'default value' => 0,
+            'source' => array('param' => 'page'),
+          ),
+          array(
+            'name' => 'fields',
+            'optional' => TRUE,
+            'type' => 'string',
+            'description' => 'The fields to get.',
+            'default value' => '*',
+            'source' => array('param' => 'fields'),
+          ),
+          array(
+            'name' => 'parameters',
+            'optional' => TRUE,
+            'type' => 'array',
+            'description' => 'Parameters array',
+            'default value' => array(),
+            'source' => array('param' => 'parameters'),
+          ),
+        ),
+        'access arguments' => array('access content'),
+      ),
+      'relationships' => array(
+        'files' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'help'   => t('This method returns files associated with a node.'),
+          'access callback' => '_node_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'callback' => '_node_resource_load_node_files',
+          'args'     => array(
+            array(
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node whose files we are getting',
+            ),
+            array(
+              'name' => 'file_contents',
+              'type' => 'int',
+              'description'  => t('To return file contents or not.'),
+              'source' => array('path' => 2),
+              'optional' => TRUE,
+              'default value' => TRUE,
+            ),
           ),
         ),
       ),
     ),
   );
+  if (module_exists('comment')) {
+    $comments = array(
+      'file'                    => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+      'help'                    => t('This method returns the number of new comments on a given node.'),
+      'access callback'         => 'user_access',
+      'access arguments'        => array('access comments'),
+      'access arguments append' => FALSE,
+      'callback'                => '_node_resource_load_node_comments',
+      'args'                    => array(
+        array(
+          'name'         => 'nid',
+          'type'         => 'int',
+          'description'  => t('The node id to load comments for.'),
+          'source'       => array('path' => 0),
+          'optional'     => FALSE,
+        ),
+        array(
+          'name'         => 'count',
+          'type'         => 'int',
+          'description'  => t('Number of comments to load.'),
+          'source'       => array('param' => 'count'),
+          'optional'     => TRUE,
+        ),
+        array(
+          'name'         => 'offset',
+          'type'         => 'int',
+          'description'  => t('If count is set to non-zero value, you can pass also non-zero value for start. For example to get comments from 5 to 15, pass count=10 and start=5.'),
+          'source'       => array('param' => 'offset'),
+          'optional'     => TRUE,
+        ),
+      ),
+    );
+    $node_resource['node']['relationships']['comments'] =  $comments;
+  }
+  return $node_resource;
 }
