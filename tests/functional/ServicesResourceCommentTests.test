@@ -88,7 +88,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $response_array = $this->servicesPost($this->endpoint->path . '/comment', $comment);
 
     $new_comment = _comment_load($response_array['body']['cid']);
-    $this->assertNotEqual($new_comment->format, $comment->format, t('Full HTML format has not been applied.'), 'CommentResource: Create');
+    $this->assertNotEqual($new_comment->format, $comment['format'], t('Full HTML format has not been applied.'), 'CommentResource: Create');
   }
 
   /**
@@ -132,7 +132,7 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $response_array = $this->servicesPost($this->endpoint->path . '/comment', array('comment' => $comment));
 
     $new_comment = _comment_load($response_array['body']['cid']);
-    $this->assertNotEqual($new_comment->format, $comment->format, t('Full HTML format has not been applied.'), 'CommentResource: Create (Legacy)');
+    $this->assertNotEqual($new_comment->format, $comment['format'], t('Full HTML format has not been applied.'), 'CommentResource: Create (Legacy)');
   }
 
   /**

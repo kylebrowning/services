@@ -156,7 +156,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
   }
 
   public function saveNewEndpoint() {
-    $edit = $this->populateEndpointFAPI() ;
+    $edit = $this->populateEndpointFAPI();
     $endpoint = new stdClass;
     $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
     $endpoint->api_version = 3;
@@ -165,11 +165,33 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $endpoint->server = $edit['server'];
     $endpoint->path = $edit['path'];
     $endpoint->authentication = array(
-      'services_sessauth' => array(),
+      'services' => 'services',
+    );
+    $endpoint->server_settings = array(
+      'rest_server' => array(
+        'formatters' => array(
+          'json' => TRUE,
+          'bencode' => TRUE,
+          'rss' => TRUE,
+          'plist' => TRUE,
+          'xmlplist' => TRUE,
+          'php' => TRUE,
+          'yaml' => TRUE,
+          'jsonp' => FALSE,
+          'xml' => FALSE,
+        ),
+        'parsers' => array(
+          'application/x-yaml' => TRUE,
+          'application/json' => TRUE,
+          'application/vnd.php.serialized' => TRUE,
+          'application/plist' => TRUE,
+          'application/plist+xml' => TRUE,
+          'application/x-www-form-urlencoded' => TRUE,
+        ),
+      ),
     );
     $endpoint->resources = array(
-      'node' => array(
-        'alias' => '',
+      'comment' => array(
         'operations' => array(
           'create' => array(
             'enabled' => 1,
@@ -187,8 +209,51 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
         ),
+        'actions' => array(
+          'countAll' => array(
+            'enabled' => 1,
+          ),
+          'countNew' => array(
+            'enabled' => 1,
+          ),
+        ),
+      ),
+      'file' => array(
+        'operations' => array(
+          'create' => array(
+            'enabled' => 1,
+          ),
+          'retrieve' => array(
+            'enabled' => 1,
+          ),
+          'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
+            'enabled' => 1,
+          ),
+        ),
+      ),
+      'node' => array(
+        'operations' => array(
+          'retrieve' => array(
+            'enabled' => 1,
+          ),
+          'create' => array(
+            'enabled' => 1,
+          ),
+          'update' => array(
+            'enabled' => 1,
+          ),
+          'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
+            'enabled' => 1,
+          ),
+        ),
         'relationships' => array(
-          'nodefiles' => array(
+          'files' => array(
             'enabled' => 1,
           ),
           'comments' => array(
@@ -197,7 +262,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         ),
       ),
       'system' => array(
-        'alias' => '',
         'actions' => array(
           'connect' => array(
             'enabled' => 1,
@@ -214,18 +278,20 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         ),
       ),
       'taxonomy_term' => array(
-        'alias' => '',
         'operations' => array(
-          'create' => array(
+          'retrieve' => array(
             'enabled' => 1,
           ),
-          'retrieve' => array(
+          'create' => array(
             'enabled' => 1,
           ),
           'update' => array(
             'enabled' => 1,
           ),
           'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
             'enabled' => 1,
           ),
         ),
@@ -236,18 +302,20 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         ),
       ),
       'taxonomy_vocabulary' => array(
-        'alias' => '',
         'operations' => array(
-          'create' => array(
+          'retrieve' => array(
             'enabled' => 1,
           ),
-          'retrieve' => array(
+          'create' => array(
             'enabled' => 1,
           ),
           'update' => array(
             'enabled' => 1,
           ),
           'delete' => array(
+            'enabled' => 1,
+          ),
+          'index' => array(
             'enabled' => 1,
           ),
         ),
@@ -258,12 +326,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         ),
       ),
       'user' => array(
-        'alias' => '',
         'operations' => array(
-          'create' => array(
+          'retrieve' => array(
             'enabled' => 1,
           ),
-          'retrieve' => array(
+          'create' => array(
             'enabled' => 1,
           ),
           'update' => array(
@@ -288,56 +355,8 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           ),
         ),
       ),
-      'comment' => array(
-        'alias' => '',
-        'operations' => array(
-          'create' => array(
-            'enabled' => 1,
-          ),
-          'retrieve' => array(
-            'enabled' => 1,
-          ),
-          'update' => array(
-            'enabled' => 1,
-          ),
-          'delete' => array(
-            'enabled' => 1,
-          ),
-        ),
-        'actions' => array(
-          'countAll' => array(
-            'enabled' => 1,
-          ),
-          'countNew' => array(
-            'enabled' => 1,
-          ),
-        ),
-      ),
-      'file' => array(
-        'alias' => '',
-        'operations' => array(
-          'create' => array(
-            'enabled' => 1,
-          ),
-          'retrieve' => array(
-            'enabled' => 1,
-          ),
-          'delete' => array(
-            'enabled' => 1,
-          ),
-        ),
-      ),
-      'echo' => array(
-        'alias' => '',
-        'operations' => array(
-          'index' => array(
-            'enabled' => 1,
-          ),
-        ),
-      ),
     );
     $endpoint->debug = 1;
-    $endpoint->status = 1;
     $endpoint->export_type = FALSE;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);

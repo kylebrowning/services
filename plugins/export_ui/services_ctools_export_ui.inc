@@ -17,7 +17,16 @@ $plugin = array(
         'load arguments' => array('services_ctools_export_ui'),
         'access arguments' => array('administer services'),
         'type' => MENU_LOCAL_TASK,
-
+      ),
+      'server' => array(
+        'path' => 'list/%ctools_export_ui/server',
+        'title' => 'Server',
+        'page callback' => 'ctools_export_ui_switcher_page',
+        'page arguments' => array('services_ctools_export_ui', 'server', 4),
+        'load arguments' => array('services_ctools_export_ui'),
+        'access arguments' => array('administer services'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => -1,
       ),
       'authentication' => array(
         'path' => 'list/%ctools_export_ui/authentication',
@@ -34,6 +43,7 @@ $plugin = array(
   // Add our custom operations.
   'allowed operations' => array(
     'resources'  => array('title' => t('Edit Resources')),
+    'server'  => array('title' => t('Edit Server')),
     'authentication' => array('title' => t('Edit Authentication')),
   ),
   'form' => array(
@@ -138,17 +148,14 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
       '#options'       => $auth_options,
       '#default_value' => $default_values,
       '#title'         => t('Authentication'),
-      '#description'   => t('Choose which authentication schemes that should ' .
-        'be used with your endpoint. If no authentication method is selected ' .
-        'the standard Drupal session security is used.'),
+      '#description'   => t('Choose which authentication schemes that should be used with your endpoint. If no authentication method is selected all requests will be done by an anonymous user.'),
     );
   }
   else {
     $form['authentication'] = array(
       '#type'          => 'item',
       '#title'         => t('Authentication'),
-      '#description'   => t('No authentication modules are installed, standard ' .
-        'Drupal session based security will be used.'),
+      '#description'   => t('No authentication modules are installed, all requests will be done by an anonymous user.'),
     );
   }
 
