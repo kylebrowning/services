@@ -26,12 +26,6 @@ function services_schema() {
         'length'      => 255,
         'not null'    => TRUE,
       ),
-      'title' => array(
-        'description' => 'The title of the endpoint.',
-        'type'        => 'varchar',
-        'length'      => 255,
-        'not null'    => TRUE,
-      ),
       'server' => array(
         'description' => 'The name of the server used in this endpoint.',
         'type'        => 'varchar',
@@ -303,7 +297,7 @@ function services_update_6302() {
 }
 
 /**
- * Update 7303 adds the possibility to configure server settings on a per-endpoint basis.
+ * Update 6303 adds the possibility to configure server settings on a per-endpoint basis.
  * and sets upgrades all new servers to have at least services session enabled.
  */
 function services_update_6303() {
@@ -317,5 +311,13 @@ function services_update_6303() {
     'serialize' => TRUE
   );
   db_add_field($ret, 'services_endpoint', 'server_settings', $new_field);
+  return $ret;
+}
+/**
+ * Update 6304 removes title functionality as it is no longer used.
+ */
+function services_update_6304() {
+  $ret = array();
+  db_drop_field($ret, 'services_endpoint', 'title');
   return $ret;
 }

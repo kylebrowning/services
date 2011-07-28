@@ -83,34 +83,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
 
     $this->assertText('Path to endpoint field is required.',
       t('Endpoint path missing error message.')) ;
-    $this->assertFieldByName('title', $edit['title'],
-      t('Title field remains.')) ;
-    $this->assertFieldByName('server', 'rest_server',
-      t('Server is rest server')) ;
-    $this->assertFieldChecked('edit-services-use-content-permissions',
-      t('Storage use content permission is checked.')) ;
-  }
-
-  /**
-   * Test missing title for endpoint causes an error.
-   */
-  public function testMissingTitle() {
-    $edit = $this->populateEndpointFAPI() ;
-    unset($edit['title']) ;
-    // Create and log in our privileged user.
-    $this->privilegedUser = $this->drupalCreateUser(array(
-      'administer services',
-      'administer nodes',
-      'administer site configuration',      
-    ));
-    $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/build/services/add', $edit, t('Save')) ;
-    $this->assertResponse('200', 'expected 200');
-
-    $this->assertText('Endpoint title field is required.',
-      t('Endpoint title missing error message.')) ;
-    $this->assertFieldByName('name', $edit['name'],
-      t('Name field remains.')) ;
     $this->assertFieldByName('server', 'rest_server',
       t('Server is rest server')) ;
     $this->assertFieldChecked('edit-services-use-content-permissions',
@@ -138,8 +110,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
       t('Server missing error message.'));
     $this->assertFieldByName('name', $edit['name'],
       t('Name field remains.'));
-    $this->assertFieldByName('title', $edit['title'],
-      t('Title field remains.'));
     $this->assertFieldChecked('edit-services-use-content-permissions',
       t('Storage use content permission is checked.')) ;
   }
@@ -159,7 +129,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
   public function populateEndpointFAPI() {
     return array(
       'name'   => 'machinename',
-      'title'  => $this->randomName(20),
       'path'   => $this->randomName(10),
       'server' => 'rest_server',
       'services_use_content_permissions' => TRUE,
@@ -172,7 +141,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
     $endpoint->api_version = 3;
     $endpoint->name = $edit['name'];
-    $endpoint->title = $edit['title'];
     $endpoint->server = $edit['server'];
     $endpoint->path = $edit['path'];
     $endpoint->authentication = array(
