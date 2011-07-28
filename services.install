@@ -26,12 +26,6 @@ function services_schema() {
         'length'      => 255,
         'not null'    => TRUE,
       ),
-      'title' => array(
-        'description' => 'The title of the endpoint.',
-        'type'        => 'varchar',
-        'length'      => 255,
-        'not null'    => TRUE,
-      ),
       'server' => array(
         'description' => 'The name of the server used in this endpoint.',
         'type'        => 'varchar',
@@ -194,4 +188,11 @@ function services_update_7303() {
       ->condition('eid',  $services_endpoint_object->eid)
       ->execute();
   }
+}
+/**
+ * Update 7304 removes the title as it is no longer used
+ */
+function services_update_7399() {
+  $table = 'services_endpoint';
+  db_drop_field($table, 'title');
 }

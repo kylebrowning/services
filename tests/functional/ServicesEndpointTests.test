@@ -64,35 +64,9 @@ class ServicesEndpointTests extends ServicesWebTestCase {
 
     $this->assertText('Path to endpoint field is required.',
       t('Endpoint path missing error message.'));
-    $this->assertFieldByName('title', $edit['title'],
-      t('Title field remains.'));
     $this->assertFieldByName('server', 'rest_server',
       t('Server is rest server'));
   }
-
-  /**
-   * Test missing title for endpoint causes an error.
-   */
-  public function testMissingTitle() {
-    $edit = $this->populateEndpointFAPI();
-    unset($edit['title']);
-    $this->privilegedUser = $this->drupalCreateUser(array(
-      'administer services',
-      'administer content types',
-      'administer site configuration',
-    ));
-    $this->drupalLogin($this->privilegedUser);
-    $this->drupalPost('admin/structure/services/add', $edit, t('Save'));
-    $this->assertResponse('200', 'expected 200');
-
-    $this->assertText('Endpoint title field is required.',
-      t('Endpoint title missing error message.'));
-    $this->assertFieldByName('name', $edit['name'],
-      t('Name field remains.'));
-    $this->assertFieldByName('server', 'rest_server',
-      t('Server is rest server'));
-  }
-
   /**
    * Test missing server for endpoint causes an error.
    */
@@ -112,8 +86,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
       t('Server missing error message.'));
     $this->assertFieldByName('name', $edit['name'],
       t('Name field remains.'));
-    $this->assertFieldByName('title', $edit['title'],
-      t('Title field remains.'));
   }
 
 }

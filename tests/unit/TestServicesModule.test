@@ -136,8 +136,7 @@ class ServicesModuleTests extends DrupalWebTestCase {
   public function testEndpointMenu() {
     // Create the endpoint.
     $endpointSettings = array(
-       'name'   => 'mchnname',
-       'title'  => $this->randomName(20),
+       'name'   => $this->randomName(10),
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
     );
@@ -241,7 +240,6 @@ class ServicesModuleTests extends DrupalWebTestCase {
     $string = 'New Service object should have property ';
     $this->assertTrue(property_exists($results, 'eid'), t($string . 'eid.'));
     $this->assertTrue(property_exists($results, 'name'), t($string . 'name.'));
-    $this->assertTrue(property_exists($results, 'title'), t($string . 'title.'));
     $this->assertTrue(property_exists($results, 'server'), t($string . 'server.'));
     $this->assertTrue(property_exists($results, 'path'  ), t($string . 'path.'));
   }

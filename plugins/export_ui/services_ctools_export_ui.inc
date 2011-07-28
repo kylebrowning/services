@@ -82,15 +82,6 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
     '#value' => $endpoint,
   );
 
-  $form['title'] = array(
-    '#type'          => 'textfield',
-    '#size'          => 24,
-    '#maxlength'     => 255,
-    '#default_value' => $endpoint->title,
-    '#title'         => t('Endpoint title'),
-    '#required'      => TRUE,
-  );
-
   $servers = services_get_servers();
   $server_opts = array(
     '' => t('-- Select a server'),
@@ -208,7 +199,6 @@ function services_ctools_export_ui_form_submit(&$form, &$form_state) {
   $endpoint = $form_state['values']['endpoint_object'];
 
   $endpoint->name   = $form_state['values']['name'];
-  $endpoint->title  = $form_state['values']['title'];
   $endpoint->server = $form_state['values']['server'];
   $endpoint->path   = $form_state['values']['path'];
   $endpoint->debug  = $form_state['values']['debug'];
