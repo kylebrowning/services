@@ -185,7 +185,7 @@ function services_edit_form_endpoint_server_submit($form, $form_state) {
     if (!empty($definition['file'])) {
       call_user_func_array('module_load_include', $definition['file']);
     }
-    $values = call_user_func($definition['submit'], $endpoint, $values);
+    $values = call_user_func_array($definition['submit'], array($endpoint, &$values));
   }
 
   // Store the settings in the endpoint
