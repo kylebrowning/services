@@ -13,8 +13,8 @@
 function _file_resource_definition() {
   return array(
     'file' => array(
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
       'create' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
         'help' => 'Creates a file',
         'callback' => '_file_resource_create',
         'access callback' => '_file_resource_access',
@@ -31,6 +31,7 @@ function _file_resource_definition() {
         ),
       ),
       'retrieve' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
         'help' => 'Retrieves a file',
         'callback' => '_file_resource_retrieve',
         'access callback' => '_file_resource_access',
@@ -55,6 +56,7 @@ function _file_resource_definition() {
         ),
       ),
       'delete' => array(
+        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
         'help' => 'Deletes a file',
         'callback' => '_file_resource_delete',
         'access callback' => '_file_resource_access',
