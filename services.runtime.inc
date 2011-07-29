@@ -94,7 +94,6 @@ class ServicesArgumentException extends ServicesException {
  */
 function services_controller_execute($controller, $args = array(), $options = array()) {
   global $user;
-
   $server_info =  services_server_info_object();
   if ($server_info->debug) {
     watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
@@ -160,12 +159,14 @@ function services_controller_execute($controller, $args = array(), $options = ar
     }
   }
 
-  // Execute the controller callback
+  // Log the arguments
   if ($server_info->debug) {
     watchdog('services', 'Called arguments: <pre>@arguments</pre>', array('@arguments' => print_r($args, TRUE)), WATCHDOG_DEBUG);
   }
-  $result = call_user_func_array($controller['callback'], $args);
 
+  // Execute the controller callback
+  $result = call_user_func_array($controller['callback'], $args);
+  
   // Check if the result should be post-processed
   if (!empty($controller['endpoint']['postprocess'])) {
     foreach ($controller['endpoint']['postprocess'] as $callable) {

@@ -136,7 +136,7 @@ class ServicesModuleTests extends DrupalWebTestCase {
   public function testEndpointMenu() {
     // Create the endpoint.
     $endpointSettings = array(
-       'name'   => $this->randomName(10),
+       'name'   => 'mchnamee',
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
     );
