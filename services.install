@@ -97,21 +97,28 @@ function services_requirements($phase) {
   // Warn users of the possible threat.
   if ($phase == 'runtime') {
     //Pull endpoints that do not have services authentication enabled
-    $result = db_query('SELECT * FROM {services_endpoint} AS se WHERE se.authentication NOT LIKE "%s"', '%services%');
+    $result = db_query("SELECT * FROM {services_endpoint} AS se WHERE se.authentication NOT LIKE '%s'", '%services%');
     $items = array();
     $has_endpoint = FALSE;
     while ($endpoint = db_fetch_object($result)) {
       $has_endpoint = TRUE;
+      print_r($endpoint);
       $items[] = l($endpoint->name, 'admin/build/services/list/'. $endpoint->name);
     }
     // theme the endpoints list
     $endpoints = theme('item_list', array('items' => $items));
     // Only display the list if we have at least one endpoint without services authentication.
-    if ($has_endpoint) {
+    if (count($items)) {
       $requirements['services'] = array(
-        'description' => $t('Services authentication mechanismhas not been enabled for the following endpoints. Requests to these endpoints will always be anonymous.'),
+        'description' => $t('Services authentication mechanism has not been enabled for the following endpoints. Requests to these endpoints will always be anonymous.'),
         'severity' => REQUIREMENT_ERROR, 
         'value' => $endpoints,
+        'title' => 'Services Authentication Mechanism',
+      );
+    } else {
+      $requirements['services'] = array(
+        'severity' => REQUIREMENT_OK, 
+        'value' => 'Enabled for all Endpoints',
         'title' => 'Services Authentication Mechanism',
       );
     }
