@@ -436,10 +436,11 @@ function _node_resource_load_node_files($nid, $include_file_contents) {
  */
 function _node_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]['node'])) {
-    $args[0] = $args[0]['node'];
+  if (is_array($args[0])) {
+    if (key_exists('node', $args[0])) {
+      $args[0] = $args[0]['node'];
+    }
   }
-
   // Make sure we have an object or this all fails, some servers can
   // mess up the types.
   if (is_array($args[0])) {

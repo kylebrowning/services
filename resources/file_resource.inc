@@ -322,10 +322,11 @@ function _file_resource_delete($fid) {
  */
 function _file_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]['file']) && count($args[0]) == 1) {
-    $args[0] = $args[0]['file'];
+  if (is_array($args[0])) {
+    if (key_exists('file', $args[0]) && count($args[0]) == 1) {
+      $args[0] = $args[0]['file'];
+    }
   }
-
   global $user;
   if (user_access('administer files')) {
     return TRUE;

@@ -353,8 +353,10 @@ function _comment_resource_count_new($nid, $since = 0) {
  */
 function _comment_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]['comment']) || isset($args[0]['data'])) {
-    $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
+  if (is_array($args[0])) { 
+    if (key_exists('comment', $args[0]) || key_exists('data', $args[0])) {
+      $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
+    }
   }
 
   if ($op == 'view' && !isset($args[0])) {
