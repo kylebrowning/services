@@ -436,7 +436,7 @@ function _user_resource_index($page, $fields, $parameters) {
  */
 function _user_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]['account']) || isset($args[0]['data'])) {
+  if (key_exists('account', $args[0]) || key_exists('data', $args[0])) {
     $args[0] = $args[0]['account'] ? $args[0]['account'] : $args[0]['data'];
   }
 
