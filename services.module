@@ -328,7 +328,7 @@ function services_get_resources($endpoint_name = '') {
 function services_services_resources() {
   module_load_include('resource_build.inc', 'services');
   // Return resources representing legacy services
-  return array_merge(_services_core_resources(), _services_legacy_services_as_resources());
+  return _services_core_resources();
 }
 
 /**

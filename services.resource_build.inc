@@ -203,32 +203,3 @@ function _services_core_resources() {
 
   return $resources;
 }
-
-/**
- * Invokes all hook_service and translates them to actions on resources.
- *
- * @return array
- */
-function _services_legacy_services_as_resources() {
-  $services = $methods = module_invoke_all('service');
-  $resources = array();
-
-  foreach ($services as $service) {
-    $signature = preg_split('/\./', $service['method']);
-
-    $controller = $service;
-    $controller['args'] = array();
-
-    if (!empty($service['args'])) {
-      foreach ($service['args'] as $arg) {
-        $arg['source'] = array(
-          'data' => $arg['name'],
-        );
-        $controller['args'][] = $arg;
-      }
-    }
-
-    $resources['service_' . $signature[0]]['actions'][$signature[1]] = $controller;
-  }
-  return $resources;
-}
