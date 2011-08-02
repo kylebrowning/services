@@ -39,6 +39,38 @@ class ServicesWebTestCase extends DrupalWebTestCase {
                    '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
+  protected function servicesPostFile($url, $filepath, $headers = array()) {
+    $options = array();
+    // Add .php to get serialized response.
+    $url = $this->getAbsoluteUrl($url) . '.php';
+
+    // Otherwise Services will reject arguments.
+    $headers[] = "Content-type: multipart/form-data";
+    // Prepare arguments.
+    $filepath = variable_get('file_public_path', '') . '/' . file_uri_target($filepath);
+    $post = array('files[file_contents]'=>'@'.$filepath);
+
+    $content = $this->curlExec(array(
+      CURLOPT_URL => $url,
+      CURLOPT_POST => TRUE,
+      CURLOPT_POSTFIELDS => $post,
+      CURLOPT_HTTPHEADER => $headers,
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE,
+      CURLOPT_FOLLOWLOCATION => TRUE,
+      CURLOPT_VERBOSE => TRUE,
+    ));
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
+    $this->verbose('POST request to: ' . $url .
+                   '<hr />File Name: ' . highlight_string('<?php . ' . var_export($filepath, TRUE), TRUE) .
+                   '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
+                   '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
+                   '<hr />Raw response: ' . $content);
+    return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
+  }
 
   protected function servicesPost($url, $data = array(), $headers = array()) {
     $options = array();
@@ -195,6 +227,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           'application/plist' => TRUE,
           'application/plist+xml' => TRUE,
           'application/x-www-form-urlencoded' => TRUE,
+          'multipart/form-data' => TRUE,
         ),
       ),
     );
@@ -238,6 +271,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
           'index' => array(
+            'enabled' => 1,
+          ),
+        ),
+        'actions' => array(
+          'create_raw' => array(
             'enabled' => 1,
           ),
         ),

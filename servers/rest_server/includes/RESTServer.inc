@@ -473,6 +473,9 @@ class RESTServer {
     return json_decode(self::contentFromStream($handle), TRUE);
   }
 
+  public static function parseFile($handle) {
+    return self::contentFromStream($handle);
+  }
   public static function parseYAML($handle) {
     module_load_include('php', 'rest_server', 'lib/spyc');
     return Spyc::YAMLLoadString(self::contentFromStream($handle));

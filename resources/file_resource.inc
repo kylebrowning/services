@@ -15,7 +15,7 @@ function _file_resource_definition() {
     'file' => array(
       'create' => array(
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
-        'help' => 'Creates a file',
+        'help' => 'Creates a file with base64 encoded data',
         'callback' => '_file_resource_create',
         'access callback' => '_file_resource_access',
         'access arguments' => array('create'),
@@ -75,6 +75,7 @@ function _file_resource_definition() {
       'index' => array(
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
         'callback' => '_file_resource_index',
+        'help' => 'Lists all files',
         'args' => array(
           array(
             'name' => 'page',
@@ -105,6 +106,16 @@ function _file_resource_definition() {
         'access arguments' => array('index'),
         'access arguments append' => TRUE,
       ),
+      'actions' => array(
+        'create_raw' => array(
+          'help' => 'Creates a file with raw data.',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/file_resource'),
+          'callback' => '_file_resource_create_raw',
+          'access callback' => '_file_resource_access',
+          'access arguments' => array('create_raw'),
+          'access arguments append' => TRUE,
+        ),
+      ),
     ),
   );
 }
@@ -113,7 +124,7 @@ function _file_resource_definition() {
  * Adds a new file and returns the fid.
  *
  * @param $file
- *   An object as representing the file.
+ *   An object as representing the file with a base64 encoded $file->file
  * @return
  *   Unique identifier for the file (fid) or errors if there was a problem.
  */
@@ -170,7 +181,34 @@ function _file_resource_create($file) {
     'uri' => services_resource_uri(array('file', $file->fid)),
   );
 }
-
+/**
+ * Adds new files and returns the files array.
+ *
+ * @return
+ *   Array of file objects with URIS to access them
+ */
+function _file_resource_create_raw() {
+  $validators = array(
+    'file_validate_extensions' => array(),
+    'file_validate_size' => array(),
+  );
+  $files = array();
+  foreach ($_FILES['files']['name'] as $field_name => $file_name) {
+    $file = file_save_upload($field_name, $validators, file_default_scheme() . "://");
+    // Required to be able to reference this file.
+    if ($file->fid) {
+      file_usage_add($file, 'services', 'files', $file->fid);
+      $files[] = array(
+        'fid' => $file->fid,
+        'uri' => services_resource_uri(array('file', $file->fid)),
+      ); 
+    } 
+    else {
+      return services_error(t('An unknown error occured', 500));
+    }
+  }
+  return $files;
+}
 /**
  * Get a given file
  *
@@ -252,13 +290,12 @@ function _file_resource_access($op = 'view', $args = array()) {
 
   global $user;
 
-  if ($op=='create') {
+  if (($op != 'create' && $op != 'create_raw') && $op != 'index') {
+    $file = file_load($args[0]);
+  } else if ($op == 'create' && $op != 'create_raw') {
     $file = (object)$args[0];
   }
-  else {
-    $file = file_load($args[0]);
-  }
-  if (empty($file) && $op != 'index') {
+  if (empty($file) && $op != 'index' && ($op != 'create' && $op != 'create_raw')) {
     return services_error(t('There is no file with ID @fid', array('@fid' => $args[0])), 406);
   }
   switch ($op) {
@@ -269,6 +306,8 @@ function _file_resource_access($op = 'view', $args = array()) {
       return $file->uid == $user->uid && user_access('get own binary files');
       break;
     case 'create':
+    case 'create_raw':
+      return user_access('save file information');
     case 'delete':
       return $file->uid == $user->uid && user_access('save file information');
       break;
