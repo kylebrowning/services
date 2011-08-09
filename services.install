@@ -174,7 +174,7 @@ function services_update_7303() {
     'type' => 'blob',
     'size' => 'big',
     'not null' => TRUE,
-    'serialize' => TRUE
+    'serialize' => TRUE,
     'initial' => '',
   ));
   // Fetch all endpoints that currently exist
