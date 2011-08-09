@@ -31,7 +31,6 @@ class ServicesParserTests extends ServicesWebTestCase {
     $endpoint->disabled = FALSE;
     $endpoint->api_version = 3;
     $endpoint->name = $edit['name'];
-    $endpoint->title = $edit['title'];
     $endpoint->server = $edit['server'];
     $endpoint->path = $edit['path'];
     $endpoint->authentication = array(
