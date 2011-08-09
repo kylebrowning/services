@@ -384,7 +384,7 @@ function _user_resource_logout() {
     return services_error(t('User is not logged in.'), 406);
   }
 
-  watchdog('user', 'Session closed for %name.', array('%name' => theme('placeholder', $user->name)));
+  watchdog('user', 'Session closed for %name.', array('%name' => drupal_placeholder($user->name)));
 
   // Destroy the current session:
   session_destroy();
