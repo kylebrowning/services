@@ -175,6 +175,7 @@ function services_update_7303() {
     'size' => 'big',
     'not null' => TRUE,
     'serialize' => TRUE
+    'initial' => '',
   ));
   // Fetch all endpoints that currently exist
   $result = db_select('services_endpoint', 'se')
