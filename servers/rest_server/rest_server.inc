@@ -51,6 +51,7 @@ function _rest_server_settings_checkboxes_attributes($settings) {
       $default[] = $key;
     }
   }
+  ksort($options);
   return array(
     '#options' => $options,
     '#default_value' => $default,
