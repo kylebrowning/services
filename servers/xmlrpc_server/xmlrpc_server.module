@@ -71,7 +71,7 @@ function xmlrpc_server_call_wrapper() {
       if($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
         $args[$index] = $arg['default value'];
       } else {
-        if($arg['optional'] == FALSE) {
+        if($arg['optional'] == FALSE && !isset($args[$index])) {
           return services_error(t('Missing required argument @arg', array(
               '@arg' => $arg['name'],
             )), 401);
