@@ -105,18 +105,21 @@ function services_requirements($phase) {
       $items[] = l($endpoint->name, 'admin/structure/services/list/'. $endpoint->name .'/edit');
     }
     // theme the endpoints list
-    $endpoints = theme('item_list', array('items' => $items));
+    $endpoints = '';
+    if (!empty($items)) {
+      $endpoints = theme('item_list', array('items' => $items));
+    }
     // Only display the list if we have at least one endpoint without services authentication.
     if (count($items)) {
       $requirements['services'] = array(
         'description' => $t('Services authentication mechanism has not been enabled for the following endpoints. Requests to these endpoints will always be anonymous.'),
-        'severity' => REQUIREMENT_ERROR, 
+        'severity' => REQUIREMENT_ERROR,
         'value' => $endpoints,
         'title' => 'Services Authentication Mechanism',
       );
     } else {
       $requirements['services'] = array(
-        'severity' => REQUIREMENT_OK, 
+        'severity' => REQUIREMENT_OK,
         'value' => 'Enabled for all Endpoints',
         'title' => 'Services Authentication Mechanism',
       );
