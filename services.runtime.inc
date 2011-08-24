@@ -178,6 +178,9 @@ function services_controller_execute($controller, $args = array(), $options = ar
     $user = $original_user;
     drupal_save_session($old_state);  
   }
+  if ($server_info->debug) {
+    watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
+  }
   return $result;
 }
 
