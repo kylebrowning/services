@@ -49,7 +49,7 @@ function _file_resource_definition() {
             'name'         => 'file_contents',
             'type'         => 'int',
             'description'  => t('To return file contents or not.'),
-            'source'       => 'data',
+            'source'       => array('param' => 'file_contents'),
             'optional'     => FALSE,
             'default value' => TRUE,
           ),
@@ -155,7 +155,7 @@ function _file_resource_index($page, $fields, $parameters) {
  */
 function _file_resource_create($file) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($file['file']) && count($file) == 1) {
+  if (isset($file['file'])) {
     $file = $file['file'];
   }
 
