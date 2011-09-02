@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Implements hook_server_info().
+ */
 function rest_server_server_info() {
   return array(
     'name' => 'REST',
@@ -12,17 +15,17 @@ function rest_server_server_info() {
   );
 }
 
+/**
+ * Starting point of the REST server.
+ *
+ * @return type
+ */
 function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
-  $canonical_path = trim(drupal_substr($_GET['q'], drupal_strlen($endpoint_path)), '/');
-  $canonical_path = explode('/', $_GET['q']);
-  $endpoint_path_count = count(explode('/', $endpoint_path));
-  for ($x = 0; $x < $endpoint_path_count; $x++) {
-    array_shift($canonical_path);
-  }
-  $canonical_path = implode('/', $canonical_path);
+
+  $canonical_path = str_replace($endpoint_path . '/', '', $_GET['q']);
   if (empty($canonical_path)) {
-    return '';
+    return;
   }
 
   try {
