@@ -403,28 +403,28 @@ class RESTServer {
     return $view->render();
   }
 
-  private function requestParser($mime = NULL, $controller = NULL) {
+  /**
+   * Get best match parser for $controller based on $mime type.
+   */
+  private function requestParser($mime, $controller = NULL) {
     // Check if the controller has declared support for parsing the mime type.
-    if ($mime && $controller && !empty($controller['rest request parsers'])) {
+    if ($controller && !empty($controller['rest request parsers'])) {
       $parser = $this->matchParser($mime, $controller['rest request parsers'], TRUE);
       if ($parser) {
         return $parser;
       }
     }
 
-    if ($mime) {
-      $parsers = rest_server_request_parsers();
+    $parsers = rest_server_request_parsers();
 
-      // Remove parsers that have been disabled for this endpoint.
-      foreach (array_keys($parsers) as $key) {
-        if (!$this->settings['parsers'][$key]) {
-          unset($parsers[$key]);
-        }
+    // Remove parsers that have been disabled for this endpoint.
+    foreach (array_keys($parsers) as $key) {
+      if (!$this->settings['parsers'][$key]) {
+        unset($parsers[$key]);
       }
-
-      return $this->matchParser($mime, $parsers);
     }
-    return FALSE;
+
+    return $this->matchParser($mime, $parsers);
   }
 
   /**
