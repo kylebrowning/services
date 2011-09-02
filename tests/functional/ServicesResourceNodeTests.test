@@ -252,8 +252,8 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
   }
 
   /**
-  * Testing node_resource Update.
-  */
+   * Testing node_resource Update.
+   */
   public function testEndpointResourceNodeUpdate() {
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
@@ -273,6 +273,13 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
     $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update');
     $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
+
+    // Try to update the node without node type.
+    $node_update_no_type = $node_update;
+    unset($node_update_no_type['type']);
+    $node_update_no_type['title'] = $this->randomName();
+    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update_no_type);
+    $this->assertNotEqual($responseArray['code'], 200, t('Can\'t update node without specifying node type'), 'NodeResource: Update');
   }
 
   /**

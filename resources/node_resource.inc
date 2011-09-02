@@ -217,9 +217,9 @@ function _node_resource_create($node) {
     $node = $node['node'];
   }
 
-  if (!isset($node['type'])) {
-    return services_error(t('Missing node type'), 406);
-  }
+  // Validate the node. If there is validation error Exception will be thrown
+  // so code below won't be executed.
+  _node_resource_validate_type($node);
 
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
@@ -228,16 +228,9 @@ function _node_resource_create($node) {
   $form_state['values'] = $node;
   $form_state['values']['op'] = t('Save');
 
-  // Wanted to return a gracefull error instead of a blank nid, this should
-  // allow for that.
-  $types = node_type_get_types();
   $node_type = $node['type'];
-  if (isset($types[$node_type])) {
-    drupal_form_submit($node_type . '_node_form', $form_state, (object)$node);
-  }
-  else {
-    return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
-  }
+
+  drupal_form_submit($node_type . '_node_form', $form_state, (object)$node);
 
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
@@ -250,6 +243,25 @@ function _node_resource_create($node) {
     $node['uri'] = $uri;
   }
   return $node;
+}
+
+/*
+ * Helper function to validate node type information.
+ *
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ */
+function _node_resource_validate_type($node) {
+  if (!isset($node['type'])) {
+    return services_error(t('Missing node type'), 406);
+  }
+  // Wanted to return a gracefull error instead of a blank nid, this should
+  // allow for that.
+  $types = node_type_get_types();
+  $node_type = $node['type'];
+  if (!isset($types[$node_type])) {
+    return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
+  }
 }
 
 /**
@@ -278,6 +290,11 @@ function _node_resource_update($nid, $node) {
 
   $old_node = node_load($nid);
   node_object_prepare($old_node);
+
+  // Validate the node. If there is validation error Exception will be thrown
+  // so code below won't be executed.
+  _node_resource_validate_type($node);
+
   if ($old_node->nid) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
@@ -288,7 +305,6 @@ function _node_resource_update($nid, $node) {
     $form_state['values']['op'] = t('Save');
     $form_state['node'] = $old_node;
     drupal_form_submit($node['type'] . '_node_form', $form_state, $old_node);
-
 
     if ($errors = form_get_errors()) {
       return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
@@ -375,7 +391,7 @@ function _node_resource_index($page, $fields, $parameters) {
  */
 function _node_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) {  
+  if (is_array($args[0])) {
     if (key_exists('node', $args[0])) {
       $args[0] = $args[0]['node'];
     }
