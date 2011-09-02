@@ -68,7 +68,7 @@ function _services_oauth_authenticate_call($settings, $method, $args) {
     }
   }
   catch (OAuthException $e) {
-    drupal_set_header(sprintf('WWW-Authenticate: OAuth realm="%s"', url('', array('absolute' => TRUE))));
+    drupal_add_http_header('WWW-Authenticate', sprintf('OAuth realm="%s"', url('', array('absolute' => TRUE))));
     return $e->getMessage();
   }
 }
