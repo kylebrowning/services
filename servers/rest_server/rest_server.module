@@ -151,11 +151,15 @@ function rest_server_setup_settings($settings = array()) {
  * @return void
  */
 function _rest_server_add_default_and_remove_unknown(&$array, $keys, $default) {
+  // Add default values to all keys that do not
+  // exist in $array but exist in $keys.
   foreach ($keys as $k) {
     if (!isset($array[$k])) {
-      $array[$k] = TRUE;
+      $array[$k] = $default;
     }
   }
+  // Unset all values that key exist in $array
+  // but does not exist in $keys.
   foreach (array_keys($array) as $key) {
     if (!in_array($key, $keys)) {
       unset($array[$key]);
