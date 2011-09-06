@@ -178,7 +178,7 @@ function _user_resource_retrieve($uid) {
 /**
  * Create a new user.
  *
- * This function uses drupal_form_submit() and as such exepects all input to match
+ * This function uses drupal_form_submit() and as such expects all input to match
  * the submitting form in question.
  *
  * @param $account
@@ -240,7 +240,7 @@ function _user_resource_create($account) {
 /**
  * Update an existing user.
  *
- * This function uses drupal_form_submit() and as such exepects all input to match
+ * This function uses drupal_form_submit() and as such expects all input to match
  * the submitting form in question.
  *
  * @param $uid
