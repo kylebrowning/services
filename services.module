@@ -500,9 +500,23 @@ function services_resource_build_index_list($results, $type, $field) {
   foreach ($results as $result) {
     if ($uri = services_resource_uri(array($type, $result->{$field}))) {
       $result->uri = $uri;
+      if ($type == 'user') {
+        services_remove_user_data($result);
+      }
     }
     $items[] = $result;
   }
 
   return $items;
+}
+
+/**
+ *  Helper function to remove data from the user object.
+ *
+ *  @param $account
+ *    Object user object.
+ */
+function services_remove_user_data(&$account) {
+  // Remove the users password from the account object.
+  unset($account->pass);
 }
