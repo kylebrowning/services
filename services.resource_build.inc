@@ -161,7 +161,7 @@ function _services_process_resource($name, &$resource, &$controllers) {
 
     foreach (array_keys($resource[$class]) as $action_name) {
       $class_singular = trim($class, 's');
-      $controllers[$name . '/' . $class_singular . '/' . $action_name] = &$resource['relationships'][$action_name];
+      $controllers[$name . '/' . $class_singular . '/' . $action_name] = &$resource[$class][$action_name];
     }
   }
 }
