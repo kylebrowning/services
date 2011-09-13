@@ -66,16 +66,14 @@ function xmlrpc_server_call_wrapper() {
   $controller = services_controller_get($method_name, $endpoint);
 
   // Add in default arguments if arguments still dont exist.
-  if(is_array($controller['args'])) {
-    foreach($controller['args'] as $index => $arg) {
-      if($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
+  if (is_array($controller['args'])) {
+    foreach ($controller['args'] as $index => $arg) {
+      if ($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
         $args[$index] = $arg['default value'];
-      } else {
-        if($arg['optional'] == FALSE && !isset($args[$index])) {
+      } elseif ($arg['optional'] == FALSE && !isset($args[$index])) {
           return services_error(t('Missing required argument @arg', array(
               '@arg' => $arg['name'],
             )), 401);
-        }
       }
     }
   }
