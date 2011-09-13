@@ -130,7 +130,9 @@ function _file_resource_definition() {
  */
 function _file_resource_create($file) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($file['file'])) {
+  // $file['file'] can be base64 encoded file so we check whether it is
+  // file array or file data.
+  if (isset($file['file']) && is_array($file['file'])) {
     $file = $file['file'];
   }
 
@@ -167,7 +169,7 @@ function _file_resource_create($file) {
   // Update the timestamp to the current time, otherwise the file could
   // get deleted on the next cron run if its status is set to 0.
   $file->timestamp = time();
-  
+
   // Write the file
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
     return services_error(t("Could not write file to destination"), 500);
@@ -201,8 +203,8 @@ function _file_resource_create_raw() {
       $files[] = array(
         'fid' => $file->fid,
         'uri' => services_resource_uri(array('file', $file->fid)),
-      ); 
-    } 
+      );
+    }
     else {
       return services_error(t('An unknown error occured', 500));
     }

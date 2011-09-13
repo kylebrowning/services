@@ -60,7 +60,6 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
       file_save($file);
       $files[$file->fid] = $file;
     }
-    debug($files);
     // Get the content.
     $page_count = ceil(count($files) / 20);
     $retrieved_files = array();
@@ -83,14 +82,14 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     sort($expected_fids);
     $retrieved_fids = array_keys($retrieved_files);
     sort($retrieved_fids);
-    
+
     $this->assertEqual($expected_fids, $retrieved_fids, t('Retrieved all files'));
 
     // The n+1 page should be empty.
     $responseArray = $this->servicesGet($this->endpoint->path . '/file', array('page' => $page_count + 1));
     $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
   }
-  
+
   /**
    * Test create method.
    */
