@@ -219,6 +219,10 @@ function _comment_resource_create($comment) {
     $comment = $comment['comment'];
   }
 
+  if (empty($comment['nid'])) {
+    return services_error(t('A nid must be provided'));
+  }
+
   // Setup form_state
   $form_state = array();
   $form_state['values'] = $comment;
@@ -228,6 +232,11 @@ function _comment_resource_create($comment) {
     'nid' => $comment['nid'],
     'cid' => NULL,
   );
+
+  if (!empty($comment['pid'])) {
+    $comment_empty['pid'] = $comment['pid'];
+  }
+
 
   $ret = drupal_execute('comment_form', $form_state, $comment_empty);
 
