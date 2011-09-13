@@ -182,13 +182,24 @@ function _comment_resource_create($comment) {
     $comment = $comment['comment'];
   }
 
+  if (empty($comment['nid'])) {
+    return services_error(t('A nid must be provided'));
+  }
+
   $form_state['values'] = $comment;
   $form_state['values']['op'] = t('Save');
 
-  $comment_empty = (object) array(
+  $comment_empty = array(
     'nid' => $comment['nid'],
     'cid' => NULL,
   );
+
+  // If a pid is provide use it
+  if (!empty($comment['pid'])) {
+    $comment_empty['pid'] = $comment['pid'];
+  }
+
+  $comment_empty = (object) $comment_empty;
 
   $ret = drupal_form_submit('comment_form', $form_state, $comment_empty);
 
