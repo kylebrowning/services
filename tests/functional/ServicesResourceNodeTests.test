@@ -360,6 +360,13 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       $this->assertTrue($nodeAfterUpdate->title == $node_update['title'], t('Title was the same'), 'NodeResource: Update');
       $this->assertTrue($nodeAfterUpdate->body == $node_update['body'], t('Body was the same'), 'NodeResource: Update');
     }
+    
+    // Try to update the node without node type.
+    $node_update_no_type = $node_update;
+    unset($node_update_no_type['type']);
+    $node_update_no_type['title'] = $this->randomName();
+    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update_no_type);
+    $this->assertNotEqual($responseArray['code'], 200, t('Can\'t update node without specifying node type'), 'NodeResource: Update');
   }
 
   /**

@@ -250,9 +250,9 @@ function _node_resource_create($node) {
     $node = $node['node'];
   }
 
-  if (!isset($node['type'])) {
-    return services_error('Missing node type', 406);
-  }
+  // Validate the node. If there is validation error Exception will be thrown
+  // so code below won't be executed.
+  _node_resource_validate_type($node);
 
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
@@ -287,6 +287,25 @@ function _node_resource_create($node) {
   return $node;
 }
 
+/*
+ * Helper function to validate node type information.
+ *
+ * @param $node
+ *   Array representing the attributes a node edit form would submit.
+ */
+function _node_resource_validate_type($node) {
+  if (!isset($node['type'])) {
+    return services_error(t('Missing node type'), 406);
+  }
+  // Wanted to return a gracefull error instead of a blank nid, this should
+  // allow for that.
+  $types = node_get_types();
+  $node_type = $node['type'];
+  if (!isset($types[$node_type])) {
+    return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
+  }
+}
+
 /**
  * Updates a new node based on submitted values.
  *
@@ -308,6 +327,10 @@ function _node_resource_update($nid, $node) {
   if (isset($node['node'])) {
     $node = $node['node'];
   }
+
+  // Validate the node. If there is validation error Exception will be thrown
+  // so code below won't be executed.
+  _node_resource_validate_type($node);
 
   $node['nid'] = $nid;
 
