@@ -275,7 +275,7 @@ function _file_resource_index($page, $fields, $parameters) {
 
   services_resource_build_index_query($file_select, $page, $fields, $parameters);
 
-  $results = $file_select->execute();
+  $results = services_resource_execute_index_query($file_select);
 
   // Put together array of matching files to return.
   return services_resource_build_index_list($results, 'file', 'fid');

@@ -430,7 +430,7 @@ function _user_resource_index($page, $fields, $parameters) {
 
   services_resource_build_index_query($user_select, $page, $fields, $parameters);
 
-  $results = $user_select->execute();
+  $results = services_resource_execute_index_query($user_select);
 
   return services_resource_build_index_list($results, 'user', 'uid');
 }

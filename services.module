@@ -520,3 +520,18 @@ function services_remove_user_data(&$account) {
   // Remove the users password from the account object.
   unset($account->pass);
 }
+
+/**
+ * Helper function to execute a index query.
+ *
+ * @param $query
+ *   Object dbtng query object.
+ */
+function services_resource_execute_index_query($query) {
+  try {
+    return $query->execute();
+  }
+  catch (Exception $e) {
+    return services_error(t('Invalid query provided, double check that the fields and parameters you defined are correct and exist. ' . $e->message()), 406);
+  }
+}

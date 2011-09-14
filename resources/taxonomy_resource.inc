@@ -568,7 +568,7 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
 
   services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters);
 
-  $results = $taxonomy_select->execute();
+  $results = services_resource_execute_index_query($taxonomy_select);
 
   return services_resource_build_index_list($results, 'taxonomy_term', 'tid');
 }

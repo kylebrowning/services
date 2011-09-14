@@ -373,7 +373,7 @@ function _node_resource_index($page, $fields, $parameters) {
     $node_select->condition('status', 1);
   }
 
-  $results = $node_select->execute();
+  $results = services_resource_execute_index_query($node_select);
 
   return services_resource_build_index_list($results, 'node', 'nid');
 }

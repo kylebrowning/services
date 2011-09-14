@@ -322,7 +322,7 @@ function _comment_resource_index($page, $fields, $parameters) {
     $comment_select->condition('status', COMMENT_PUBLISHED);
   }
 
-  $results = $comment_select->execute();
+  $results = services_resource_execute_index_query($comment_select);
 
   return services_resource_build_index_list($results, 'comment', 'cid');
 }
