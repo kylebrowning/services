@@ -404,7 +404,7 @@ class RESTServer {
   private function requestParser($mime, $controller = NULL) {
     // Check if the controller has declared support for parsing the mime type.
     if ($controller && !empty($controller['rest request parsers'])) {
-      $parser = $this->matchParser($mime, $controller['rest request parsers'], TRUE);
+      $parser = $this->matchParser($mime, $controller['rest request parsers']);
       if ($parser) {
         return $parser;
       }
@@ -433,7 +433,7 @@ class RESTServer {
     return $mimeparse;
   }
 
-  private function matchParser($mime, $parsers, $allow_all_parsers = FALSE) {
+  private function matchParser($mime, $parsers) {
     $mimeparse = $this->mimeParse();
     $mime_type = $mimeparse->best_match(array_keys($parsers), $mime);
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
