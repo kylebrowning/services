@@ -221,14 +221,6 @@ function services_endpoint_load($name) {
  */
 function services_endpoint_load_all() {
   ctools_include('export');
-  if (!ctools_export_load_object('services_endpoint')) {
-    $result = db_query("SELECT * FROM {services_endpoint}");
-    $matches = array();
-    while ($endpoint = db_fetch_object($result)) {
-      $matches[] = $endpoint;
-    }
-    return $matches;
-  }
   return ctools_export_load_object('services_endpoint');
 }
 
@@ -242,6 +234,7 @@ function services_endpoint_save($endpoint) {
     $endpoint = $endpoint['build_info']['args'][0];
   }
   ctools_export_crud_save('services_endpoint', $endpoint);
+  ctools_export_load_object_reset('services_endpoint');
   menu_rebuild();
   cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
 }
@@ -253,6 +246,7 @@ function services_endpoint_save($endpoint) {
  */
 function services_endpoint_delete($endpoint) {
   ctools_export_crud_delete('services_endpoint', $endpoint);
+  ctools_export_load_object_reset('services_endpoint');
   menu_rebuild();
   cache_clear_all('services:' . $endpoint->name . ':', 'cache', TRUE);
 }
@@ -264,8 +258,7 @@ function services_endpoint_delete($endpoint) {
  */
 function services_endpoint_export($endpoint, $indent = '') {
   ctools_include('export');
-  $output = ctools_export_object('services_endpoint', $endpoint, $indent);
-  return $output;
+  return ctools_export_object('services_endpoint', $endpoint, $indent);
 }
 
 
