@@ -106,21 +106,16 @@ class RESTServer {
       }
 
       // Get the best matching format, default to json
+      $response_format = 'json';
       if (isset($_SERVER['HTTP_ACCEPT'])) {
         $mime = $this->mimeParse();
         $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
-      }
-
-      if (isset($mime_type) && $mime_type) {
         $response_format = $mime_map[$mime_type];
-      }
-      else {
-        $response_format = 'json';
       }
     }
 
     // Check if we support the response format and determine the mime type
-    if (empty($mime_type) && !empty($response_format) && isset($formats[$response_format])) {
+    if (empty($mime_type) && isset($formats[$response_format])) {
       $formatter = $formats[$response_format];
       if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
         $mime_type = $formatter['mime types'][0];
