@@ -34,7 +34,7 @@ function _services_build_resources($endpoint_name = '') {
   // Process the resources, and collect all controllers in the process
   $controllers = array();
   foreach ($resources as $name => &$resource) {
-    $controllers = _services_process_resource($name, $resource, $controllers);
+    _services_process_resource($name, $resource, $controllers);
   }
 
   // Make sure that we got a access callback for all resources
@@ -140,38 +140,27 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
  *  An that will be fillew with all the controllers for the resource.
  * @return void
  */
-function _services_process_resource($name, &$resource, $controllers) {
+function _services_process_resource($name, &$resource, &$controllers) {
   $resource['name'] = $name;
 
-  $keys = array('retrieve', 'create', 'update', 'delete');
-  foreach ($keys as $key) {
-    if (isset($resource[$key])) {
-      $controllers[$name . '/' . $key] = &$resource[$key];
+  // CRUD operations.
+  foreach (array('retrieve', 'create', 'update', 'delete', 'index') as $op) {
+    if (isset($resource[$op])) {
+      $controllers[$name . '/' . $op] = &$resource[$op];
     }
   }
 
-  if (isset($resource['index'])) {
-    $controllers[$name . '/index'] = &$resource['index'];
-  }
+  // Actions and relationships.
+  foreach (array('relationships', 'actions', 'targeted_actions') as $class) {
+    if (!isset($resource[$class])) {
+      continue;
+    }
 
-  if (isset($resource['relationships'])) {
-    foreach ($resource['relationships'] as $relname => $rel) {
-      $controllers[$name . '/relationship/' . $relname] = &$resource['relationships'][$relname];
+    foreach (array_keys($resource[$class]) as $action_name) {
+      $class_singular = trim($class, 's');
+      $controllers[$name . '/' . $class_singular . '/' . $action_name] = &$resource[$class][$action_name];
     }
   }
-
-  if (isset($resource['actions'])) {
-    foreach ($resource['actions'] as $actname => $act) {
-      $controllers[$name . '/action/' . $actname] = &$resource['actions'][$actname];
-    }
-  }
-
-  if (isset($resource['targeted_actions'])) {
-    foreach ($resource['targeted_actions'] as $actname => $act) {
-      $controllers[$name . '/targeted_actions/' . $actname] = &$resource['targeted_actions'][$actname];
-    }
-  }
-  return $controllers;
 }
 
 /**
