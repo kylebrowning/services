@@ -60,9 +60,7 @@ function _services_build_resources($endpoint_name = '') {
     }
 
     // Apply any aliases from endpoint
-    if (!empty($endpoint)) {
-      $aliased = array();
-    }
+    $aliased = array();
     foreach ($resources as $key => $def) {
       if (!empty($def['endpoint']['alias'])) {
         $aliased[$def['endpoint']['alias']] = $def;
