@@ -205,11 +205,6 @@ function services_endpoint_load($name) {
   if (isset($result[$name])) {
     return $result[$name];
   }
-  $result = db_query("SELECT * FROM {services_endpoint} WHERE name = '%s'", $name);
-  $matches = array();
-  while ($endpoint = db_fetch_object($result)) {
-    return $endpoint;
-  }
   return FALSE;
 }
 
