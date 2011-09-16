@@ -110,7 +110,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   services_set_server_info('original_user', $original_user);
 
-  // Check authentication
+  // Check authentication.
   if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
     $endpoint_name = services_get_server_info('endpoint');
     $endpoint = services_endpoint_load($endpoint_name);
@@ -122,12 +122,12 @@ function services_controller_execute($controller, $args = array(), $options = ar
     }
   }
 
-  // Load the proper file
+  // Load the proper file.
   if (!empty($controller['file']) && $file = $controller['file']) {
     module_load_include($file['type'], $file['module'], (isset($file['name']) ? $file['name'] : NULL));
   }
 
-  // Construct access arguments array
+  // Construct access arguments array.
   if (isset($controller['access arguments'])) {
     $access_arguments = $controller['access arguments'];
     if (isset($controller['access arguments append']) && $controller['access arguments append']) {
@@ -139,7 +139,13 @@ function services_controller_execute($controller, $args = array(), $options = ar
     $access_arguments = $args;
   }
 
-  // Call default or custom access callback
+  // Load the proper file for the access callback.
+  if (!empty($controller['access callback file']) && $access_cb_file = $controller['access callback file']) {
+    $access_cb_file_name = isset($access_cb_file['name']) ? $access_cb_file['name'] : NULL;
+    module_load_include($access_cb_file['type'], $access_cb_file['module'], $access_cb_file_name);
+  }
+
+  // Call default or custom access callback.
   if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
     global $user;
     return services_error(t('Access denied for user !uid "@user"', array(
@@ -156,21 +162,21 @@ function services_controller_execute($controller, $args = array(), $options = ar
     chdir($drupal_path);
   }
 
-  // Check if the arguments should be preprocessed
+  // Check if the arguments should be preprocessed.
   if (!empty($controller['endpoint']['preprocess'])) {
     foreach ($controller['endpoint']['preprocess'] as $callable) {
       call_user_func_array($callable, array(&$args, &$controller));
     }
   }
 
-  // Execute the controller callback
+  // Execute the controller callback.
   $result = call_user_func_array($controller['callback'], $args);
 
   if (isset($server_root) && $server_root) {
     chdir($server_root);
   }
 
-  // Check if the result should be post-processed
+  // Check if the result should be post-processed.
   if (!empty($controller['endpoint']['postprocess'])) {
     foreach ($controller['endpoint']['postprocess'] as $callable) {
       $result = call_user_func_array($callable, array($args, $controller, $result));
