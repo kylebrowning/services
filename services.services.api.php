@@ -58,9 +58,16 @@
   *   - help: Text describing what this callback does.
   *   - callback: The name of a function to call when this resource is
   *     requested.
+  *   - file: an array describing the file which contains the callback
+  *     function
   *   - access callback: The name of a function to call to check whether
   *     the requesting user has permission to access this resource. If not
   *     specified, this defaults to 'user_access'.
+  *   - access callback file: an array describing the file which contains the
+  *     access callback function.  This attribute only needs to be supplied if
+  *     the method callback and the access callback are defined in different
+  *     files, for example when a method callback is overridden using
+  *     hook_services_resources_alter but the access callback is not
   *   - access arguments: The arguments to pass to the access callback.
   *   - access arguments append: A boolean indicating whether the resource's
   *     arguments should be appended to the access arguments. This can be useful
@@ -101,6 +108,7 @@ function hook_services_resources() {
           ),
         ),
         'access callback' => '_node_resource_access',
+        'access callback file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
         'access arguments' => array('view'),
         'access arguments append' => TRUE,
       ),
