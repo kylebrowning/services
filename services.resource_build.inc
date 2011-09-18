@@ -50,6 +50,9 @@ function _services_build_resources($endpoint_name = '') {
     }
   }
   drupal_alter('services_resources_controller_post_processing', $controllers, $endpoint);
+
+  // This hook is deprecated and will be removed in next versions of services.
+  // Use hook_services_resources_alter instead.
   drupal_alter('services_resources_post_processing', $resources, $endpoint);
 
   // Do some endpoint-dependent processing
