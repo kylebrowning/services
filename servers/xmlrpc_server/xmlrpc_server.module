@@ -27,7 +27,6 @@ function xmlrpc_server_server() {
   require_once './includes/xmlrpc.inc';
   require_once './includes/xmlrpcs.inc';
 
-  //
   return xmlrpc_server(xmlrpc_server_xmlrpc());
 }
 
@@ -70,11 +69,9 @@ function xmlrpc_server_call_wrapper() {
     foreach ($controller['args'] as $index => $arg) {
       if ($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
         $args[$index] = $arg['default value'];
-      } elseif ($arg['optional'] == FALSE && !isset($args[$index])) {
-          return services_error(t('Missing required argument @arg', array(
-              '@arg' => $arg['name'],
-            )), 401);
-        }
+      }
+      elseif ($arg['optional'] == FALSE && !isset($args[$index])) {
+        return services_error(t('Missing required argument @arg', array('@arg' => $arg['name'])), 401);
       }
     }
   }
@@ -87,13 +84,13 @@ function xmlrpc_server_call_wrapper() {
     switch($code) {
       case 401:
         drupal_add_http_header('Status', '401 Unauthorized: ' . $e->getMessage());
-      break;
+        break;
       case 404:
         drupal_add_http_header('Status', '404 Not found: ' . $e->getMessage());
-      break;
+        break;
       case 406:
         drupal_add_http_header('Status', '406 Not Acceptable: ' . $e->getMessage());
-      break;
+        break;
       default:
         if ($code >= 400 && $code < 600) {
           drupal_add_http_header('Status', $code . ' ' . $e->getMessage());
@@ -101,7 +98,7 @@ function xmlrpc_server_call_wrapper() {
         else {
           drupal_add_http_header('Status', '500 An error occurred: (' . $code . ') ' . $e->getMessage());
         }
-      break;
+        break;
     }
   }
 }
