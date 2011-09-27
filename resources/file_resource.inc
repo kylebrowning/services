@@ -50,8 +50,14 @@ function _file_resource_definition() {
             'type'         => 'int',
             'description'  => t('To return file contents or not.'),
             'source'       => array('param' => 'file_contents'),
-            'optional'     => FALSE,
             'default value' => TRUE,
+          ),
+          array(
+            'name'         => 'image_styles',
+            'type'         => 'int',
+            'description'  => t('To return image styles or not.'),
+            'source'       => array('param' => 'image_styles'),
+            'default value' => FALSE,
           ),
         ),
       ),
@@ -218,14 +224,32 @@ function _file_resource_create_raw() {
  *   Number. File ID
  * @param $include_file_contents
  *   Bool Whether or not to include the base64_encoded version of the file.
+ * @param $get_image_style
+ *   Bool Whether or not to provide image style paths.
  * @return
  *   The file
  */
-function _file_resource_retrieve($fid, $include_file_contents = TRUE) {
+function _file_resource_retrieve($fid, $include_file_contents, $get_image_style) {
   if ($file = file_load($fid)) {
     $filepath = $file->uri;
+
+    // Convert the uri to the external url path provided by the stream wrapper.
+    $file->uri_full = file_create_url($file->uri);
+
+    // Provide a path in the form sample/test.txt.
+    $file->target_uri = file_uri_target($file->uri);
+
     if ($include_file_contents) {
       $file->file = base64_encode(file_get_contents($filepath));
+    }
+
+    $file->image_styles = array();
+    // Add image style information if available.
+    if ($get_image_style) {
+      foreach (image_styles() as $style) {
+        $style_name = $style['name'];
+        $file->image_styles[$style_name] = image_style_url($style_name, $file->uri);
+      }
     }
     return $file;
   }
