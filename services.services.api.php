@@ -48,7 +48,7 @@
   *   ability to get the files for a node at node/123/files.
   *
   *   The first five (the CRUD functions + index) define the indvidual service
-  *   callbacks for each function. However 'actions', 'targeted actions',
+  *   callbacks for each function. However 'actions', 'targeted_actions',
   *   and 'relationships' can contain multiple callbacks.
   *
   *   For those familiar with Services 2.x, these callbacks are created

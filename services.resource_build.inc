@@ -114,7 +114,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
         }
       }
 
-      $classes = array('targeted actions', 'actions', 'relationships');
+      $classes = array('targeted_actions', 'actions', 'relationships');
       foreach ($classes as $class) {
         if (!empty($resource[$class])) {
           foreach ($resource[$class] as $op => $def) {
