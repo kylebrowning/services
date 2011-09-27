@@ -21,6 +21,7 @@ class ServicesParserTests extends ServicesWebTestCase {
    */
   public function setUp() {
     parent::setUp(
+      'autoload',
       'ctools',
       'services',
       'rest_server'

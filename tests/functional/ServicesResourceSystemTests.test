@@ -27,7 +27,6 @@ class ServicesResourceSystemTests extends ServicesWebtestCase {
       'ctools',
       'services',
       'rest_server',
-      'services_sessauth',
       'inputstream'
     );
     // Set up endpoint.

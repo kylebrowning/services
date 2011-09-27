@@ -28,7 +28,6 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'ctools',
       'services',
       'rest_server',
-      'services_sessauth',
       'inputstream',
       'upload',
       'comment'
@@ -179,11 +178,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'type' => 'page',
     );
 
-    $responseArray = $this->servicesPost($this->endpoint->path . '/node', $node);
+    $response_array = $this->servicesPost($this->endpoint->path . '/node', $node);
 
-    $nodeResourceUpdateReturn = $responseArray['body'];
-    $nodeAfterUpdate = node_load($nodeResourceUpdateReturn);
-    $this->assertTrue(strpos($responseArray['status'], 'Title field is required.'), t('Node was not created without title. '), 'NodeResource: Created');
+    $this->assertEqual($response_array['body']['form_errors']['title'], t('Title field is required.'), t('Node was not created without title. '), 'NodeResource: Created');
   }
 
   /**
@@ -250,7 +247,6 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
 
     $nid = $node->nid;
-    $this->pass(print_r($node, 1));
     // Generate 15 comments for node.
     $comments = array();
     for ($i = 0; $i < 15; $i++) {
@@ -261,7 +257,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'comment' => $this->randomString(),
       );
 
-      $cid = comment_save((array) $comment);
+      $cid = comment_save($comment);
 
       $comments[] = _comment_load($cid);
     }
@@ -278,13 +274,12 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'comment' => $this->randomString(),
       );
 
-      $cid = comment_save((array) $comment);
+      $cid = comment_save($comment);
     }
 
 
     // Load all comments of the first node.
     $response = $this->servicesGet($path . '/node/'. $nid .'/comments');
-    $this->pass($response);
     $this->assertEqual($comments, $response['body'], t('Received all 15 comments.'), 'NodeResource: comments');
 
     // Load only 5 comments of the first node.
@@ -296,9 +291,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
   }
 
   /**
-   * Test nodeFiles action.
+   * Test files relationship.
    */
-  public function testNodeFiles() {
+  public function testNodeRelationshipFiles() {
     $this->privileged_user = $this->drupalCreateUser(array(
       'get own binary files',
       'save file information',
@@ -330,7 +325,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     ));
     $node = $this->drupalCreateNode($settings);
 
-    $result = $this->servicesPost($this->endpoint->path . '/node/nodeFiles', array('nid' => $node->nid));
+    $result = $this->servicesGet($this->endpoint->path . '/node/' . $node->nid . '/files');
     $this->assertTrue(isset($result['body'][$testfile1['fid']]) && isset($result['body'][$testfile2['fid']]) && !isset($result['body'][$testfile3['fid']]),
       t('Attached files listed.'), 'FileResource: nodeFiles');
   }
@@ -360,7 +355,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       $this->assertTrue($nodeAfterUpdate->title == $node_update['title'], t('Title was the same'), 'NodeResource: Update');
       $this->assertTrue($nodeAfterUpdate->body == $node_update['body'], t('Body was the same'), 'NodeResource: Update');
     }
-    
+
     // Try to update the node without node type.
     $node_update_no_type = $node_update;
     unset($node_update_no_type['type']);

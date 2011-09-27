@@ -23,7 +23,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
       'ctools',
       'services',
       'rest_server',
-      'services_sessauth',
       'inputstream'
     );
   }
@@ -53,7 +52,7 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer nodes',
-      'administer site configuration',      
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
     $this->drupalPost('admin/build/services/add', $edit, t('Save')) ;
@@ -99,7 +98,7 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
       'administer nodes',
-      'administer site configuration',      
+      'administer site configuration',
     ));
     $this->drupalLogin($this->privilegedUser);
     $this->drupalPost('admin/build/services/add', $edit,
@@ -144,7 +143,6 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $endpoint->server = $edit['server'];
     $endpoint->path = $edit['path'];
     $endpoint->authentication = array(
-      'services_sessauth' => array(),
     );
     $endpoint->resources = array(
       'node' => array(
@@ -294,8 +292,11 @@ class ServicesEndpointTests extends ServicesWebTestCase {
             'enabled' => 1,
           ),
         ),
-        'actions' => array(
-          'nodeFiles' => array(
+        'relationships' => array(
+          'files' => array(
+            'enabled' => 1,
+          ),
+          'comments' => array(
             'enabled' => 1,
           ),
         ),
@@ -313,12 +314,7 @@ class ServicesEndpointTests extends ServicesWebTestCase {
     $endpoint->status = 1;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
-    if ($endpoint->name == $edit['name']) {
-      $this->pass('Endpoint successfully created');
-    }
-    else {
-      $this->fail('Endpoint creation failed');
-    }
+    $this->assertEqual($endpoint->name, $edit['name'], t('Endpoint successfully created'));
     $this->servicesGet($endpoint->path);
     return $endpoint;
   }

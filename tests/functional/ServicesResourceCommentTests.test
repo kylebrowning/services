@@ -28,7 +28,6 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
       'ctools',
       'services',
       'rest_server',
-      'services_sessauth',
       'inputstream'
     );
     // Set up endpoint.
@@ -146,10 +145,12 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
+      'cid' => NULL,
       'uid' => $this->privileged_user->uid,
       'nid' => $node->nid,
       'subject' => $this->randomString(),
       'comment' => $this->randomString(),
+      'format' => 1,
     );
 
     $cid = comment_save((array) $comment);
@@ -175,13 +176,15 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
+      'cid' => NULL,
       'uid' => $this->privileged_user->uid,
       'nid' => $node->nid,
       'subject' => $this->randomString(),
       'comment' => $this->randomString(),
+      'format' => 1,
     );
 
-    $cid = comment_save((array) $comment);
+    $cid = comment_save($comment);
     $comment['cid'] = $cid;
 
     $comment_update = $comment;
@@ -211,10 +214,12 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
+      'cid' => NULL,
       'uid' => $this->privileged_user->uid,
       'nid' => $node->nid,
       'subject' => $this->randomString(),
       'comment' => $this->randomString(),
+      'format' => 1,
     );
 
     $cid = comment_save((array) $comment);
@@ -244,10 +249,12 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
 
     $comment = array(
+      'cid' => NULL,
       'uid' => $this->privileged_user->uid,
       'nid' => $node->nid,
       'subject' => $this->randomString(),
       'comment' => $this->randomString(),
+      'format' => 1,
     );
 
     $cid = comment_save((array) $comment);
@@ -270,10 +277,12 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
     for ($i = 0; $i < 5; $i++) {
       $comment = array(
+        'cid' => NULL,
         'uid' => $this->privileged_user->uid,
         'nid' => $node->nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'format' => 1,
       );
       $cid = comment_save((array) $comment);
     }
@@ -292,10 +301,12 @@ class ServicesResourceCommentTests extends ServicesWebtestCase {
     $node = $this->drupalCreateNode($settings);
     for ($i = 0; $i < 5; $i++) {
       $comment = array(
+        'cid' => NULL,
         'uid' => $this->privileged_user->uid,
         'nid' => $node->nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'format' => 1,
       );
       $cid = comment_save((array) $comment);
       $comments[] = _comment_load($cid);
