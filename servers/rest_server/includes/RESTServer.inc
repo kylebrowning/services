@@ -551,15 +551,21 @@ class RESTServer {
   function handleException($exception){
     $code = $exception->getCode();
     switch ($code) {
+      case 204:
+        drupal_add_http_header('HTTP/1.0 204 No Content', $exception->getMessage());
+        break;
+      case 304:
+        drupal_add_http_header('HTTP/1.0 304 Not Modified', $exception->getMessage());
+        break;
       case 401:
         drupal_add_http_header('HTTP/1.0 401 Unauthorized', $exception->getMessage());
-      break;
+        break;
       case 404:
         drupal_add_http_header('HTTP/1.0 404 Not found', $exception->getMessage());
-      break;
+        break;
       case 406:
         drupal_add_http_header('HTTP/1.0 406 Not Acceptable', $exception->getMessage());
-      break;
+        break;
       default:
         if ($code >= 400 && $code < 600) {
           drupal_add_http_header('HTTP/1.0 ' . $code, $exception->getMessage());
@@ -567,7 +573,7 @@ class RESTServer {
         else {
           drupal_add_http_header('HTTP/1.0 500 An error occurred: (' . $code . ')',  $exception->getMessage());
         }
-      break;
+        break;
     }
     if(method_exists($exception,'getData')){
       return $exception->getData();
