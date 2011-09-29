@@ -104,6 +104,14 @@ function _taxonomy_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_term_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -240,6 +248,14 @@ function _taxonomy_resource_definition() {
             'description' => 'Parameters',
             'default value' => array(),
             'source' => array('param' => 'parameters'),
+          ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_vocabulary_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
           ),
         ),
         'access arguments' => array('access content'),
@@ -541,20 +557,22 @@ function _taxonomy_resource_delete_access($tid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of term objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_term_resource_index($page, $fields, $parameters) {
+function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) {
   $taxonomy_select = db_select('taxonomy_term_data', 't')
     ->orderBy('vid', 'DESC')
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size);
 
   $results = services_resource_execute_index_query($taxonomy_select);
 
@@ -576,8 +594,10 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of vocabulary objects.
  *
@@ -586,12 +606,12 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_vocabulary_resource_index($page, $fields, $parameters) {
+function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_size) {
   $taxonomy_select = db_select('taxonomy_vocabulary', 't')
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size);
 
   $results = $taxonomy_select->execute();
 

@@ -467,9 +467,10 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  *   Array fields to return.
  * @param $parameter
  *   Array parameters to add to the index query.
+ * @param $page_size
+ *   Integer number of items to be returned.
  */
-function services_resource_build_index_query($query, $page, $fields, $parameters = array()) {
-  $page_size = variable_get('services_index_page_size', 20);
+function services_resource_build_index_query($query, $page, $fields, $parameters, $page_size) {
   $query->range($page * $page_size, $page_size);
   if ($fields == '*') {
     $query->fields('t');

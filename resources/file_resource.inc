@@ -107,6 +107,14 @@ function _file_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_file_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access callback' => '_file_resource_access',
         'access arguments' => array('index'),
@@ -284,18 +292,20 @@ function _file_resource_delete($fid) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of file objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _file_resource_index($page, $fields, $parameters) {
+function _file_resource_index($page, $fields, $parameters, $page_size) {
   $file_select = db_select('file_managed', 't')
     ->orderBy('timestamp', 'DESC');
 
-  services_resource_build_index_query($file_select, $page, $fields, $parameters);
+  services_resource_build_index_query($file_select, $page, $fields, $parameters, $page_size);
 
   $results = services_resource_execute_index_query($file_select);
 
