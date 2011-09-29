@@ -71,18 +71,16 @@ class RESTServer {
     }
     else {
       //This will stop the 404 from happening when you request just the endpoint.
-      if($endpoint_definition->path == $resource_name) {
+      if ($endpoint_definition->path == $resource_name) {
         $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint));
         drupal_alter('services_endpoint_response', $response);
         return $response;
       }
-      throw new ServicesException(t('Could not find resource @name', array(
-          '@name' => $resource_name,
-        )), 404);
+      return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
     }
 
     if (!$controller) {
-      throw new ServicesException('Could not find the controller', 404);
+      return services_error(t('Could not find the controller.'), 404);
     }
 
     // Parse the request data
@@ -124,7 +122,7 @@ class RESTServer {
     }
 
     if (empty($response_format) || empty($mime_type)) {
-      throw new ServicesException('Unknown or unsupported response format', 406);
+      return services_error(t('Unknown or unsupported response format.'), 406);
     }
 
     // Give the model (if any) a opportunity to alter the arguments.
@@ -272,9 +270,7 @@ class RESTServer {
         // Get the parser for the mime type
         $parser = $this->requestParser($mime, $controller);
         if (!$parser) {
-          throw new ServicesException(t('Unsupported request content type !mime', array(
-              '!mime' => $mime,
-            )), 406);
+          return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
 
         // Read the raw input stream
@@ -363,7 +359,7 @@ class RESTServer {
       $errors = array_merge($errors, call_user_func_array($function, $args));
     }
     if (!empty($errors)) {
-      throw new ServicesException(t('Errors while validating the file'), 406, $errors);
+      return services_error(t('Errors while validating the file - @errors', array('@errors' => implode(" ", $errors))), 406);
     }
 
     drupal_write_record('files', $file);

@@ -489,7 +489,7 @@ function _taxonomy_resource_update_access($tid, $term) {
   
   $term = (object) $term;
   if (!isset($term->vid)) {
-    throw new ServicesArgumentException(t('Term object needs vid property.'), 'term', 0);
+    return services_error(t('Term object needs vid property.'), 406);
   }
   return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');
 }
@@ -521,7 +521,7 @@ function _taxonomy_resource_create_access($term) {
 function _taxonomy_resource_delete_access($tid) {
   $term = taxonomy_term_load($tid);
   if (!$term) {
-    throw new ServicesArgumentException(t('There is no term with id %tid', array('%tid' => $tid)), 'tid', 0);
+    return services_error(t('There is no term with id @tid.', array('@tid' => $tid)), 406);
   }
   return user_access('delete terms in ' . $term->vid) || user_access('administer taxonomy');
 }
