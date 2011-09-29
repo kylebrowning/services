@@ -195,6 +195,14 @@ function _file_resource_create($file) {
   // Get the directory name for the location of the file:
   $dir = dirname($file['filepath']);
   // Build the destination folder tree if it doesn't already exists.
+  // @see http://drupal.org/node/180970
+  $dir_array = explode('/', $dir);
+  $file_check_directory_array = array();
+  foreach ($dir_array as $dir_element) {
+    $file_check_directory_array[] = $dir_element;
+    $dir_path_element = implode('/', $file_check_directory_array);
+    file_check_directory($dir_path_element, FILE_CREATE_DIRECTORY);
+  }
   if (!file_check_directory($dir, FILE_CREATE_DIRECTORY)) {
     return services_error("Could not create destination directory for file. " . $dir);
   }
@@ -225,7 +233,7 @@ function _file_resource_create($file) {
   $file['timestamp'] = time();
 
   // If we made it this far it's safe to record this file in the database.
-  drupal_write_record('files', $file, $update);
+  drupal_write_record('files', $file);
 
   return array(
     'fid' => $file['fid'],
@@ -244,7 +252,8 @@ function _file_resource_create($file) {
 function _file_resource_retrieve($fid, $file_contents) {
   if ($file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid))) {
     if ($file_contents) {
-      $binaryfile = fopen($file['filepath'], 'rb');
+      $absolute_file_path = $_SERVER['DOCUMENT_ROOT'] . '/' . file_create_path($file['filepath']);
+      $binaryfile = fopen($absolute_file_path, 'rb');
       if ($binaryfile === FALSE) {
         services_error(t('Cannot open file with ID %fid.', array('%fid' => $fid)));
       }
