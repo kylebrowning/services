@@ -404,9 +404,7 @@ function _taxonomy_term_resource_retrieve($tid) {
  */
 function _taxonomy_term_resource_create($term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   return taxonomy_save_term($term);
 }
@@ -425,9 +423,7 @@ function _taxonomy_term_resource_create($term) {
  */
 function _taxonomy_term_resource_update($tid, $term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term['tid'] = $tid;
   return _taxonomy_term_resource_create($term);
@@ -493,9 +489,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
   taxonomy_save_vocabulary($vocabulary);
   return $vocabulary;
 }
@@ -514,9 +508,7 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
 
   $vocabulary['vid'] = $vid;
   return _taxonomy_vocabulary_resource_create($vocabulary);

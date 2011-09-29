@@ -154,10 +154,7 @@ function _file_resource_index($page, $fields, $parameters) {
  *   Unique identifier for the file (fid) or errors if there was a problem.
  */
 function _file_resource_create($file) {
-  // Adds backwards compatability with regression fixed in #1083242
-  if (isset($file['file'])) {
-    $file = $file['file'];
-  }
+  $file = _services_arg_value($file, 'file');
 
   global $user;
 
@@ -322,11 +319,7 @@ function _file_resource_delete($fid) {
  */
 function _file_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) {
-    if (key_exists('file', $args[0]) && count($args[0]) == 1) {
-      $args[0] = $args[0]['file'];
-    }
-  }
+  $args[0] = _services_access_value($args[0], 'file');
   global $user;
   if (user_access('administer files')) {
     return TRUE;

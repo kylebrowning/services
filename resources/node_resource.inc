@@ -246,9 +246,7 @@ function _node_resource_retrieve($nid) {
  */
 function _node_resource_create($node) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($node['node'])) {
-    $node = $node['node'];
-  }
+  $node = _services_arg_value($node, 'node');
 
   if (!isset($node['name'])) {
     // Assign username to the node from $user created at auth step.
@@ -330,9 +328,7 @@ function _node_resource_validate_type($node) {
  */
 function _node_resource_update($nid, $node) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($node['node'])) {
-    $node = $node['node'];
-  }
+  $node = _services_arg_value($node, 'node');
 
   // Validate the node. If there is validation error Exception will be thrown
   // so code below won't be executed.
@@ -465,11 +461,7 @@ function _node_resource_load_node_files($nid, $include_file_contents) {
  */
 function _node_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) {
-    if (key_exists('node', $args[0])) {
-      $args[0] = $args[0]['node'];
-    }
-  }
+  $args[0] = _services_access_value($args[0], 'node');
   // Make sure we have an object or this all fails, some servers can
   // mess up the types.
   if (is_array($args[0])) {

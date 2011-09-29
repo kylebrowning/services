@@ -215,9 +215,7 @@ function _comment_resource_index($page, $fields, $parameters) {
 
 function _comment_resource_create($comment) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['comment']) && !isset($comment['subject'])) {
-    $comment = $comment['comment'];
-  }
+  $comment = _services_arg_value($comment, 'comment');
 
   if (empty($comment['nid'])) {
     return services_error(t('A nid must be provided'));
@@ -277,11 +275,9 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
 function _comment_resource_update($cid, $comment) {
-  $comment['cid'] = $cid;
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['data']) && !isset($comment['subject'])) {
-    $comment = $comment['data'];
-  }
+  $comment = _services_arg_value($comment, 'data');
+  $comment['cid'] = $cid;
 
   $old_comment = (array) _comment_load($cid);
   if (empty($old_comment)) {
@@ -361,12 +357,8 @@ function _comment_resource_count_new($nid, $since = 0) {
  * Access check callback for comment controllers.
  */
 function _comment_resource_access($op = 'view', $args = array()) {
-  // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) { 
-    if (key_exists('comment', $args[0]) || key_exists('data', $args[0])) {
-      $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
-    }
-  }
+  // Add backwards compatability with regression fixed in #1083242
+  $args = _services_access_value($args, array('comment', 'data'));
 
   if ($op == 'view' && !isset($args[0])) {
     return user_access('access comments');

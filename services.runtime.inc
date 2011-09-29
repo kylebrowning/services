@@ -182,10 +182,10 @@ function services_controller_execute($controller, $args = array(), $options = ar
       $result = call_user_func_array($callable, array($args, $controller, $result));
     }
   }
-  
+
   if (session_save_session($user) === FALSE) {
     $user = $original_user;
-    session_save_session($old_state);  
+    session_save_session($old_state);
   }
   if ($server_info->debug) {
     watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
@@ -450,4 +450,49 @@ function services_session_unload($backup) {
   session_decode($user->session);
 
   session_save_session(TRUE);
+}
+
+
+/**
+ * Extract arguments for a services method callback, preserving backwards compatibility with #1083242.
+ *
+ * @param array $data
+ *  original argument passed to a resource method callback
+ * @param string $field
+ *  name of the field where arguments should be checked for
+ * @return array
+ */
+
+// Adds backwards compatability with regression fixed in #1083242
+function _services_arg_value($data, $field) {
+  if (isset($data[$field]) && count($data) == 1 && is_array($data[$field])) {
+    return $data[$field];
+  }
+  return $data;
+}
+
+
+/**
+ * Extract arguments for a services method access callback, preserving backwards compatibility with #1083242.
+ *
+ * @param string $data
+ *  original argument passed to a resource method callback
+ * @param mixed $fields
+ *  name of the field(s) where arguments should be checked for, either as a string or as an array of strings
+ * @return array
+ */
+
+// Adds backwards compatability with regression fixed in #1083242
+function _services_access_value($data, $fields) {
+
+  if (!is_array($fields)) {
+    $fields = array($fields);
+  }
+
+  foreach ($fields as $field) {
+    if (is_array($data) && isset($data[$field]) && count($data) == 1) {
+      return $data[$field];
+    }
+  }
+  return $data;
 }
