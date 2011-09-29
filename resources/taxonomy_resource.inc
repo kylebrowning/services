@@ -307,9 +307,7 @@ function _taxonomy_term_resource_retrieve($tid) {
  */
 function _taxonomy_term_resource_create($term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object)$term;
   return taxonomy_term_save($term);
@@ -329,9 +327,7 @@ function _taxonomy_term_resource_create($term) {
  */
 function _taxonomy_term_resource_update($tid, $term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object) $term;
   $term->tid = $tid;
@@ -398,9 +394,7 @@ function _taxonomy_vocabulary_resource_retrieve($vid) {
  */
 function _taxonomy_vocabulary_resource_create($vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
 
   $vocabulary = (object) $vocabulary;
   return taxonomy_vocabulary_save($vocabulary);
@@ -420,9 +414,7 @@ function _taxonomy_vocabulary_resource_create($vocabulary) {
  */
 function _taxonomy_vocabulary_resource_update($vid, $vocabulary) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($vocabulary['vocabulary'])) {
-    $vocabulary = $vocabulary['vocabulary'];
-  }
+  $vocabulary = _services_arg_value($vocabulary, 'vocabulary');
 
   $vocabulary = (object) $vocabulary;
   $vocabulary->vid = $vid;
@@ -493,9 +485,7 @@ function taxonomy_service_select_nodes($tid = '', $pager, $limit,  $order) {
  */
 function _taxonomy_resource_update_access($tid, $term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
   
   $term = (object) $term;
   if (!isset($term->vid)) {
@@ -514,9 +504,7 @@ function _taxonomy_resource_update_access($tid, $term) {
  */
 function _taxonomy_resource_create_access($term) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($term['term'])) {
-    $term = $term['term'];
-  }
+  $term = _services_arg_value($term, 'term');
 
   $term = (object) $term;
   return user_access('edit terms in ' . $term->vid) || user_access('administer taxonomy');

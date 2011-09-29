@@ -203,9 +203,7 @@ function _user_resource_retrieve($uid) {
  */
 function _user_resource_create($account) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($account['account'])) {
-    $account = $account['account'];
-  }
+  $account = _services_arg_value($account, 'account');
 
   // Load the required includes for saving profile information
   // with drupal_form_submit().
@@ -255,9 +253,7 @@ function _user_resource_create($account) {
  */
 function _user_resource_update($uid, $account) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($account['data'])) {
-    $account = $account['data'];
-  }
+  $account = _services_arg_value($account, 'data');
 
   $account['uid'] = $uid;
 
@@ -440,11 +436,10 @@ function _user_resource_index($page, $fields, $parameters) {
  */
 function _user_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]) && is_array($args[0])) {
-    if (key_exists('account', $args[0]) || key_exists('data', $args[0])) {
-      $args[0] = $args[0]['account'] ? $args[0]['account'] : $args[0]['data'];
-    }
+  if (isset($args[0])) {
+    $args[0] = _services_access_value($args[0], array('account', 'data'));
   }
+  
   global $user;
   switch ($op) {
     case 'view':

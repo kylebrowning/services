@@ -178,9 +178,7 @@ function _comment_resource_definition() {
 
 function _comment_resource_create($comment) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['comment'])) {
-    $comment = $comment['comment'];
-  }
+  $comment = _services_arg_value($comment, 'comment');
 
   if (empty($comment['nid'])) {
     return services_error(t('A nid must be provided'));
@@ -240,10 +238,7 @@ function _comment_resource_retrieve($cid) {
  */
 function _comment_resource_update($cid, $comment) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($comment['data'])) {
-    $comment = $comment['data'];
-  }
-
+  $comment = _services_arg_value($comment, 'data');
   $comment['cid'] = $cid;
 
   $old_comment = comment_load($cid);
@@ -359,10 +354,8 @@ function _comment_resource_count_new($nid, $since) {
  */
 function _comment_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (is_array($args[0])) {
-    if (key_exists('comment', $args[0]) || key_exists('data', $args[0])) {
-      $args[0] = $args[0]['comment'] ? $args[0]['comment'] : $args[0]['data'];
-    } 
+  if (isset($args[0])) {
+    $args[0] = _services_access_value($args[0], array('comment', 'data'));
   }
 
   if ($op == 'create') {

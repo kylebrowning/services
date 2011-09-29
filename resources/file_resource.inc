@@ -138,9 +138,7 @@ function _file_resource_create($file) {
   // Adds backwards compatability with regression fixed in #1083242
   // $file['file'] can be base64 encoded file so we check whether it is
   // file array or file data.
-  if (isset($file['file']) && is_array($file['file'])) {
-    $file = $file['file'];
-  }
+  $file = _services_arg_value($file, 'file');
 
   global $user;
   $file = (object) $file;
@@ -310,10 +308,8 @@ function _file_resource_index($page, $fields, $parameters) {
  */
 function _file_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
-  if (isset($args[0]) && is_array($args[0])) {
-    if (key_exists('file', $args[0]) && count($args[0]) == 1) {
-      $args[0] = $args[0]['file'];
-    }
+  if (isset($args[0])) {
+    $args[0] = _services_access_value($args[0], 'file'); 
   }
 
   global $user;
