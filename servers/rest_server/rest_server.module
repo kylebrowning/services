@@ -186,7 +186,7 @@ function _rest_server_add_default_and_remove_unknown(&$array, $keys, $default) {
 /**
  * Implements hook_services_resources_alter().
  */
-function rest_server_services_resources_alter($resources, $endpoint) {
+function rest_server_services_resources_alter(&$resources, $endpoint) {
   // Set the default models for the retrieve and index controllers in the node
   // resource if they are not already set.
   if (isset($resources['node'])) {

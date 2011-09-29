@@ -496,15 +496,21 @@ class RESTServer {
   function handleException($e){
     $code = $e->getCode();
     switch ($code) {
+      case 204:
+        drupal_set_header('HTTP/1.0 204 No Content: ' . $e->getMessage());
+        break;
+      case 304:
+        drupal_set_header('HTTP/1.0 304 Not Modified: ' . $e->getMessage());
+        break;
       case 401:
         drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
-      break;
+        break;
       case 404:
         drupal_set_header('HTTP/1.0 404 Not found: ' . $e->getMessage());
-      break;
+        break;
       case 406:
         drupal_set_header('HTTP/1.0 406 Not Acceptable: ' . $e->getMessage());
-      break;
+        break;
       default:
         if ($code >= 400 && $code < 600) {
           drupal_set_header('HTTP/1.0 ' . $code . ' ' . $e->getMessage());
@@ -512,12 +518,13 @@ class RESTServer {
         else {
           drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
         }
-      break;
+        break;
     }
     if(method_exists($e,'getData')){
       return $e->getData();
     }
   }
+
   private function resolveController($resource, $method, $path) {
     $pc = count($path);
     // Use the index handler for all empty path request, except on POST

@@ -82,6 +82,12 @@ function xmlrpc_server_call_wrapper() {
   catch (Exception $e) {
     $code = $e->getCode();
     switch($code) {
+      case 204:
+        drupal_set_header('HTTP/1.0 204 No Content: ' . $e->getMessage());
+        break;
+      case 304:
+        drupal_set_header('HTTP/1.0 304 Not Modified: ' . $e->getMessage());
+        break;
       case 401:
         drupal_set_header('HTTP/1.0 401 Unauthorized: ' . $e->getMessage());
         break;

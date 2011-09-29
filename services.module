@@ -324,7 +324,7 @@ function _services_sessions_authenticate_call() {
  */
 function services_controllers_list($endpoint) {
   $controllers = array();
-  $ops = array('actions', 'relationships', 'targeted actions');
+  $ops = array('actions', 'relationships', 'targeted_actions');
   $resources = services_get_resources($endpoint);
   foreach ($resources as $resource_name => $res) {
     // Get all basic operations
@@ -358,7 +358,7 @@ function services_controllers_list($endpoint) {
  */
 function services_controller_get($name, $endpoint) {
   list($resource_name, $method) = explode('.', $name);
-  $ops = array('actions', 'relationships', 'targeted actions');
+  $ops = array('actions', 'relationships', 'targeted_actions');
   $resources = services_get_resources($endpoint);
 
   if (isset($resources[$resource_name])) {
@@ -389,7 +389,7 @@ function services_controller_get($name, $endpoint) {
  */
 function services_resources_as_procedures($resource) {
   static $controllers = array('create', 'retrieve', 'update', 'delete', 'index');
-  static $subcontrollers = array('actions', 'relationships', 'targeted actions');
+  static $subcontrollers = array('actions', 'relationships', 'targeted_actions');
 
   $methods = array();
 
