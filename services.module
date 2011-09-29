@@ -165,6 +165,7 @@ function services_endpoint_callback($endpoint_name) {
       'endpoint_path' => $endpoint->path,
       'debug'         => $endpoint->debug,
       'drupal_path'   => getcwd(),
+      'settings'      => $endpoint->server_settings[$server],
     ));
     if ($endpoint->debug) {
       watchdog('services', 'Server info main object: <pre>@info</pre>', array('@info' => print_r(services_server_info_object(), TRUE)), WATCHDOG_DEBUG);
