@@ -71,6 +71,12 @@ class RESTServer {
       $controller = $this->resolveController($resource, $method, $path);
     }
     else {
+      //This will stop the 404 from happening when you request just the endpoint.
+      if($endpoint_definition->path == $resource_name) {
+        $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint));
+        drupal_alter('services_endpoint_response', $response);
+        return $response;
+      }
       throw new ServicesException(t('Could not find resource @name', array(
           '@name' => $resource_name,
         )), 404);
