@@ -479,8 +479,6 @@ function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
  *   An array of comment objects.
  */
 function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
-  $comments = array();
-
   $query = db_select('comment', 'c');
   $query->innerJoin('node', 'n', 'n.nid = c.nid');
   $query->addTag('node_access');
@@ -497,6 +495,6 @@ function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
   foreach ($result as $record) {
     $cids[] = $record->cid;
   }
-  $comments = comment_load_multiple($cids);
-  return $comments;
+
+  return !empty($cids) ? comment_load_multiple($cids) : array();
 }
