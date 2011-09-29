@@ -90,13 +90,13 @@ function services_edit_form_endpoint_authentication($form_state) {
       '#tree' => TRUE,
     );
     $module_settings_form = services_auth_invoke($module, 'security_settings', $settings);
-    if (!empty($module_settings_form) && $settings == $module || is_array($settings)) {
+    if (!empty($module_settings_form) && $module_settings_form !== TRUE && $settings == $module || is_array($settings)) {
       $form[$module] += $module_settings_form;
     }
     else {
       $form[$module]['message'] = array(
         '#type'   => 'item',
-        '#value'  => t('@module has no settings available.', array('@module' => $module)),
+        '#value'  => t('@module has no settings available.', array('@module' => drupal_ucfirst($module))),
       );
     }
   }
