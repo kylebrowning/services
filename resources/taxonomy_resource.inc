@@ -108,6 +108,14 @@ function _taxonomy_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_term_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -270,6 +278,14 @@ function _taxonomy_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_taxonomy_vocabulary_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -326,15 +342,17 @@ function _taxonomy_resource_definition() {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of term objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_term_resource_index($page, $fields, $parameters) {
-  $query = services_resource_build_index_query('term_data', 't.vid DESC, t.weight DESC, t.name DESC', $page, $fields, $parameters, 't', 'tid');
+function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) {
+  $query = services_resource_build_index_query('term_data', 't.vid DESC, t.weight DESC, t.name DESC', $page, $fields, $parameters, 't', 'tid', $page_size);
 
   $results = array();
   while ($taxonomy = db_fetch_object($query)) {
@@ -358,8 +376,10 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be returned.
+*   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of vocabulary objects.
  *
@@ -368,8 +388,8 @@ function _taxonomy_term_resource_index($page, $fields, $parameters) {
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_vocabulary_resource_index($page, $fields, $parameters) {
-  $query = services_resource_build_index_query('vocabulary', 'v.weight DESC, v.name DESC', $page, $fields, $parameters, 'v', 'vid');
+function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_size) {
+  $query = services_resource_build_index_query('vocabulary', 'v.weight DESC, v.name DESC', $page, $fields, $parameters, 'v', 'vid', $page_size);
 
   $results = array();
   while ($taxonomy = db_fetch_object($query)) {

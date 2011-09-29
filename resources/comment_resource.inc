@@ -181,20 +181,22 @@ function _comment_resource_definition() {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of comment objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _comment_resource_index($page, $fields, $parameters) {
+function _comment_resource_index($page, $fields, $parameters, $page_title) {
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
   if (!user_access('administer comments')) {
     $parameters['status'] = 1;
   }
-  $query = services_resource_build_index_query('comments', 'c.timestamp DESC', $page, $fields, $parameters, 'c', 'cid');
+  $query = services_resource_build_index_query('comments', 'c.timestamp DESC', $page, $fields, $parameters, 'c', 'cid', $page_title);
   // Put together array of matching nodes to return.
   $results = array();
   while ($comments = db_fetch_object($query)) {

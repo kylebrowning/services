@@ -441,8 +441,10 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  *   Array fields to return.
  * @param $parameter
  *   Array parameters to add to the index query.
+ * @param $page_size
+ *   Integer number of items to be returned.
  */
-function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field) {
+function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field, $page_size) {
   $where = array();
   $fields = db_escape_string($fields);
 
@@ -471,7 +473,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   // Run through db_rewrite_sql to make sure proper access checks are applied.
   $sql = "SELECT $fields FROM {{$table}} AS $primary_table $where ORDER BY $order";
   $sql = db_rewrite_sql($sql, $primary_table, $primary_field);
-  $result = db_query_range($sql, $parameters, $page * 20, 20);
+  $result = db_query_range($sql, $parameters, $page * $page_size, $page_size);
   return $result;
 }
 

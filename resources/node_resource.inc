@@ -101,6 +101,14 @@ function _node_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_node_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access arguments' => array('access content'),
       ),
@@ -391,10 +399,10 @@ function _node_resource_delete($nid) {
  *   Page number of results to return (in pages of 20).
  * @param $fields
  *   The fields you want returned.
- * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
- * @return
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  *   An array of node objects.
  *
  * @todo
@@ -403,13 +411,13 @@ function _node_resource_delete($nid) {
  *     - Is there an easier syntax we can define which can make the urls
  *       for index requests more straightforward?
  */
-function _node_resource_index($page, $fields, $parameters) {
+function _node_resource_index($page, $fields, $parameters, $page_size) {
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
   if (!user_access('administer nodes')) {
     $parameters['status'] = 1;
   }
-  $query = services_resource_build_index_query('node', 'n.sticky DESC, n.created DESC', $page, $fields, $parameters, 'n', 'nid');
+  $query = services_resource_build_index_query('node', 'n.sticky DESC, n.created DESC', $page, $fields, $parameters, 'n', 'nid', $page_size);
   // Put together array of matching nodes to return.
   $results = array();
   while ($node = db_fetch_object($query)) {

@@ -100,6 +100,14 @@ function _file_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'init',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_file_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access callback' => '_file_resource_access',
         'access arguments' => array('index'),
@@ -124,17 +132,18 @@ function _file_resource_definition() {
  * @param $fields
  *   The fields you want returned.
  * @param $parameters
- *   An array of fields and values used to build a sql WHERE clause indicating
- *   what items should be deleted.
+ *   An array containing fields and values used to build a sql WHERE clause
+ *   indicating items to retrieve.
+ * @param $page_size
+ *   Integer number of items to be returned.
  * @return
  *   An array of file objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _file_resource_index($page, $fields, $parameters) {
-  services_resource_build_index_query('files', 'f.timestamp DESC', $page, $fields, $parameters, 'f', 'fid');
+function _file_resource_index($page, $fields, $parameters, $page_size) {
 
-  $query = services_resource_build_index_query('files', 'f.timestamp', $page, $fields, $parameters, 'f', 'fid');
+  $query = services_resource_build_index_query('files', 'f.timestamp', $page, $fields, $parameters, 'f', 'fid', $page_size);
   // Put together array of matching nodes to return.
   $results = array();
   while ($comments = db_fetch_object($query)) {
