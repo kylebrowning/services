@@ -64,21 +64,20 @@ function xmlrpc_server_call_wrapper() {
   $endpoint = services_get_server_info('endpoint', '');
   $controller = services_controller_get($method_name, $endpoint);
 
-  // Add in default arguments if arguments still dont exist.
-  if (is_array($controller['args'])) {
-    foreach ($controller['args'] as $index => $arg) {
-      if ($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
-        $args[$index] = $arg['default value'];
-      }
-      elseif ($arg['optional'] == FALSE && !isset($args[$index])) {
-        return services_error(t('Missing required argument @arg', array('@arg' => $arg['name'])), 401);
+  try {
+    // Add in default arguments if arguments still dont exist.
+    if (isset($controller['args'])  && is_array($controller['args'])) {
+      foreach ($controller['args'] as $index => $arg) {
+        if ($arg['optional'] && isset($arg['default value']) && !isset($args[$index])) {
+          $args[$index] = $arg['default value'];
+        }
+        elseif ($arg['optional'] == FALSE && !isset($args[$index])) {
+          return services_error(t('Missing required argument @arg', array('@arg' => $arg['name'])), 401);
+        }
       }
     }
+    return services_controller_execute($controller, $args);
   }
-  
-  try {
-    return services_controller_execute($controller, $args);  
-  } 
   catch (Exception $e) {
     $code = $e->getCode();
     switch($code) {
