@@ -286,12 +286,16 @@ function _node_resource_validate_type($node) {
   if (!isset($node['type'])) {
     return services_error(t('Missing node type'), 406);
   }
-  // Wanted to return a gracefull error instead of a blank nid, this should
+  // Wanted to return a graceful error instead of a blank nid, this should
   // allow for that.
   $types = node_type_get_types();
   $node_type = $node['type'];
   if (!isset($types[$node_type])) {
     return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
+  }
+  $allowed_node_types = variable_get('services_allowed_create_content_types', $types);
+  if (!isset($allowed_node_types[$node_type])) {
+    return services_error(t("This node type @type can't be processed via services", array('@type' => $node_type)), 406);
   }
 }
 
@@ -328,6 +332,11 @@ function _node_resource_update($nid, $node, $op) {
   _node_resource_validate_type($node);
 
   if ($old_node->nid) {
+    // Node types cannot be changed once they are created.
+    if (isset($node['type']) && $node['type'] != $old_node->type) {
+      return services_error(t('Node type cannot be changed'), 406);
+    }
+
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
 
