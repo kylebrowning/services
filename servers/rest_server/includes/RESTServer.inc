@@ -21,17 +21,17 @@ class RESTServer {
 
     // Determine the request method
     $method = $_SERVER['REQUEST_METHOD'];
-    if ($method=='POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+    if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
       $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
     }
-    if ($method=='POST' && (isset($_GET['_method']) && $_GET['_method'])) {
+    if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
       $method = $_GET['_method'];
     }
     $path = explode('/', $canonical_path);
     $leaf = array_pop($path);
     $resource_name = array_shift($path);
     // Extract response format info from the path
-    $matches=array();
+    $matches = array();
     if ($leaf && preg_match('/^(.+)\.([^\.]+)$/', $leaf, $matches)) {
       $leaf = $matches[1];
       $response_format = $matches[2];
@@ -157,7 +157,8 @@ class RESTServer {
 
     try {
       $result = services_controller_execute($controller, $arguments);
-    } catch (ServicesException $e) {
+    }
+    catch (ServicesException $e) {
       $errors = $this->handleException($e);
       drupal_alter('rest_server_execute_errors', $errors, $controller, $arguments);
       $result = $errors;
@@ -195,7 +196,7 @@ class RESTServer {
    *  An array of the sources used for getting the arguments for the call
    * @return void
    */
-  private function getControllerArguments($controller, $path, $method, &$sources=array()) {
+  private function getControllerArguments($controller, $path, $method, &$sources = array()) {
     // Get argument sources
     $parameters = $_GET;
     unset($parameters['_method']);
@@ -326,7 +327,7 @@ class RESTServer {
     return $content;
   }
 
-  public static function fileRecieve($handle, $validators=array()) {
+  public static function fileRecieve($handle, $validators = array()) {
     $validators['file_validate_name_length'] = array();
 
     $type = RESTServer::parseContentHeader($_SERVER['CONTENT_TYPE']);
@@ -534,9 +535,7 @@ class RESTServer {
       return isset($resource['index']) ? $resource['index'] : NULL;
     }
     // Detect the standard crud operations
-    elseif (
-        ($pc==1 && ($method=='GET' || $method=='PUT' || $method=='DELETE')) ||
-        ($pc==0 && $method='POST')) {
+    elseif (($pc == 1 && ($method == 'GET' || $method == 'PUT' || $method == 'DELETE')) || ($pc == 0 && $method == 'POST')) {
       $action_mapping = array(
         'GET' => 'retrieve',
         'POST' => 'create',

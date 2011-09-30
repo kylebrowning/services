@@ -462,7 +462,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   $schema = drupal_get_schema($schema);
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
-  if(is_array($parameters)) {
+  if (is_array($parameters)) {
     foreach ($parameters as $field => $value) {
       $where[] = $primary_table . '.' . $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
     } 
