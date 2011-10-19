@@ -162,12 +162,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
     chdir($drupal_path);
   }
 
-  // Check if the arguments should be preprocessed.
-  if (!empty($controller['endpoint']['preprocess'])) {
-    foreach ($controller['endpoint']['preprocess'] as $callable) {
-      call_user_func_array($callable, array(&$args, &$controller));
-    }
-  }
+  // Preprocess controller and arguments.
+  drupal_alter('services_request_preprocess', $controller, $args);
 
   // Execute the controller callback.
   $result = call_user_func_array($controller['callback'], $args);
@@ -176,12 +172,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
     chdir($server_root);
   }
 
-  // Check if the result should be post-processed.
-  if (!empty($controller['endpoint']['postprocess'])) {
-    foreach ($controller['endpoint']['postprocess'] as $callable) {
-      $result = call_user_func_array($callable, array($args, $controller, $result));
-    }
-  }
+  // Postprocess controller, arguments and result.
+  drupal_alter('services_request_postprocess', $controller, $args, $result);
 
   if (session_save_session($user) === FALSE) {
     $user = $original_user;
