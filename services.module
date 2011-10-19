@@ -479,7 +479,7 @@ function services_resource_build_index_query($query, $page, $fields, $parameters
   else {
     $query->fields('t', explode(',', $fields));
   }
-  if(isset($parameters) && is_array($parameters)) {
+  if (isset($parameters) && is_array($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
       $query->condition($parameter, $parameter_value, '=');
     }
