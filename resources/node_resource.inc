@@ -152,6 +152,13 @@ function _node_resource_definition() {
               'optional' => TRUE,
               'default value' => TRUE,
             ),
+            array(
+              'name'         => 'image_styles',
+              'type'         => 'int',
+              'description'  => t('To return image styles or not.'),
+              'source'       => array('path' => 3),
+              'default value' => FALSE,
+            ),
           ),
         ),
       ),
@@ -474,10 +481,12 @@ function _node_resource_access($op = 'view', $args = array()) {
  *   Number. Node ID
  * @param $include_file_contents
  *   Bool Whether or not to include the base64_encoded version of the file.
+  * @param $get_image_style
+ *   Bool Whether or not to provide image style paths.
  * @return
  *   Array. A list of all files from the given node
  */
-function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
+function _node_resource_load_node_files($nid, $include_file_contents, $get_image_style) {
   module_load_include('inc', 'services', 'resources/file_resource');
   $node = node_load($nid);
 
@@ -496,7 +505,7 @@ function _node_resource_load_node_files($nid, $include_file_contents = TRUE) {
           // Grab the items given and attach them to the array.
           $node_file_field_items = $node->{$field['field_name']}[LANGUAGE_NONE];
           foreach ($node_file_field_items as $file) {
-            $files[] = _file_resource_retrieve($file['fid'], $include_file_contents);
+            $files[] = _file_resource_retrieve($file['fid'], $include_file_contents, $get_image_style);
           }
         }
       }
