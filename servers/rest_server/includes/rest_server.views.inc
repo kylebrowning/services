@@ -42,7 +42,7 @@ class RESTServerViewBuiltIn extends RESTServerView {
   }
 
   private function render_json($data, $jsonp = FALSE) {
-    $json = json_encode($data);
+    $json = str_replace('\\/', '/', json_encode($data));
     if ($jsonp && isset($_GET['callback'])) {
       return sprintf('%s(%s);', $_GET['callback'], $json);
     }
