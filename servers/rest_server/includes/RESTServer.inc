@@ -492,10 +492,6 @@ class RESTServer {
     return $formatters;
   }
 
-  private function loadInclude($file) {
-    module_load_include($file['file'], $file['module'], isset($file['name'])?$file['name']:NULL);
-  }
-
   private function supportedControllerModel($controller, $format) {
     if (
       // The format uses models
