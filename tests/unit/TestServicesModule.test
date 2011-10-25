@@ -136,18 +136,13 @@ class ServicesModuleTests extends DrupalWebTestCase {
   public function testEndpointMenu() {
     // Create the endpoint.
     $endpointSettings = array(
-       'name'   => 'mchnamee',
+       'name'   => 'machine_name',
        'path'   => $this->randomName(10),
        'server' => 'rest_server',
     );
 
     $this->drupalPost('admin/structure/services/add', $endpointSettings, t('Save'));
-    cache_clear_all(NULL, 'cache_menu');
-    menu_rebuild();
     $this->assertResponse('200', t('Attempting to create Endpoint.'));
-    // Check path.
-    $this->drupalGet($endpointSettings['path']);
-    $this->assertResponse('200', t('Failed to access endpoint menu path.'));
 
     // Check edit.
     $this->drupalGet('admin/structure/services/list/' . $endpointSettings['name']
