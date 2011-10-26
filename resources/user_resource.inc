@@ -356,9 +356,12 @@ function _user_resource_delete($uid) {
 function _user_resource_login($username, $password) {
   global $user;
 
-  if ($user->uid) {
+  $original_user = services_get_server_info('original_user');
+
+  // We should only be able to log in if the original user was anonymous.
+  if ($original_user->uid) {
     // user is already logged in
-    return services_error(t('Already logged in as @user.', array('@user' => $user->name)), 406);
+    return services_error(t('Already logged in as @user.', array('@user' => $original_user->name)), 406);
   }
 
   $uid = user_authenticate($username, $password);
