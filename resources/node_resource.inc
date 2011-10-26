@@ -244,7 +244,7 @@ function _node_resource_retrieve($nid) {
  *
  * @see drupal_execute()
  */
-function _node_resource_create($node, $op) {
+function _node_resource_create($node) {
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
   $op = _services_arg_value($op, 'op');
