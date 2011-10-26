@@ -144,18 +144,9 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   // Call default or custom access callback.
   if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
-    global $user;
     return services_error(t('Access denied for user @user', array(
       '@user' => isset($user->name) ? $user->name : 'anonymous',
     )), 401);
-  }
-
-  // Change working directory to drupal root to call drupal function,
-  // then change it back to server module root to handle return.
-  $server_root = getcwd();
-  $drupal_path = services_get_server_info('drupal_path');
-  if (isset($drupal_path) && $drupal_path) {
-    chdir($drupal_path);
   }
 
   drupal_alter('services_request_preprocess', $controller, $args);
