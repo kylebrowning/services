@@ -22,14 +22,6 @@ function _comment_resource_definition() {
             'source' => 'data',
             'optional' => FALSE,
           ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Save'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
-          ),
         ),
       ),
 
@@ -72,14 +64,6 @@ function _comment_resource_definition() {
             'description' => 'The comment array with updated information',
             'source' => 'data',
             'optional' => FALSE,
-          ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Save'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
           ),
         ),
       ),
@@ -227,17 +211,13 @@ function _comment_resource_index($page, $fields, $parameters, $page_title) {
  *
  * @param $comment
  *   An object as would be returned from comment_load().
- * @param $op
- *   String the op we are performing.
- *
  * @return
  *   Unique identifier for the comment (cid) or errors if there was a problem.
  */
 
-function _comment_resource_create($comment, $op) {
+function _comment_resource_create($comment) {
   // Adds backwards compatability with regression fixed in #1083242
   $comment = _services_arg_value($comment, 'comment');
-  $op = _services_arg_value($op, 'op');
 
   if (empty($comment['nid'])) {
     return services_error(t('A nid must be provided'));
@@ -246,7 +226,7 @@ function _comment_resource_create($comment, $op) {
   // Setup form_state
   $form_state = array();
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = $op;
+  $form_state['values']['op'] = t('Save');
 
   $comment_empty = array(
     'nid' => $comment['nid'],
@@ -293,15 +273,12 @@ function _comment_resource_retrieve($cid) {
  *   Unique identifier for this comment.
  * @param $comment
  *   An object as would be returned from comment_load().
- * @param $op
- *   String the op we are performing.
  * @return
  *   Unique identifier for the comment (cid) or FALSE if there was a problem.
  */
-function _comment_resource_update($cid, $comment, $op) {
+function _comment_resource_update($cid, $comment) {
   // Adds backwards compatability with regression fixed in #1083242
   $comment = _services_arg_value($comment, 'data');
-  $op = _services_arg_value($op, 'op');
   $comment['cid'] = $cid;
 
   $old_comment = (array) _comment_load($cid);
@@ -312,7 +289,7 @@ function _comment_resource_update($cid, $comment, $op) {
   // Setup form_state.
   $form_state = array();
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = $op;
+  $form_state['values']['op'] = t('Save');
   $form_state['comment'] = $old_comment;
 
   drupal_execute('comment_form', $form_state, $old_comment);
