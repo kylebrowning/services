@@ -30,14 +30,6 @@ function _node_resource_definition() {
             'description' => 'The node data to create',
             'type' => 'array',
           ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Save'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
-          ),
         ),
         'access callback' => '_node_resource_access',
         'access arguments' => array('create'),
@@ -60,14 +52,6 @@ function _node_resource_definition() {
             'source' => 'data',
             'description' => 'The node data to update',
             'type' => 'array',
-          ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Save'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
           ),
         ),
         'access callback' => '_node_resource_access',
@@ -236,8 +220,6 @@ function _node_resource_retrieve($nid) {
  *
  * @param $node
  *   Array representing the attributes a node edit form would submit.
- * @param $op
- *   String the op we are performing.
  * @return
  *   An associative array contained the new node's nid and, if applicable,
  *   the fully qualified URI to this resource.
@@ -247,7 +229,6 @@ function _node_resource_retrieve($nid) {
 function _node_resource_create($node) {
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
-  $op = _services_arg_value($op, 'op');
 
   if (!isset($node['name'])) {
     // Assign username to the node from $user created at auth step.
@@ -264,7 +245,7 @@ function _node_resource_create($node) {
   // Setup form_state
   $form_state = array();
   $form_state['values'] = $node;
-  $form_state['values']['op'] = $op;
+  $form_state['values']['op'] = t('Save');
 
   $node_type = $node['type'];
 
@@ -317,17 +298,14 @@ function _node_resource_validate_type($node) {
  *   Node ID of the node we're editing.
  * @param $node
  *   Array representing the attributes a node edit form would submit.
- * @param $op
- *   String the op we are performing.
  * @return
  *   The node's nid.
  *
  * @see drupal_execute()
  */
-function _node_resource_update($nid, $node, $op) {
+function _node_resource_update($nid, $node) {
   // Adds backwards compatability with regression fixed in #1083242
   $node = _services_arg_value($node, 'node');
-  $op = _services_arg_value($op, 'op');
 
   $node['nid'] = $nid;
 
@@ -350,7 +328,7 @@ function _node_resource_update($nid, $node, $op) {
     // Setup form_state.
     $form_state = array();
     $form_state['values'] = $node;
-    $form_state['values']['op'] = $op;
+    $form_state['values']['op'] = t('Save');
     $form_state['node'] = $old_node;
     drupal_form_submit($node['type'] . '_node_form', $form_state, $old_node);
 

@@ -36,14 +36,6 @@ function _user_resource_definition() {
             'source' => 'data',
             'optional' => FALSE,
           ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Create new account'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
-          ),
         ),
       ),
 
@@ -68,14 +60,6 @@ function _user_resource_definition() {
             'description' => 'The user object with updated information',
             'source' => 'data',
             'optional' => FALSE,
-          ),
-          array(
-            'name' => 'op',
-            'optional' => TRUE,
-            'default value' => t('Save'),
-            'source' => 'data',
-            'description' => 'option',
-            'type' => 'string',
           ),
         ),
       ),
@@ -221,16 +205,13 @@ function _user_resource_retrieve($uid) {
  *  Roles can be passed in a roles property which is an associative
  *  array formatted with '<role id>' => '<role id>', not including
  *  the authenticated user role, which is given by default.
- * @param $op
- *   String the op we are performing.
  *
  * @return
  *   The user object of the newly created user.
  */
-function _user_resource_create($account, $op) {
+function _user_resource_create($account) {
   // Adds backwards compatability with regression fixed in #1083242
   $account = _services_arg_value($account, 'account');
-  $op = _services_arg_value($op, 'op');
 
   // Load the required includes for saving profile information
   // with drupal_form_submit().
@@ -242,13 +223,13 @@ function _user_resource_create($account, $op) {
     'pass1' => $account['pass'],
     'pass2' => $account['pass'],
   );
-  $form_state['values']['op'] = $op;
+  $form_state['values']['op'] = t('Create new account');
 
   // execute the register form
   drupal_form_submit('user_register_form', $form_state);
   // find and store the new user into the form_state
   if(isset($form_state['values']['uid'])) {
-    $form_state['user'] = user_load($form_state['values']['uid']);
+    $form_state['user'] = user_load($form_state['values']['uid']); 
   }
 
   // Error if needed.
@@ -274,16 +255,13 @@ function _user_resource_create($account, $op) {
  *   Unique identifier for this user
  * @param $account
  *   Fields to modify for this user.
- * @param $op
- *   String the op we are performing.
  *
  * @return
  *   The modified user object.
  */
-function _user_resource_update($uid, $account, $op) {
+function _user_resource_update($uid, $account) {
   // Adds backwards compatability with regression fixed in #1083242
   $account = _services_arg_value($account, 'data');
-  $op = _services_arg_value($op, 'op');
 
   $account['uid'] = $uid;
 
@@ -327,7 +305,7 @@ function _user_resource_update($uid, $account, $op) {
     $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
-  $form_state['values']['op'] = $op;
+  $form_state['values']['op'] = t('Save');
   $form_state['values']['#user_category'] = $category;
   $form_state['values']['#account'] = $account_loaded;
 
