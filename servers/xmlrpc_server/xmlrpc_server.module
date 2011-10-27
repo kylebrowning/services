@@ -27,7 +27,7 @@ function xmlrpc_server_server() {
   require_once './includes/xmlrpc.inc';
   require_once './includes/xmlrpcs.inc';
 
-  return xmlrpc_server(xmlrpc_server_xmlrpc());
+  return xmlrpc_server(array_merge(xmlrpc_server_xmlrpc(), module_invoke_all('xmlrpc')));
 }
 
 /**
