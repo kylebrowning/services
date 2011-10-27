@@ -395,7 +395,7 @@ function _node_resource_index($page, $fields, $parameters, $page_size) {
     ->orderBy('sticky', 'DESC')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($node_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($node_select, $page, $fields, $parameters, $page_size, 'node');
 
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);

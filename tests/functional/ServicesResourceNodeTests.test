@@ -48,6 +48,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     // Create and log in our privileged user.
     $this->privilegedUser = $this->drupalCreateUser(array(
       'administer services',
+      'perform unlimited index queries',
     ));
     $this->drupalLogin($this->privilegedUser);
 
@@ -88,6 +89,18 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
     // The n+1 page should be empty.
     $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('page' => $page_count + 1));
     $this->assertEqual(count($responseArray['body']), 0, t('The n+1 page is empty'));
+
+    // Adjust the pager size.
+    $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('fields' => 'nid,title', 'pagesize' => 40));
+    $this->assertTrue(count($responseArray['body']) == 40, t('Correct number of items returned'));
+
+    // Swap to user that can only use the default pager size.
+    $this->lessPrivilegedUser = $this->drupalCreateUser(array(
+      'administer services',
+    ));
+    $this->drupalLogin($this->lessPrivilegedUser);
+    $responseArray = $this->servicesGet($this->endpoint->path . '/node', array('fields' => 'nid,title', 'pagesize' => 40));
+    $this->assertTrue(count($responseArray['body']) == 20, t('Correct number of items returned'));
   }
 
   /**

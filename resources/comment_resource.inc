@@ -321,7 +321,7 @@ function _comment_resource_index($page, $fields, $parameters, $page_size) {
   $comment_select = db_select('comment', 't')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($comment_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($comment_select, $page, $fields, $parameters, $page_size, 'comment');
 
   if (!user_access('administer comments')) {
     $comment_select->condition('status', COMMENT_PUBLISHED);

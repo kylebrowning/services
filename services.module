@@ -60,6 +60,11 @@ function services_permission() {
       'title' => t('Set a system variable'),
       'description' => t(''),
     ),
+    // Query-limiting permissions
+    'perform unlimited index queries' => array(
+      'title' => t('Perform unlimited index queries'),
+      'description' => t(''),
+    ),
   );
 }
 
@@ -469,8 +474,14 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  *   Array parameters to add to the index query.
  * @param $page_size
  *   Integer number of items to be returned.
+ * @param $resource
+ *   String name of the resource building the index query
  */
-function services_resource_build_index_query($query, $page, $fields, $parameters, $page_size) {
+function services_resource_build_index_query($query, $page, $fields, $parameters, $page_size, $resource) {
+  $default_limit = variable_get("services_{$resource}_index_page_size", 20);
+  if (!user_access('perform unlimited index queries') && $page_size > $default_limit) {
+    $page_size = $default_limit;
+  }
   $query->range($page * $page_size, $page_size);
   if ($fields == '*') {
     $query->fields('t');

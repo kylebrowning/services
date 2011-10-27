@@ -434,7 +434,7 @@ function _user_resource_index($page, $fields, $parameters, $page_size) {
   $user_select = db_select('users', 't')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size, 'user');
 
   $results = services_resource_execute_index_query($user_select);
 
