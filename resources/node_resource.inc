@@ -266,6 +266,8 @@ function _node_resource_create($node) {
   // so code below won't be executed.
   _node_resource_validate_type($node);
 
+  $node_type = $node['type'];
+
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
   $nid = NULL;
@@ -283,8 +285,8 @@ function _node_resource_create($node) {
   // Setup form_state
   $form_state = array();
   $form_state['values'] = $node;
-  $form_state['values']['op'] = t('Save');
-  $ret = drupal_execute($node['type'] . '_node_form', $form_state, (object)$node);
+  $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_create', t('Save'));
+  $ret = drupal_execute($node_type . '_node_form', $form_state, (object)$node);
 
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
@@ -358,13 +360,15 @@ function _node_resource_update($nid, $node) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
 
+    $node_type = $node['type'];
+
     // Setup form_state.
     $form_state = array();
     $form_state['values'] = $node;
-    $form_state['values']['op'] = t('Save');
+    $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_update', t('Save'));
     $form_state['node'] = (array)$old_node;
 
-    drupal_execute($old_node->type . '_node_form', $form_state, $old_node);
+    drupal_execute($node_type . '_node_form', $form_state, $old_node);
 
     if ($errors = form_get_errors()) {
       return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));

@@ -344,7 +344,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $node_update = array(
       'title' => 'testing',
       'body' => 'bodytest',
-      'type' => 'story',
+      'type' => 'page',
       'name' => $this->privilegedUser->name,
     );
 
@@ -381,7 +381,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $node_update = array(
       'title' => 'testing',
       'body' => 'bodytest',
-      'type' => 'story',
+      'type' => 'page',
       'name' => $this->privilegedUser->name,
     );
 
@@ -414,7 +414,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $node_update = array(
       'title' => 'testing',
       'body' => 'bodytest',
-      'type' => 'story',
+      'type' => 'page',
     );
     $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update);
 
@@ -436,7 +436,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'title' => '',
       'body' => 'bodytest',
       'name' => $this->privilegedUser->name,
-      'type' => 'story',
+      'type' => 'page',
     );
 
     $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update);

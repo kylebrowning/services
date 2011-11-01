@@ -234,7 +234,7 @@ function _user_resource_create($account) {
     'pass1' => $account['pass'],
     'pass2' => $account['pass'],
   );
-  $form_state['values']['op'] = t('Create new account');
+  $form_state['values']['op'] = variable_get('services_user_create_button_resource_create', t('Create new account'));
 
   // execute the register form
   drupal_execute('user_register', $form_state);
@@ -301,7 +301,7 @@ function _user_resource_update($uid, $account) {
     $form_state['values'][$key] = $value;
   }
 
-  $form_state['values']['op'] = 'Save';
+  $form_state['values']['op'] = variable_get('services_user_save_button_resource_update', t('Save'));
   $form_state['values']['_category'] = $category;
   $form_state['values']['_account'] = (object)$account;
   if (isset($account['pass'])) {
