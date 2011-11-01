@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * @file
+ * This file will parse a node resource feed
+ * And will also provide the necessary manip functions
+ */
+
 class NodeResourceFeedModel implements ResourceTimeFeedModel {
   protected $nodes = NULL;
   protected $mode = 'raw';

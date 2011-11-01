@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Will define the comments resource for dealing with node comments
+ */
+
 function _comment_resource_definition() {
   if (!module_exists('comment')) {
     return array();
@@ -188,8 +193,8 @@ function _comment_resource_definition() {
  * @return
  *   An array of comment objects.
  *
- * @see _node_resource_index() for more notes
- **/
+ * @see _node_resource_index()
+ */
 function _comment_resource_index($page, $fields, $parameters, $page_title) {
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
@@ -374,9 +379,9 @@ function _comment_resource_access($op = 'view', $args = array()) {
   }
 
   // If the submitted comment does not contain a nid, then return an error.
-  if(isset($comment->nid)) {
+  if (isset($comment->nid)) {
     $node = node_load($comment->nid);
-    if($op == 'create' && !$node->nid) {
+    if ($op == 'create' && !$node->nid) {
       return services_error(t('Node nid: @nid does not exist.', array('@nid' => $comment->nid)), 406);
     }
   }

@@ -1,5 +1,7 @@
 <?php
-/*
+
+/**
+ * @file
  * Plugin definition for Ctools Export UI
  */
 $plugin = array(

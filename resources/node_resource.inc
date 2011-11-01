@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * This file will define the resources for dealing directly with nodes
+ */
+
 function _node_resource_definition() {
   $node_resource = array(
     'node' => array(
@@ -134,7 +139,7 @@ function _node_resource_definition() {
               'description'  => t('To return file contents or not.'),
               'source' => array('path' => 2),
               'optional' => TRUE,
-              'default value' => false,
+              'default value' => FALSE,
             ),
           ),
         ),
@@ -319,9 +324,9 @@ function _node_resource_validate_type($node) {
     return services_error(t('Node type @type does not exist.', array('@type' => $node_type)), 406);
   }
   $allowed_node_types = variable_get('services_allowed_create_content_types', $types);
-   if (!isset($allowed_node_types[$node_type])) {
-     return services_error(t("This node type @type can't be processed via services", array('@type' => $node_type)), 406);
-   }
+  if (!isset($allowed_node_types[$node_type])) {
+    return services_error(t("This node type @type can't be processed via services", array('@type' => $node_type)), 406);
+  }
 }
 
 /**

@@ -117,7 +117,8 @@ function services_requirements($phase) {
         'value' => $endpoints,
         'title' => 'Services Authentication Mechanism',
       );
-    } else {
+    }
+    else {
       $requirements['services'] = array(
         'severity' => REQUIREMENT_OK,
         'value' => 'Enabled for all Endpoints',

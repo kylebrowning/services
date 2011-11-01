@@ -72,7 +72,7 @@ class RESTServer {
     }
     else {
       //This will stop the 404 from happening when you request just the endpoint.
-      if($endpoint_definition->path == $resource_name) {
+      if ($endpoint_definition->path == $resource_name) {
         $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint));
         drupal_alter('services_endpoint_response', $response);
         return $response;
@@ -492,7 +492,7 @@ class RESTServer {
     }
   }
 
-  function handleException($e){
+  function handleException($e) {
     $code = $e->getCode();
     switch ($code) {
       case 204:
@@ -519,7 +519,7 @@ class RESTServer {
         }
         break;
     }
-    if(method_exists($e,'getData')){
+    if (method_exists($e, 'getData')) {
       return $e->getData();
     }
   }

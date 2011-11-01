@@ -9,69 +9,70 @@
  * @addtogroup hooks
  */
 
- /**
-  * Defines function signatures for resources available to services.
-  *
-  * Functionally this is very similar to the way hook_menu() works, and in many
-  * ways Services can be seen as an abstraction layer on top of hook_menu().
-  *
-  * @return
-  *   An associative array which defines available resources.
-  *
-  *   The associative array which defines services has seven possible top
-  *   level keys:
-  *
-  *     - create
-  *     - retrieve
-  *     - update
-  *     - delete
-  *     - actions
-  *     - targeted_actions
-  *     - relationships
-  *
-  *
-  *   The first four (the CRUD functions) define the indvidual service
-  *   callbacks for each function. However 'actions' and 'targeted_actions'
-  *   can contain multiple callbacks.
-  *
-  *   For those familiar with Services 2.x, these callbacks are created
-  *   similarly, but the keys have changed around a bit. The following keys
-  *   are used to describe a callback.
-  *
-  *   - help: Text describing what this callback does.
-  *   - callback: The name of a function to call when this resource is
-  *     requested.
-  *   - file: an array describing the file which contains the callback
-  *     function
-  *   - access callback: The name of a function to call to check whether
-  *     the requesting user has permission to access this resource. If not
-  *     specified, this defaults to 'user_access'.
-  *   - access callback file: an array describing the file which contains the
-  *     access callback function.  This attribute only needs to be supplied if
-  *     the method callback and the access callback are defined in different
-  *     files, for example when a method callback is overridden using
-  *     hook_services_resources_alter but the access callback is not
-  *   - access arguments: The arguments to pass to the access callback.
-  *   - access arguments append: A boolean indicating whether the resource's
-  *     arguments should be appended to the access arguments. This can be useful
-  *     in situations where an access callback is specific to the particular
-  *     item ('edit all nodes' vs 'edit my nodes'). Defaults to FALSE.
-  *   - args: an array describing the arguments which should be passed to this
-  *     resource when it is called. Each element in the array is an associative
-  *     array containing the following keys:
-  *
-  *     - name: The name of this argument.
-  *     - type: The data type of this argument (int, string, array)
-  *     - description: Text describing this argument's usage.
-  *     - optional: A boolean indicating whether or not this argument is optional.
-  *     - source: Where this argument should be retrieved from. This can be
-  *       'data' (indicating the POST data), 'param' (indicating the query
-  *       string) or 'path' (indicating the url path). In the case of path,
-  *       an additional parameter must be passed indicating the index to be used.
-  *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
-  */
+/**
+ * Implementation of hook_services_resources().
+ * Defines function signatures for resources available to services.
+ *
+ * Functionally this is very similar to the way hook_menu() works, and in many
+ * ways Services can be seen as an abstraction layer on top of hook_menu().
+ *
+ * @return
+ *   An associative array which defines available resources.
+ *
+ *   The associative array which defines services has seven possible top
+ *   level keys:
+ *
+ *     - create
+ *     - retrieve
+ *     - update
+ *     - delete
+ *     - actions
+ *     - targeted_actions
+ *     - relationships
+ *
+ *
+ *   The first four (the CRUD functions) define the indvidual service
+ *   callbacks for each function. However 'actions' and 'targeted_actions'
+ *   can contain multiple callbacks.
+ *
+ *   For those familiar with Services 2.x, these callbacks are created
+ *   similarly, but the keys have changed around a bit. The following keys
+ *   are used to describe a callback.
+ *
+ *   - help: Text describing what this callback does.
+ *   - callback: The name of a function to call when this resource is
+ *     requested.
+ *   - file: an array describing the file which contains the callback
+ *     function
+ *   - access callback: The name of a function to call to check whether
+ *     the requesting user has permission to access this resource. If not
+ *     specified, this defaults to 'user_access'.
+ *   - access callback file: an array describing the file which contains the
+ *     access callback function.  This attribute only needs to be supplied if
+ *     the method callback and the access callback are defined in different
+ *     files, for example when a method callback is overridden using
+ *     hook_services_resources_alter but the access callback is not
+ *   - access arguments: The arguments to pass to the access callback.
+ *   - access arguments append: A boolean indicating whether the resource's
+ *     arguments should be appended to the access arguments. This can be useful
+ *     in situations where an access callback is specific to the particular
+ *     item ('edit all nodes' vs 'edit my nodes'). Defaults to FALSE.
+ *   - args: an array describing the arguments which should be passed to this
+ *     resource when it is called. Each element in the array is an associative
+ *     array containing the following keys:
+ *
+ *     - name: The name of this argument.
+ *     - type: The data type of this argument (int, string, array)
+ *     - description: Text describing this argument's usage.
+ *     - optional: A boolean indicating whether or not this argument is optional.
+ *     - source: Where this argument should be retrieved from. This can be
+ *       'data' (indicating the POST data), 'param' (indicating the query
+ *       string) or 'path' (indicating the url path). In the case of path,
+ *       an additional parameter must be passed indicating the index to be used.
+ *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
+ */
 function hook_services_resources() {
-$node_resource = array(
+  $node_resource = array(
     'node' => array(
       'retrieve' => array(
         'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),

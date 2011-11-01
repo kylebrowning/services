@@ -88,7 +88,7 @@ function _rest_server_settings_not_zero($value) {
 }
 
 /**
- * Actual implementation of hook_autoload_info().
+ * Implementation of hook_autoload_info().
  */
 function _rest_server_autoload_info() {
   return array(

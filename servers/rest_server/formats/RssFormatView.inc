@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * This file will parse the rss view for the rest server
+ */
+
 class RssFormatView extends RESTServerView {
   function render() {
     $items = '';

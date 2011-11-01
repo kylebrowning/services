@@ -140,7 +140,7 @@ function services_edit_form_endpoint_server($form, $form_state) {
       '#description'   => t('No server matching the one used in the endpoint.'),
     );
   }
-  else if (empty($server['settings'])) {
+  elseif (empty($server['settings'])) {
     $form['message'] = array(
       '#type'          => 'item',
       '#title'         => t('@name has no settings', array('@name' => $endpoint->server)),
@@ -251,11 +251,11 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
     '#type' => 'fieldset',
     '#title' => t('Resources'),
     '#description' => t('Select the resource(s) or resource group(s) you would like to enable, and click <em>Save</em>.'),
-   );
+  );
 
   $form['resources']['table'] = array(
     '#theme' => 'services_resource_table',
-   );
+  );
 
   $ignoreArray = array('actions', 'relationships', 'endpoint', 'name', 'file', 'targeted_actions');
   // Generate the list of methods arranged by resource.
@@ -280,7 +280,8 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
       if (!in_array($class, $ignoreArray)) {
         if (!isset($info['help'])) {
           $description = t('No description is available');
-        } else {
+        }
+        else {
           $description = $info['help'];
         }
         if (isset($endpoint->resources[$resource]['operations'][$class])) {
@@ -294,10 +295,10 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
           '#title' => $class,
           '#description' => $description,
           '#default_value' => $default_value,
-         );
+        );
       }
-      elseif($class == 'actions' || $class == 'relationships' || $class == 'targeted_actions') {
-        foreach($info as $key => $action) {
+      elseif ($class == 'actions' || $class == 'relationships' || $class == 'targeted_actions') {
+        foreach ($info as $key => $action) {
           if (!isset($action['help'])) {
             $description = t('No description is available');
           }
@@ -316,17 +317,16 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
             '#description' => $description,
             '#default_value' => $default_value,
           );
-         }
-       }
-     }
-   }
+        }
+      }
+    }
+  }
 
-   $form['save'] = array(
-     '#type'  => 'submit',
-     '#value' => t('Save'),
-   );
-   //print_r($form);
-   return $form;
+  $form['save'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Save'),
+  );
+  return $form;
 }
 
 /**
@@ -342,7 +342,7 @@ function services_edit_form_endpoint_resources_validate($form, &$form_state) {
   // Validate aliases.
   foreach ($input as $key => $value) {
     if (strpos($key, '-alias') !== FALSE && !empty($value) && !preg_match('/^[a-z-]+$/', $value)) {
-      list($resource_name,) = explode('_', $key);
+      list($resource_name, ) = explode('_', $key);
       // Still this doesn't highlight needed form element.
       form_set_error("resources][table][$resource_name][alias", t("The alias for the !name resource may only contain lower case a-z and dashes.", array(
         '!name' => $resource_name,
@@ -389,5 +389,5 @@ function services_edit_form_endpoint_resources_submit($form, &$form_state) {
   }
   $endpoint->resources = $final_resource;
   services_endpoint_save($endpoint);
-  drupal_set_message('Resources have been saved');
+  drupal_set_message(t('Resources have been saved'));
 }

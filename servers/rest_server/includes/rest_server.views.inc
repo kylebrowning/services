@@ -1,10 +1,8 @@
 <?php
-// $Id$
 
 /**
  * @file
  * Provide formatter class for all standard response formats.
- *
  */
 
 /**

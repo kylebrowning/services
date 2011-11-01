@@ -70,7 +70,7 @@ function services_menu() {
 }
 
 /**
- * Implements of hook_ctools_plugin_api().
+ * Implementation of hook_ctools_plugin_api().
  */
 function services_ctools_plugin_api($module, $api) {
   if ($module == 'services' && $api == 'plugins') {
@@ -79,7 +79,7 @@ function services_ctools_plugin_api($module, $api) {
 }
 
 /**
- * Implement of hook_ctools_plugin_directory().
+ * Implementation of hook_ctools_plugin_directory().
  */
 function services_ctools_plugin_directory($module, $type) {
   // Safety: go away if CTools is not at an appropriate version.

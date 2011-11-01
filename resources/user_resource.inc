@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * This file will define the resources for dealing with the user object
+ */
+
 function _user_resource_definition() {
   return array(
     'user' => array(
@@ -242,7 +247,8 @@ function _user_resource_create($account) {
   // Error if needed.
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
-  } else {
+  }
+  else {
     $user = array('uid' => $form_state['user']->uid);
     if ($uri = services_resource_uri(array('user', $user['uid']))) {
       $user['uri'] = $uri;
@@ -429,7 +435,7 @@ function _user_resource_logout() {
  * @return
  *   An array of user objects.
  *
- * @see _node_resource_index() for more notes
+ * @see _node_resource_index()
  */
 function _user_resource_index($page, $fields, $parameters, $page_size) {
   if (!user_access('administer users')) {

@@ -139,8 +139,8 @@ function _file_resource_definition() {
  * @return
  *   An array of file objects.
  *
- * @see _node_resource_index() for more notes
- **/
+ * @see _node_resource_index()
+ */
 function _file_resource_index($page, $fields, $parameters, $page_size) {
 
   $query = services_resource_build_index_query('files', 'f.timestamp', $page, $fields, $parameters, 'f', 'fid', $page_size);
@@ -174,7 +174,7 @@ function _file_resource_create($file) {
 
   // Check whether we have filename or filepath for the file.
   if ((!isset($file['filename']) || empty($file['filename']))
-   && (!isset($file['filepath']) || empty($file['filepath']))) {
+    && (!isset($file['filepath']) || empty($file['filepath']))) {
     return services_error('No filename and no filepath specified or they are both empty.');
   }
 

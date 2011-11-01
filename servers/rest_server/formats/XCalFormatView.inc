@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * This file will parse the xcal view for the rest server
+ */
+
 class XCalFormatView extends RESTServerView {
   const DATE_FORMAT = 'Ymd\This';
 

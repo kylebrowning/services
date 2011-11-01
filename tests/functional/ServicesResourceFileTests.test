@@ -137,7 +137,7 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
 
     // Assert that fid, filesize and uri are the same.
     $this->assertTrue($file['fid'] == $testfile['fid']
-                   && $file['filesize'] == $testfile['filesize'],
+                  && $file['filesize'] == $testfile['filesize'],
       t('File retrieved.'), 'FileResource: Retrieve');
   }
 

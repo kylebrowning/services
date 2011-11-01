@@ -180,7 +180,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
 
     $response_array = $this->servicesPost($this->endpoint->path . '/node', $node);
 
-    $this->assertEqual($response_array['body']['form_errors']['title'], t('Title field is required.'), t('Node was not created without title. '), 'NodeResource: Created');
+    $this->assertEqual($response_array['body']['form_errors']['title'], t('Title field is required.'), t('Node was not created without title.'), 'NodeResource: Created');
   }
 
   /**
@@ -287,7 +287,7 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
     $this->assertEqual(array_slice($comments, 0, 5), array_slice($response['body'], 0, 5), t('Received last 5 comments.'), 'NodeResource: comments');
     // Load only 5 comments of the first node starting from fifth comment.
     $response = $this->servicesGet($path . '/node/'. $nid .'/comments', array('count' => 5, 'offset' => 5));
-    $this->assertEqual(array_slice($comments, 5, 5), array_merge(array(),$response['body']), t('Received 5 comments starting from fifth comment.'), 'NodeResource: comments');
+    $this->assertEqual(array_slice($comments, 5, 5), array_merge(array(), $response['body']), t('Received 5 comments starting from fifth comment.'), 'NodeResource: comments');
   }
 
   /**

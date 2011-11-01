@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * @file
+ * This file will define the administrative methods of services
+ */
 function theme_services_resource_table($variables) {
   $table = $variables;
 
@@ -30,7 +35,7 @@ function theme_services_resource_table($variables) {
 
     // Make the class name safe for output on the page by replacing all
     // non-word/decimal characters with a dash (-).
-    $method_class = strtolower(trim(preg_replace("/[^\w\d]/", "-", $key)));
+    $method_class = drupal_strtolower(trim(preg_replace("/[^\w\d]/", "-", $key)));
 
     // Select the right "expand"/"collapse" image, depending on whether the
     // category is expanded (at least one method selected) or not.
@@ -52,7 +57,7 @@ function theme_services_resource_table($variables) {
       'class' => 'resource-group-description',
     );
     $row[] = array(
-      'data' => drupal_render($element[$method_class. '-alias']),
+      'data' => drupal_render($element[$method_class . '-alias']),
       'class' => 'resource-group-alias',
     );
     $rows[] = array('data' => $row, 'class' => 'resource-group');
@@ -67,7 +72,7 @@ function theme_services_resource_table($variables) {
 
     // Cycle through each method within the current group.
     foreach (element_children($element) as $method_name) {
-      if(!strpos($method_name, 'alias') && $method_name != 'alias') {
+      if (!strpos($method_name, 'alias') && $method_name != 'alias') {
         $method = $element[$method_name];
         $row = array();
 
