@@ -128,7 +128,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $user['mail']   = $user['name'] . '@example.com';
     $user['pass']   = user_password();
     $user['status'] = 1;
-    
+
     $response = $this->servicesPost($this->endpoint->path . '/user/register', $user);
     $account = $response['body'];
 
@@ -164,7 +164,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $user['mail']   = $user['name'] . '@example.com';
     $user['pass']   = user_password();
     $user['status'] = 1;
-    
+
     $response = $this->servicesPost($this->endpoint->path . '/user/register', array('account' => $user));
     $account = $response['body'];
 

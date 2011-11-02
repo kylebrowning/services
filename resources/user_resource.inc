@@ -180,7 +180,7 @@ function _user_resource_retrieve($uid) {
   }
 
   services_remove_user_data($account);
-  
+
   // Everything went right.
   return $account;
 }
@@ -229,7 +229,7 @@ function _user_resource_create($account) {
   drupal_form_submit('user_register_form', $form_state);
   // find and store the new user into the form_state
   if(isset($form_state['values']['uid'])) {
-    $form_state['user'] = user_load($form_state['values']['uid']); 
+    $form_state['user'] = user_load($form_state['values']['uid']);
   }
 
   // Error if needed.
@@ -357,7 +357,7 @@ function _user_resource_login($username, $password) {
   global $user;
 
   $original_user = services_get_server_info('original_user');
-
+  debug($original_user);
   // We should only be able to log in if the original user was anonymous.
   if ($original_user->uid) {
     // user is already logged in
@@ -376,7 +376,7 @@ function _user_resource_login($username, $password) {
       $return->session_name = session_name();
 
       services_remove_user_data($user);
-      
+
       $return->user = $user;
 
       return $return;
@@ -452,20 +452,20 @@ function _user_resource_access($op = 'view', $args = array()) {
   if (isset($args[0])) {
     $args[0] = _services_access_value($args[0], array('account', 'data'));
   }
-  
+
+  // Check if the user exists if appropriate.
+  if ($op != 'create' && $op != 'register' ) {
+    $account = user_load($args[0]);
+    if (!$account) {
+      return services_error(t('There is no user with ID @uid.', array('@uid' => $args[0])), 406);
+    }
+  }
+
   global $user;
   switch ($op) {
     case 'view':
-      $account = user_load($args[0]);
-      if (!$account->uid) {
-        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
-      }
       return user_view_access($account);
     case 'update':
-      $account = user_load($args[0]);
-      if (!$account->uid) {
-        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
-      }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
     case 'register':
@@ -476,10 +476,6 @@ function _user_resource_access($op = 'view', $args = array()) {
         return user_access('administer users');
       }
     case 'delete':
-      $account = user_load($args[0]);
-      if (!$account->uid) {
-        return services_error(t('There is no user with ID @uid.', array('@uid' => $account->uid)), 406);
-      }
       return user_access('administer users');
   }
 }
