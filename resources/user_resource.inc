@@ -456,20 +456,18 @@ function _user_resource_index($page, $fields, $parameters, $page_size) {
 function _user_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
   $args[0] = _services_access_value($args[0], array('account', 'data'));
-
+  // Check if the user exists if appropriate.
+  if ($op != 'create' && $op != 'register' ) {
+    $account = user_load($args[0]);
+    if (!$account) {
+      return services_error(t('There is no user with ID @uid.', array('@uid' => $args[0])), 406);
+    }
+  }
   global $user;
   switch ($op) {
     case 'view':
-        $account = user_load($args[0]);
-        if (!$account->uid) {
-          return services_error('That user ID does not exist', 406);
-        }
         return user_view_access($account);
     case 'update':
-        $account = user_load($args[0]);
-        if (!$account->uid) {
-          return services_error('That user ID does not exist', 406);
-        }
       return ($user->uid == $account->uid || user_access('administer users'));
     case 'create':
       return user_access('administer users');
@@ -482,10 +480,6 @@ function _user_resource_access($op = 'view', $args = array()) {
         return FALSE;
       }
     case 'delete':
-      $account = user_load($args[0]);
-      if (!$account->uid) {
-        return services_error('That user ID does not exist', 406);
-      }
       return user_access('administer users');
   }
 
