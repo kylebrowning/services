@@ -57,57 +57,6 @@ class ServicesModuleTests extends DrupalWebTestCase {
   }
 
   /**
-   * Test services_perm results.
-   */
-  public function testServicesPerm() {
-    $resultArray = services_permission() ;
-    $message = t('services_perm should return an array') ;
-    $this->assertTrue(gettype($resultArray)=='array', $message) ;
-
-    $message = t('There should be 6 permission types') ;
-    $this->assertEqual(count($resultArray), 6, $message) ;
-
-    $permission = 'administer services' ;
-    $this->helperPermExists($resultArray, $permission) ;
-
-    $permission = 'get any binary files' ;
-    $this->helperPermExists($resultArray, $permission) ;
-
-    $permission = 'get own binary files' ;
-    $this->helperPermExists($resultArray, $permission) ;
-
-    $permission = 'save file information' ;
-    $this->helperPermExists($resultArray, $permission) ;
-
-    $permission = 'get a system variable' ;
-    $this->helperPermExists($resultArray, $permission) ;
-
-    $permission = 'set a system variable' ;
-    $this->helperPermExists($resultArray, $permission) ;
-  } // function
-
-  /**
-   * Helper function to do the same checks on every permission.
-   *
-   * @param $array_to_search
-   * Usually an array from the hook_perm implementation.
-   *
-   * @param $perm
-   * The permission to verify exists
-   *
-   * @return
-   * Void. The asserts in the code provide feedback via the test harness.__PHP_Incomplete_Class
-   */
-  protected function helperPermExists($arrayToSearch, $perm) {
-    $result = array_key_exists($perm, $arrayToSearch);
-
-    $message = t("There should be a '$perm' permission") ;
-    $this->assertTrue($result, $message);
-//    $this->fail(print_r($arrayToSearch, 1));
-//    $this->assertNotIdentical($result, FALSE, $message) ;
-  } // function
-
-  /**
    * Test hook_hook_info implementation.
    */
   public function testHookHookInfo() {

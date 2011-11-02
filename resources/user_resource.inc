@@ -223,7 +223,7 @@ function _user_resource_create($account) {
     'pass1' => $account['pass'],
     'pass2' => $account['pass'],
   );
-  $form_state['values']['op'] = t('Create new account');
+  $form_state['values']['op'] = variable_get('services_user_create_button_resource_create', t('Create new account'));
 
   // execute the register form
   drupal_form_submit('user_register_form', $form_state);
@@ -305,7 +305,7 @@ function _user_resource_update($uid, $account) {
     $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
-  $form_state['values']['op'] = t('Save');
+  $form_state['values']['op'] = variable_get('services_user_save_button_resource_update', t('Save'));
   $form_state['values']['#user_category'] = $category;
   $form_state['values']['#account'] = $account_loaded;
 
@@ -437,7 +437,7 @@ function _user_resource_index($page, $fields, $parameters, $page_size) {
   $user_select = db_select('users', 't')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size, 'user');
 
   $results = services_resource_execute_index_query($user_select);
 

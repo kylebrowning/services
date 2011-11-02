@@ -572,7 +572,7 @@ function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) 
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_term');
 
   $results = services_resource_execute_index_query($taxonomy_select);
 
@@ -611,7 +611,7 @@ function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_vocabulary');
 
   $results = $taxonomy_select->execute();
 

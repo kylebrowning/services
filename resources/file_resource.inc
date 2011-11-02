@@ -305,7 +305,7 @@ function _file_resource_index($page, $fields, $parameters, $page_size) {
   $file_select = db_select('file_managed', 't')
     ->orderBy('timestamp', 'DESC');
 
-  services_resource_build_index_query($file_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($file_select, $page, $fields, $parameters, $page_size, 'file');
 
   $results = services_resource_execute_index_query($file_select);
 

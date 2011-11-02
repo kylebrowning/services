@@ -242,12 +242,13 @@ function _node_resource_create($node) {
 
   // Load the required includes for drupal_execute
   module_load_include('inc', 'node', 'node.pages');
+
+  $node_type = $node['type'];
+
   // Setup form_state
   $form_state = array();
   $form_state['values'] = $node;
-  $form_state['values']['op'] = t('Save');
-
-  $node_type = $node['type'];
+  $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_create', t('Save'));
 
   drupal_form_submit($node_type . '_node_form', $form_state, (object)$node);
 
@@ -325,12 +326,14 @@ function _node_resource_update($nid, $node) {
     // Load the required includes for drupal_execute
     module_load_include('inc', 'node', 'node.pages');
 
+    $node_type = $node['type'];
+
     // Setup form_state.
     $form_state = array();
     $form_state['values'] = $node;
-    $form_state['values']['op'] = t('Save');
+    $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_update', t('Save'));
     $form_state['node'] = $old_node;
-    drupal_form_submit($node['type'] . '_node_form', $form_state, $old_node);
+    drupal_form_submit($node_type . '_node_form', $form_state, $old_node);
 
     if ($errors = form_get_errors()) {
       return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
@@ -395,7 +398,7 @@ function _node_resource_index($page, $fields, $parameters, $page_size) {
     ->orderBy('sticky', 'DESC')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($node_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($node_select, $page, $fields, $parameters, $page_size, 'node');
 
   if (!user_access('administer nodes')) {
     $node_select->condition('status', 1);

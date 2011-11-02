@@ -193,7 +193,7 @@ function _comment_resource_create($comment) {
   }
 
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = t('Save');
+  $form_state['values']['op'] = variable_get('services_comment_save_button_resource_create', t('Save'));
 
   $comment_empty = array(
     'nid' => $comment['nid'],
@@ -256,7 +256,7 @@ function _comment_resource_update($cid, $comment) {
   // Setup form_state.
   $form_state = array();
   $form_state['values'] = $comment;
-  $form_state['values']['op'] = t('Save');
+  $form_state['values']['op'] = variable_get('services_comment_save_button_resource_update', t('Save'));
   $form_state['comment'] = $old_comment;
 
   drupal_form_submit('comment_form', $form_state, $old_comment);
@@ -321,7 +321,7 @@ function _comment_resource_index($page, $fields, $parameters, $page_size) {
   $comment_select = db_select('comment', 't')
     ->orderBy('created', 'DESC');
 
-  services_resource_build_index_query($comment_select, $page, $fields, $parameters, $page_size);
+  services_resource_build_index_query($comment_select, $page, $fields, $parameters, $page_size, 'comment');
 
   if (!user_access('administer comments')) {
     $comment_select->condition('status', COMMENT_PUBLISHED);
