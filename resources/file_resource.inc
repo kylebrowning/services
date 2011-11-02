@@ -143,7 +143,7 @@ function _file_resource_definition() {
  */
 function _file_resource_index($page, $fields, $parameters, $page_size) {
 
-  $query = services_resource_build_index_query('files', 'f.timestamp', $page, $fields, $parameters, 'f', 'fid', $page_size);
+  $query = services_resource_build_index_query('files', 'f.timestamp', $page, $fields, $parameters, 'f', 'fid', $page_size, 'file');
   // Put together array of matching nodes to return.
   $results = array();
   while ($comments = db_fetch_object($query)) {

@@ -441,7 +441,7 @@ function _user_resource_index($page, $fields, $parameters, $page_size) {
   if (!user_access('administer users')) {
     $parameters['active'] = 1;
   }
-  $query = services_resource_build_index_query('users', 'u.created DESC', $page, $fields, $parameters, 'u', 'uid', $page_size);
+  $query = services_resource_build_index_query('users', 'u.created DESC', $page, $fields, $parameters, 'u', 'uid', $page_size, 'user');
 
   $results = array();
   while ($user = db_fetch_object($query)) {

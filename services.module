@@ -43,6 +43,8 @@ function services_perm() {
     // System resource permissions
     'get a system variable',
     'set a system variable',
+    // Query permissions
+    'perform unlimited index queries',
   );
 }
 
@@ -443,8 +445,10 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  *   Array parameters to add to the index query.
  * @param $page_size
  *   Integer number of items to be returned.
+ * @param $resource
+ *   String name of the resource building the index query
  */
-function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field, $page_size) {
+function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field, $page_size, $resource) {
   $where = array();
   $fields = db_escape_string($fields);
 
@@ -469,6 +473,12 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
 
   // Now implode that array into an actual WHERE clause.
   $where = !empty($where) ? ' WHERE '. implode(' AND ', $where) : '';
+
+  // Apply page size limits.
+  $default_limit = variable_get("services_{$resource}_index_page_size", 20);
+  if (!user_access('perform unlimited index queries') && $page_size > $default_limit) {
+      $page_size = $default_limit;
+  }
 
   // Run through db_rewrite_sql to make sure proper access checks are applied.
   $sql = "SELECT $fields FROM {{$table}} AS $primary_table $where ORDER BY $order";

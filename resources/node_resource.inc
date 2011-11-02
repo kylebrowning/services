@@ -435,7 +435,7 @@ function _node_resource_index($page, $fields, $parameters, $page_size) {
   if (!user_access('administer nodes')) {
     $parameters['status'] = 1;
   }
-  $query = services_resource_build_index_query('node', 'n.sticky DESC, n.created DESC', $page, $fields, $parameters, 'n', 'nid', $page_size);
+  $query = services_resource_build_index_query('node', 'n.sticky DESC, n.created DESC', $page, $fields, $parameters, 'n', 'nid', $page_size, 'node');
   // Put together array of matching nodes to return.
   $results = array();
   while ($node = db_fetch_object($query)) {
