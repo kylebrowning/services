@@ -51,7 +51,7 @@ function rest_server_request_parsers() {
       'application/x-yaml' => 'RESTServer::parseYAML',
       'application/json' => 'RESTServer::parseJSON',
       'application/vnd.php.serialized' => 'RESTServer::parsePHP',
-      'multipart/form-data' => 'RESTServer::parseFile',
+      'multipart/form-data' => 'RESTServer::parseMultipart',
     );
     drupal_alter('rest_server_request_parsers', $parsers);
   }
