@@ -246,7 +246,7 @@ function _file_resource_retrieve($fid, $include_file_contents, $get_image_style)
     $file->target_uri = file_uri_target($file->uri);
 
     if ($include_file_contents) {
-      $file->file = base64_encode(file_get_contents($filepath));
+      $file->file = base64_encode(file_get_contents(drupal_realpath($filepath)));
     }
 
     $file->image_styles = array();
