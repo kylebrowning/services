@@ -274,17 +274,23 @@ class RESTServer {
         if (!$parser) {
           return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
-
-        // Read the raw input stream
-        if (module_exists('inputstream')) {
-          $handle = fopen('drupal://input', 'r');
+        // php://input is not available with enctype="multipart/form-data".
+        // see http://php.net/manual/en/wrappers.php.php
+        if ($mime == 'multipart/form-data') {
+          $data = call_user_func($parser);
         }
         else {
-          $handle = fopen('php://input', 'r');
-        }
-        if ($handle) {
-          $data = call_user_func($parser, $handle);
-          fclose($handle);
+          // Read the raw input stream.
+          if (module_exists('inputstream')) {
+            $handle = fopen('drupal://input', 'r');
+          }
+          else {
+            $handle = fopen('php://input', 'r');
+          }
+          if ($handle) {
+            $data = call_user_func($parser, $handle);
+            fclose($handle);
+          }
         }
         return $data;
 
