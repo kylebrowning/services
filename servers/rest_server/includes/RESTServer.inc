@@ -271,18 +271,24 @@ class RESTServer {
         if (!$parser) {
           return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
-
-        // Read the raw input stream
-        if (module_exists('inputstream')) {
-          $handle = fopen('drupal://input', 'r');
+        // php://input is not available with enctype="multipart/form-data".
+        // see http://php.net/manual/en/wrappers.php.php
+        if ($mime == 'multipart/form-data') {
+          $data = call_user_func($parser);
         }
         else {
-          $handle = fopen('php://input', 'r');
-        }
+          // Read the raw input stream
+          if (module_exists('inputstream')) {
+            $handle = fopen('drupal://input', 'r');
+          }
+          else {
+            $handle = fopen('php://input', 'r');
+          }
 
-        if ($handle) {
-          $data = call_user_func($parser, $handle);
-          fclose($handle);
+          if ($handle) {
+            $data = call_user_func($parser, $handle);
+            fclose($handle);
+          }
         }
         return $data;
 
@@ -470,6 +476,11 @@ class RESTServer {
   public static function parseFile($handle) {
     return self::contentFromStream($handle);
   }
+
+  public static function parseMultipart() {
+    return $_POST;
+  }
+
   public static function parseYAML($handle) {
     module_load_include('php', 'rest_server', 'lib/spyc');
     return Spyc::YAMLLoadString(self::contentFromStream($handle));

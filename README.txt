@@ -9,3 +9,12 @@ Goals
 Documentation
 ==============
 http://drupal.org/node/109782
+
+Installation
+============
+If you are using the rest server you will need to download the latest version of the following libraries
+* spyc - http://code.google.com/p/spyc/downloads/list
+* mimeparse - http://code.google.com/p/mimeparse/downloads/list
+
+Once downloaded you need to add spyc.php and mimeparse.php to the rest_server/lib folder which exists under
+the location you have installed services in.
