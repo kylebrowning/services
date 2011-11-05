@@ -101,7 +101,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
   }
 
   $original_user = $user;
-  $old_state = drupal_save_session(FALSE);
+  $old_state = drupal_save_session();
+  drupal_save_session(FALSE);
   $user = drupal_anonymous_user();
 
   services_set_server_info('original_user', $original_user);
@@ -160,8 +161,10 @@ function services_controller_execute($controller, $args = array(), $options = ar
   
   drupal_alter('services_request_postprocess', $controller, $args, $result);
   
-  $user = $original_user;
-  drupal_save_session($old_state);
+  if (drupal_save_session($user) === FALSE) {
+    $user = $original_user;
+    drupal_save_session($old_state);  
+  }
   if ($server_info->debug) {
     watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
   }
