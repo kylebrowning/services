@@ -96,6 +96,19 @@ function services_requirements($phase) {
   $t = get_t();
   // Warn users of the possible threat.
   if ($phase == 'runtime') {
+    // If rest_server is enabled, make sure it's from Services core.
+    if (module_exists('rest_server')) {
+      $rest_path = drupal_get_path('module', 'rest_server');
+      $core_path = drupal_get_path('module', 'services'). '/servers/rest_server';
+      if ($rest_path !== $core_path) {
+        $requirements['services_rest_server_compatibility'] = array(
+          'description' => $t('The enabled version of Rest Server is not from Services core. Uninstall then remove the old Rest Server module from'). ' '. $rest_path. ' '. t('to utilize Services core Rest Server'),
+          'severity' => REQUIREMENT_ERROR,
+          'title' => 'Services Rest Server Compatibility',
+        );
+      }
+    }
+
     //Pull endpoints that do not have services authentication enabled
     $result = db_query("SELECT * FROM {services_endpoint} AS se WHERE se.authentication NOT LIKE '%s'", '%services%');
     $items = array();

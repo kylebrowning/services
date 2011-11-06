@@ -274,21 +274,19 @@ class RESTServer {
         if (!$parser) {
           return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
-
         // php://input is not available with enctype="multipart/form-data".
         // see http://php.net/manual/en/wrappers.php.php
         if ($mime == 'multipart/form-data') {
           $data = call_user_func($parser);
         }
         else {
-          // Read the raw input stream
+          // Read the raw input stream.
           if (module_exists('inputstream')) {
             $handle = fopen('drupal://input', 'r');
           }
           else {
             $handle = fopen('php://input', 'r');
           }
-
           if ($handle) {
             $data = call_user_func($parser, $handle);
             fclose($handle);
@@ -463,10 +461,6 @@ class RESTServer {
     return self::contentFromStream($handle);
   }
 
-  public static function parseMultipart() {
-    return $_POST;
-  }
-  
   public static function parseJSON($handle) {
     return json_decode(self::contentFromStream($handle), TRUE);
   }
