@@ -255,7 +255,6 @@ function _user_resource_create($account) {
     }
     return $user;
   }
-  return $form_state['user'];
 }
 
 /**
