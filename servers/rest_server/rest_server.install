@@ -11,7 +11,7 @@ function rest_server_requirements($phase) {
   $requirements = array();
   // Ensure translations don't break at install time
   $t = get_t();
-  if ($phase == 'runtime') {
+  if ($phase == 'install') {
     if (!file_exists(dirname(__FILE__) . '/lib/spyc.php')) {
       $requirements['rest_server'] = array(
         'description' => 'A library is missing for rest_server to work',
