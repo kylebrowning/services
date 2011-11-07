@@ -314,6 +314,10 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
                   && $response_data->user->name == $account->name;
     $this->assertTrue($proper_answer, t('User successfully logged in.'), 'UserResource: Login');
 
+    // Make sure the session exists in the database.
+    $result = db_query("SELECT * FROM {sessions} WHERE :uid=uid", array(':uid' => $account->uid))->fetchObject();
+    $this->assertTrue(!empty($result), t('Session found'), 'UserResource: Login');
+
     // Save session details.
     $this->session_id = $response_data->sessid;
     $this->session_name = $response_data->session_name;
