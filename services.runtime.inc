@@ -154,7 +154,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
   }
 
   // Preprocess controller and arguments.
-  drupal_alter('services_request_preprocess', $controller, $args);
+  $controller['__drupal_alter_by_ref'] = array(&$args);
+  drupal_alter('services_request_preprocess', $controller);
 
   // Execute the controller callback.
   $result = call_user_func_array($controller['callback'], $args);
@@ -164,7 +165,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
   }
 
   // Postprocess controller, arguments and result.
-  drupal_alter('services_request_postprocess', $controller, $args, $result);
+  $controller['__drupal_alter_by_ref'] = array(&$args, &$result);
+  drupal_alter('services_request_postprocess', $controller);
 
   if (session_save_session($user) === FALSE) {
     $user = $original_user;
