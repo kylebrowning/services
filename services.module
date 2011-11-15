@@ -259,6 +259,14 @@ function services_endpoint_save($endpoint) {
   if (is_array($endpoint) && isset($endpoint['build_info'])) {
     $endpoint = $endpoint['build_info']['args'][0];
   }
+
+  // Set a default of an array if the value is not present.
+  foreach (array('server_settings', 'resources', 'authenication') as $endpoint_field) {
+    if (empty($endpoint->{$endpoint_field})) {
+      $endpoint->{$endpoint_field} = array();
+    }
+  }
+
   ctools_export_crud_save('services_endpoint', $endpoint);
   ctools_export_load_object_reset('services_endpoint');
   menu_rebuild();
