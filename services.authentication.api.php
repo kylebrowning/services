@@ -25,9 +25,9 @@
   *     to perform the actual authentication. <details of params/return>
   *   - security_settings: A callback function which returns an associative
   *     array of Form API elements for a settings form.
-  *   - _services_oauth_security_settings_validate: The name of a standard form
+  *   - _services_security_settings_validate: The name of a standard form
   *     validation callback for the form defined in 'security_settings'.
-  *   - _services_oauth_security_settings_submit: The name of a standard form
+  *   - _services_security_settings_submit: The name of a standard form
   *     submit callback for the form defined in 'security_settings'.
   *   - alter_methods: The name of a callback function which will alter a
   *     services method signature in order to add required arguments.
