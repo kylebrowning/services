@@ -20,14 +20,6 @@ function rest_server_requirements($phase) {
         'title' => t('Missing library'),
       );
     }
-    if (file_exists(dirname(__FILE__) . '/lib/mimeparse.php')) {
-      $requirements['rest_server']= array(
-        'description' => 'A library is missing for rest_server to work',
-        'severity' => REQUIREMENT_ERROR,
-        'value' => $t('Please download <a href="@download">mimeparse</a> and create a file called mimeparse.php in rest_server/lib', array('@download' =>  'http://code.google.com/p/mimeparse/downloads/list')),
-        'title' => t('Missing library'),
-      );
-    }
   }
   return $requirements;
 }
