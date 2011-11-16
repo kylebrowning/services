@@ -280,6 +280,25 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     $this->assertTrue(empty($accounts_copy), t('Users were listed properly.'), 'UserResource: Index');
 
+    // Retrieve all the users using a list of uids.
+    $response = $this->servicesGet($this->endpoint->path . '/user', array('parameters' => array('uid' => implode(',', array_keys($accounts)))));
+
+    $response_accounts = $response['body'];
+
+    $accounts_copy = $accounts;
+
+    foreach ($response_accounts as $response_account) {
+      // If name and email are the same we believe that accounts are the same.
+      if (isset($accounts[$response_account->uid])) {
+        $saved_account = $accounts[$response_account->uid];
+        if ($response_account->name == $saved_account->name && $response_account->mail == $saved_account->mail) {
+          unset($accounts_copy[$response_account->uid]);
+        }
+      }
+    }
+
+    $this->assertTrue(empty($accounts_copy), t('Users were listed properly.'), 'UserResource: Index');
+
     $accounts_copy = $accounts;
     $account = array_pop($accounts_copy);
 
