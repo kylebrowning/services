@@ -309,4 +309,69 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $response = $this->servicesPost($this->endpoint->path . '/user/logout');
     $this->assertTrue(strpos($response['status'], 'User is not logged in'), t('User cannot logout when is anonymous'), 'UserResource: Logout');
   }
+
+  /**
+   * Test index method.
+   *
+   * Create several users list them. List one user by name.
+   */
+  function testUserIndex() {
+    // Create several users.
+    $accounts = array();
+    for ($i = 0; $i < 5; $i++) {
+      $account = $this->drupalCreateUser();
+      $accounts[$account->uid] = $account;
+    }
+
+    $accounts_copy = $accounts;
+
+    $response = $this->servicesGet($this->endpoint->path . '/user', array('fields' => 'uid,name,mail'));
+    $response_accounts = $response['body'];
+
+    foreach ($response_accounts as $response_account) {
+      // We do not check anonymous and admin users.
+      if ($response_account->uid < 2) {
+        continue;
+      }
+      // If name and email are the same we believe that accounts are the same.
+      if (isset($accounts[$response_account->uid])) {
+        $saved_account = $accounts[$response_account->uid];
+        if ($response_account->name == $saved_account->name && $response_account->mail == $saved_account->mail) {
+          unset($accounts_copy[$response_account->uid]);
+        }
+      }
+    }
+
+    $this->assertTrue(empty($accounts_copy), t('Users were listed properly.'), 'UserResource: Index');
+
+    $accounts_copy = $accounts;
+    $account = array_pop($accounts_copy);
+
+    // Get user with specific name.
+    $response = $this->servicesGet($this->endpoint->path . '/user', array('parameters' => array('name' => $account->name)));
+    $response_accounts = $response['body'];
+    $response_account = current($response['body']);
+
+    $proper_answer = count($response_accounts) == 1 && $response_account->name == $account->name;
+    $this->assertTrue($proper_answer, t('User was listed by name properly.'), 'UserResource: Index');
+
+    // Retrieve all the users using a list of uids.
+    $response = $this->servicesGet($this->endpoint->path . '/user', array('parameters' => array('uid' => implode(',', array_keys($accounts)))));
+
+    $response_accounts = $response['body'];
+
+    $accounts_copy = $accounts;
+
+    foreach ($response_accounts as $response_account) {
+      // If name and email are the same we believe that accounts are the same.
+      if (isset($accounts[$response_account->uid])) {
+        $saved_account = $accounts[$response_account->uid];
+        if ($response_account->name == $saved_account->name && $response_account->mail == $saved_account->mail) {
+          unset($accounts_copy[$response_account->uid]);
+        }
+      }
+    }
+
+    $this->assertTrue(empty($accounts_copy), t('Users were listed properly.'), 'UserResource: Index');
+  }
 }

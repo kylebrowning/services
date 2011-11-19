@@ -447,15 +447,16 @@ function _services_resource_controller_as_procedure($resource, $name, $controlle
  *   Integer page number we are requesting.
  * @param $fields
  *   Array fields to return.
- * @param $parameter
+ * @param $service_params
  *   Array parameters to add to the index query.
  * @param $page_size
  *   Integer number of items to be returned.
  * @param $resource
  *   String name of the resource building the index query
  */
-function services_resource_build_index_query($schema, $order, $page, $fields, $parameters = array(), $primary_table, $primary_field, $page_size, $resource) {
+function services_resource_build_index_query($schema, $order, $page, $fields, $service_params = array(), $primary_table, $primary_field, $page_size, $resource) {
   $where = array();
+  $query_params = array();
   $fields = db_escape_string($fields);
 
   // need to append table prefix
@@ -471,9 +472,14 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   $schema = drupal_get_schema($schema);
   // Build an array of fields with the appropriate placeholders for use in
   // db_query().
-  if (is_array($parameters)) {
-    foreach ($parameters as $field => $value) {
-      $where[] = $primary_table . '.' . $field . ' = ' . db_type_placeholder($schema['fields'][$field]['type']);
+  if (is_array($service_params)) {
+    foreach ($service_params as $param_field => $param_value) {
+      $in_placeholders = array();
+      foreach (explode(',', $param_value) as $single_value) {
+        $in_placeholders[] = db_type_placeholder($schema['fields'][$param_field]['type']);
+        $query_params[] = $single_value;
+      }
+      $where[] = $primary_table . '.' . $param_field . ' IN (' . implode(',', $in_placeholders) . ')';
     } 
   }
 
@@ -489,7 +495,7 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $p
   // Run through db_rewrite_sql to make sure proper access checks are applied.
   $sql = "SELECT $fields FROM {{$table}} AS $primary_table $where ORDER BY $order";
   $sql = db_rewrite_sql($sql, $primary_table, $primary_field);
-  $result = db_query_range($sql, $parameters, $page * $page_size, $page_size);
+  $result = db_query_range($sql, $query_params, $page * $page_size, $page_size);
   return $result;
 }
 
