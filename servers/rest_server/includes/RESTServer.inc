@@ -460,7 +460,10 @@ class RESTServer {
   public static function parseFile($handle) {
     return self::contentFromStream($handle);
   }
-
+  
+  public static function parseMultipart() {
+    return $_POST;
+  }
   public static function parseJSON($handle) {
     return json_decode(self::contentFromStream($handle), TRUE);
   }
