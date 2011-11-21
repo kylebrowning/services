@@ -261,7 +261,7 @@ function services_endpoint_save($endpoint) {
   }
 
   // Set a default of an array if the value is not present.
-  foreach (array('server_settings', 'resources', 'authenication') as $endpoint_field) {
+  foreach (array('server_settings', 'resources', 'authentication') as $endpoint_field) {
     if (empty($endpoint->{$endpoint_field})) {
       $endpoint->{$endpoint_field} = array();
     }
