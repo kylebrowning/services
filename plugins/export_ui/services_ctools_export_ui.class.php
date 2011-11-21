@@ -373,6 +373,8 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
   $resources = $form_state['input'];
   $endpoint = $form_state['build_info']['args'][0];
 
+  $final_resource = array();
+  
   foreach ($resources as $path => $state) {
     if (strpos($path, '/') === FALSE || empty($state)) {
       continue;
