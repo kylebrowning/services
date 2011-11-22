@@ -232,12 +232,17 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
     '#value' => $endpoint,
   );
 
-    $ops = array(
+  $ops = array(
     'create'   => t('Create'),
     'retrieve' => t('Retrieve'),
     'update'   => t('Update'),
     'delete'   => t('Delete'),
     'index'    => t('Index'),
+  );
+  $classes = array(
+    'actions'          => t('Action'),
+    'targeted_actions' => t('Targeted Action'),
+    'relationships'    => t('Relationship'),
   );
 
   // Call _services_build_resources() directly instead of
@@ -257,74 +262,41 @@ function services_edit_form_endpoint_resources(&$form_state, $endpoint) {
     '#theme' => 'services_resource_table',
   );
 
-  $ignoreArray = array('actions', 'relationships', 'endpoint', 'name', 'file', 'targeted_actions');
+  $form['resources']['table']['#endpoint_object'] = $endpoint;
   // Generate the list of methods arranged by resource.
-  foreach ($resources as $resource => $methods) {
-    $form['resources']['table'][$resource] = array(
+  foreach ($resources as $name => $resource) {
+    $form['resources']['table'][$name] = array(
       '#collapsed' => TRUE,
       '#collapsible' => TRUE,
     );
 
     $alias = '';
-    if (isset($endpoint->resources[$resource]['alias'])) {
-      $alias = $endpoint->resources[$resource]['alias'];
+    if (isset($endpoint->resources[$name]['alias'])) {
+      $alias = $endpoint->resources[$name]['alias'];
     }
 
-    $form['resources']['table'][$resource][$resource . '-alias'] = array(
+    $form['resources']['table'][$name][$name . '-alias'] = array(
       '#type' => 'textfield',
       '#default_value' => $alias,
-      '#name' => $resource .'-alias',
+      '#name' => $name .'-alias',
       '#size' => 20,
     );
-    foreach ($methods as $class => $info) {
-      if (!in_array($class, $ignoreArray)) {
-        if (!isset($info['help'])) {
-          $description = t('No description is available');
-        }
-        else {
-          $description = $info['help'];
-        }
-        if (isset($endpoint->resources[$resource]['operations'][$class])) {
-          $default_value = $endpoint->resources[$resource]['operations'][$class]['enabled'];
-        }
-        else {
-          $default_value = 0;
-        }
-        $form['resources']['table'][$resource][$resource .'-'. $class] = array(
-          '#type' => 'checkbox',
-          '#title' => $class,
-          '#description' => $description,
-          '#default_value' => $default_value,
-        );
+    foreach ($ops as $op => $title) {
+      if (isset($resource[$op])) {
+        $form['resources']['table'][$name][$name .'/'. $op] = _services_resource_operation_settings($endpoint, $resource, $title, $op);
       }
-      elseif ($class == 'actions' || $class == 'relationships' || $class == 'targeted_actions') {
-        foreach ($info as $key => $action) {
-          if (!isset($action['help'])) {
-            $description = t('No description is available');
-          }
-          else {
-            $description = $action['help'];
-          }
-          if (isset($endpoint->resources[$resource][$class][$key])) {
-            $default_value = $endpoint->resources[$resource][$class][$key]['enabled'];
-          }
-          else {
-            $default_value = 0;
-          }
-          $form['resources']['table'][$resource][$resource .'-'. $key .'-'. $class] = array(
-            '#type' => 'checkbox',
-            '#title' => $key,
-            '#description' => $description,
-            '#default_value' => $default_value,
-          );
-        }
+    }
+    foreach ($classes as $element => $class) {
+      if (!empty($resource[$element])) {
+        foreach ($resource[$element] as $action => $definition) {
+          $form['resources']['table'][$name][$name .'/'. $name .'/'. $action] = _services_resource_operation_settings($endpoint, $resource, $class . ' - ' . $action, $element, $action);
+         }
       }
     }
   }
-
   $form['save'] = array(
-    '#type'  => 'submit',
-    '#value' => t('Save'),
+   '#type'  => 'submit',
+   '#value' => t('Save'),
   );
   return $form;
 }
@@ -390,4 +362,76 @@ function services_edit_form_endpoint_resources_submit($form, &$form_state) {
   $endpoint->resources = $final_resource;
   services_endpoint_save($endpoint);
   drupal_set_message(t('Resources have been saved'));
+}
+
+
+/**
+ * Returns information about a resource operation given it's class and name.
+ *
+ * @return array
+ *  Information about the operation, or NULL if no matching
+ *  operation was found.
+ */
+function services_get_resource_operation_info($resource, $class, $name = NULL) {
+  $op = NULL;
+  $classes = array(
+    'actions'          => t('Action'),
+    'targeted_actions' => t('Targeted Action'),
+    'relationships'    => t('Relationship'),
+  );
+  if (isset($resource[$class])) {
+    $op = $resource[$class];
+    if (!empty($name)) {
+      $op = isset($op[$name]) ? $op[$name] : NULL;
+    }
+  }
+
+  return $op;
+}
+
+/**
+ * Constructs the settings form for resource operation.
+ *
+ * @param string $resource
+ *  The resource information array.
+ * @param string $class
+ *  The class of the operation. Can be 'create', 'retrieve', 'update',
+ *  'delete', 'index', 'actions' or 'targeted_actions' or 'relationships'.
+ * @param string $name
+ *  Optional. The name parameter is only used for actions, targeted actions
+ *  and relationship.
+ */
+function _services_resource_operation_settings($endpoint, $resource, $title, $class, $name = NULL) {
+  module_load_include('runtime.inc', 'services');
+
+  $form = array(
+    '#tree' => TRUE,
+  );
+  if ($rop = services_get_resource_operation_info($resource, $class, $name)) {
+    if (isset($rop['help'])) {
+      $description = $rop['help'];
+    }
+    else {
+      $description = t('No description is available');
+    }
+    $form['enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => $title,
+      '#description' => $description,
+      '#default_value' => !empty($rop['settings']) && $rop['settings']['enabled'],
+      '#return_value' => 1,
+    );
+
+    // Let authentication modules add their configuration options
+    foreach ($endpoint->authentication as $auth_module => $auth_settings) {
+      $settings_form = services_auth_invoke($auth_module, 'controller_settings', $auth_settings, $rop, $endpoint, $class, $name);
+      if (!empty($settings_form) && $auth_module != 'services') {
+        //$settings_form['#tree'] = TRUE;
+        $form[$auth_module] = array();
+        $form[$auth_module] += $settings_form;
+      }
+    }
+  }
+
+  return $form;
 }

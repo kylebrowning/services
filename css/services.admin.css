@@ -56,6 +56,12 @@ a.resource-collapse:hover {
 td.resource-group-alias {
   width:130px;
 }
+td.resource-method-select .description {
+  white-space: normal;
+}
+td.resource-method-setting .description {
+  white-space: normal;
+}
 /* Zebra colors for resources admin table */
 #resource-form-table tr.resource-even td {
   background: none repeat scroll 0 0 #F3F4EE;
