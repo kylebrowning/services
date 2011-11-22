@@ -95,19 +95,11 @@ function _services_oauth_security_settings($settings) {
 function _services_oauth_controller_settings($settings, $controller, $endpoint, $class, $name) {
   $form = array();
 
-  if(isset($controller['settings']) && isset($controller['settings']['services_oauth'])) {
-     $cc = $controller['settings']['services_oauth']; 
-  }
+  $cc = $controller['endpoint']['services_oauth'];
   $auth_levels = array();
-  if(is_array($settings)) {
-    $context = oauth_common_context_load($settings['oauth_context']); 
-  } else {
-    $context = new StdClass();
-  }
-  if(isset($context->authorization_levels)) {
-    foreach ($context->authorization_levels as $name => $level) {
-      $auth_levels[$name] = t($level['title']);
-    } 
+  $context = oauth_common_context_load($settings['oauth_context']);
+  foreach ($context->authorization_levels as $name => $level) {
+    $auth_levels[$name] = t($level['title']);
   }
 
   $form['credentials'] = array(

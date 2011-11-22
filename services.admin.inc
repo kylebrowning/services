@@ -16,7 +16,6 @@ function theme_services_resource_table($variables) {
     theme('table_select_header_cell'),
     array('data' => t('Resource'), 'class' => 'resource_method'),
     array('data' => t('Description'), 'class' => 'resource_description'),
-    array('data' => t('Settings'), 'class' => 'resource_settings'),
     array('data' => t('Alias'), 'class' => 'resource_alias'),
   );
 
@@ -30,7 +29,6 @@ function theme_services_resource_table($variables) {
 
   // Cycle through each method group and create a row.
   $rows = array();
-
   foreach (element_children($table) as $key) {
     $element = &$table[$key];
     $row = array();
@@ -59,10 +57,6 @@ function theme_services_resource_table($variables) {
       'class' => 'resource-group-description',
     );
     $row[] = array(
-      'data' => '&nbsp;',
-      'class' => 'resource-group-settings',
-    );
-    $row[] = array(
       'data' => drupal_render($element[$method_class . '-alias']),
       'class' => 'resource-group-alias',
     );
@@ -82,12 +76,11 @@ function theme_services_resource_table($variables) {
         $method = $element[$method_name];
         $row = array();
 
-        $current_js['methodNames'][] = $element[$method_name]['enabled']['#id'];
+        $current_js['methodNames'][] = $method['#id'];
 
         // Store method title and description so that checkbox won't render them.
-        $title = $element[$method_name]['enabled']['#title'];;
-        $description = $element[$method_name]['enabled']['#description'];
- 
+        $title = $method['#title'];
+        $description = $method['#description'];
 
         unset($method['#description']);
         unset($method['#title']);
@@ -95,27 +88,16 @@ function theme_services_resource_table($variables) {
         // Test name is used to determine what methods to run.
         $method['#name'] = $method_name;
         $row[] = array(
-          'data' => drupal_render($method['enabled']),
+          'data' => drupal_render($method),
           'class' => 'resource-method-select',
         );
         $row[] = array(
-          'data' => '<label for="' . $element[$method_name]['enabled']['#id'] . '">' . $title . '</label>',
+          'data' => '<label for="' . $method['#id'] . '">' . $title . '</label>',
           'class' => 'resource-method-label',
         );
         $row[] = array(
           'data' => '<div class="description">' . $description . '</div>',
           'class' => 'resource-method-description',
-        );
-        $endpoint = $table['#endpoint_object'];
-        if(is_array($endpoint->authentication)) {
-          $auth_settings_form = '';
-          foreach ($endpoint->authentication as $auth_module => $auth_settings) {
-            $auth_settings_form .= drupal_render($element[$method_name][$auth_module]);
-          }
-        }
-        $row[] = array(
-          'data' => $auth_settings_form,
-          'class' => 'resource-method-setting',
         );
         $row[] = array(
           'data' => '<div class="alias">&nbsp;</div>',
