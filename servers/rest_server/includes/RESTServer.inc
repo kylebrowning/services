@@ -27,29 +27,23 @@ class RESTServer {
     if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
       $method = $_GET['_method'];
     }
-    $path = explode('/', $canonical_path);
-    $leaf = array_pop($path);
-    $resource_name = array_shift($path);
-    // Extract response format info from the path
+    // Extract response format info from the canonical path.
     $matches = array();
-    if ($leaf && preg_match('/^(.+)\.([^\.]+)$/', $leaf, $matches)) {
-      $leaf = $matches[1];
+    $response_format = '';
+
+    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
+      $canonical_path = $matches[1];
       $response_format = $matches[2];
     }
+
+    // Prepare $path array and $resource_name.
+    $path = explode('/', $canonical_path);
+    $resource_name = array_shift($path);
+
     // Response will vary with accept headers
     // if no format was supplied as path suffix
     if (empty($response_format)) {
       drupal_set_header('Vary: Accept');
-    }
-
-    // Return the leaf to the path array if it's not the resource name
-    if ($leaf) {
-      if (!$resource_name) {
-        $resource_name = $leaf;
-      }
-      else {
-        array_push($path, $leaf);
-      }
     }
 
     $endpoint = services_get_server_info('endpoint', '');
@@ -61,7 +55,7 @@ class RESTServer {
     // Normalize the settings so that we get the expected structure
     // and sensible defaults.
     $this->settings = rest_server_setup_settings($this->settings);
-    
+
     $resources = services_get_resources($endpoint);
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
@@ -456,7 +450,7 @@ class RESTServer {
   public static function parsePHP($handle) {
     return unserialize(self::contentFromStream($handle));
   }
-  
+
   public static function parseFile($handle) {
     return self::contentFromStream($handle);
   }
@@ -485,7 +479,7 @@ class RESTServer {
     if ($format) {
       return isset($formatters[$format]) ? $formatters[$format] : FALSE;
     }
-    
+
     return $formatters;
   }
 
