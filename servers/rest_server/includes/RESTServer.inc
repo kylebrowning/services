@@ -27,6 +27,9 @@ class RESTServer {
     if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
       $method = $_GET['_method'];
     }
+    if (isset($_GET['_method'])) {
+      unset($_GET['_method']);
+    }
     // Extract response format info from the canonical path.
     $matches = array();
     $response_format = '';
@@ -190,14 +193,11 @@ class RESTServer {
    * @return void
    */
   private function getControllerArguments($controller, $path, $method) {
-    // Get argument sources
-    $parameters = $_GET;
-    unset($parameters['_method']);
     $data = $this->parseRequest($method, $controller);
 
     $sources = array(
       'path' => $path,
-      'param' => $parameters,
+      'param' =>  $_GET,
       'data' => $data,
     );
 
