@@ -77,8 +77,7 @@ class RESTServer {
     }
 
     // Parse the request data
-    $data = array();
-    $arguments = $this->getControllerArguments($controller, $path, $method, $data);
+    $arguments = $this->getControllerArguments($controller, $path, $method);
 
     $formats = $this->responseFormatters();
 
@@ -177,14 +176,12 @@ class RESTServer {
    *
    * @param array $controller
    *  The controller definition
-   * @param string $path
+   * @param array $path
    * @param string $method
    *  The method used to make the request
-   * @param array $sources
-   *  An array of the sources used for getting the arguments for the call
    * @return void
    */
-  private function getControllerArguments($controller, $path, $method, &$sources = array()) {
+  private function getControllerArguments($controller, $path, $method) {
     // Get argument sources
     $parameters = $_GET;
     if (isset($parameters['_method'])) {
@@ -194,16 +191,12 @@ class RESTServer {
     $data = $this->parseRequest($method, $controller);
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
-    $defaults = array(
+    $sources = array(
       'path' => $path,
       'param' => $parameters,
       'data' => $data,
     );
-    foreach ($defaults as $key => $data) {
-      if (!isset($sources[$key])) {
-        $sources[$key] = $data;
-      }
-    }
+
     // Map source data to arguments.
     $arguments = array();
     if (isset($controller['args'])) {
@@ -230,15 +223,11 @@ class RESTServer {
         // When argument isn't set, insert default value if provided or
         // throw a exception if the argument isn't optional.
         if (!isset($arguments[$i])) {
-          if (isset($info['default value'])) {
-            $arguments[$i] = $info['default value'];
-          }
-          elseif (!isset($info['optional']) || !$info['optional']) {
+          if (!isset($info['optional']) || !$info['optional']) {
             return services_error(t('Missing required argument @arg', array('@arg' => $info['name'])), 401);
           }
-          else {
-            $arguments[$i] = NULL;
-          }
+          // Set default value or NULL if default value is not set.
+         $arguments[$i] = isset($info['default value']) ? $info['default value'] : NULL;
         }
       }
     }
