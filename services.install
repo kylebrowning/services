@@ -154,8 +154,11 @@ function services_uninstall() {
  */
 function services_update_7301() {
   $table = 'services_endpoint';
-  db_add_field($table, 'debug', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
-  db_add_field($table, 'status', array('type' => 'int', 'not null' => TRUE, 'default' => 1));
+  foreach (array('debug' => 0, 'status' => 1) as $field => $value) {
+    if (!db_field_exists($table, $field)) {
+      db_add_field($table, $field, array('type' => 'int', 'not null' => TRUE, 'default' => $value));
+    }
+  }
 }
 
 /**
@@ -163,7 +166,9 @@ function services_update_7301() {
  */
 function services_update_7302() {
   $table = 'services_endpoint';
-  db_drop_field($table, 'status');
+  if (db_field_exists($table, 'status')) {
+    db_drop_field($table, 'status');
+  }
 }
 
 /**
@@ -172,14 +177,16 @@ function services_update_7302() {
  */
 function services_update_7303() {
   // Add the new server settings field.
-  db_add_field('services_endpoint', 'server_settings', array(
-    'description'    => 'The server settings for the endpoint.',
-    'type' => 'blob',
-    'size' => 'big',
-    'not null' => TRUE,
-    'serialize' => TRUE,
-    'initial' => '',
-  ));
+  if (!db_field_exists('services_endpoint', 'server_settings')) {
+    db_add_field('services_endpoint', 'server_settings', array(
+      'description'    => 'The server settings for the endpoint.',
+      'type' => 'blob',
+      'size' => 'big',
+      'not null' => TRUE,
+      'serialize' => TRUE,
+      'initial' => '',
+    ));
+  }
   // Fetch all endpoints that currently exist
   $result = db_select('services_endpoint', 'se')
     ->fields('se')
@@ -204,5 +211,7 @@ function services_update_7303() {
  */
 function services_update_7399() {
   $table = 'services_endpoint';
-  db_drop_field($table, 'title');
+  if (db_field_exists($table, 'title')) {
+    db_drop_field($table, 'title');
+  }
 }
