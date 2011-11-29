@@ -6,6 +6,10 @@
  *
  */
 
+define("SERVICES_NODE_TYPE_INCLUDE", 1);
+define("SERVICES_NODE_TYPE_EMPTY", 2);
+define("SERVICES_NODE_TYPE_REMOVED", 3);
+
 /**
  * Run test cases for the endpoint with no authentication turned on.
  *
@@ -265,6 +269,33 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
   }
 
   /**
+   *  Helper function to perform node updates.
+   *
+   *  @parm $exclude_type
+   *    Integer how should the type value be treated.
+   */
+  function update_node($exclude_type) {
+    $node = $this->drupalCreateNode();
+    $node_update = (array) $node;
+    $node_update['title'] = $this->randomName();
+    $node_update['body'][LANGUAGE_NONE][0]['value'] = $this->randomName();
+
+    if ($exclude_type == SERVICES_NODE_TYPE_EMPTY) {
+      $node_update['type'] = '';
+    }
+    elseif($exclude_type == SERVICES_NODE_TYPE_REMOVED) {
+      unset($node_update['type']);
+    }
+
+    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update);
+    // Load node not from cache.
+    $nodeAfterUpdate = node_load($responseArray['body']['nid'], NULL, TRUE);
+    $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
+    $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update');
+    $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
+  }
+
+  /**
    * Testing node_resource Update.
    */
   public function testEndpointResourceNodeUpdate() {
@@ -274,25 +305,10 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
       'bypass node access',
     ));
     $this->drupalLogin($this->privilegedUser);
-    $node = $this->drupalCreateNode();
 
-    $node_update = (array) $node;
-    $node_update['title'] = $this->randomName();
-    $node_update['body'][LANGUAGE_NONE][0]['value'] = $this->randomName();
-
-    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update);
-    // Load node not from cache.
-    $nodeAfterUpdate = node_load($responseArray['body']['nid'], NULL, TRUE);
-    $this->assertTrue(isset($nodeAfterUpdate->nid), t('Node was successfully updated'), 'NodeResource: Updated');
-    $this->assertEqual($nodeAfterUpdate->title, $node_update['title'], t('Title is the same'), 'NodeResource: Update');
-    $this->assertEqual($nodeAfterUpdate->body[LANGUAGE_NONE][0]['value'], $node_update['body'][LANGUAGE_NONE][0]['value'], t('Body is the same'), 'NodeResource: Update');
-
-    // Try to update the node without node type.
-    $node_update_no_type = $node_update;
-    unset($node_update_no_type['type']);
-    $node_update_no_type['title'] = $this->randomName();
-    $responseArray = $this->servicesPut($this->endpoint->path . '/node/' . $node->nid, $node_update_no_type);
-    $this->assertNotEqual($responseArray['code'], 200, t('Can\'t update node without specifying node type'), 'NodeResource: Update');
+    $this->update_node(SERVICES_NODE_TYPE_INCLUDE);
+    $this->update_node(SERVICES_NODE_TYPE_EMPTY);
+    $this->update_node(SERVICES_NODE_TYPE_REMOVED);
   }
 
   /**

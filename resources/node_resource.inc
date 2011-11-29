@@ -311,36 +311,38 @@ function _node_resource_update($nid, $node) {
   $node['nid'] = $nid;
 
   $old_node = node_load($nid);
-  node_object_prepare($old_node);
+  if (empty($old_node->nid)) {
+    return services_error(t('Node @nid not found', array('@nid' => $old_node->nid)), 404);
+  }
+
+  // If no type is provided use the existing node type.
+  if (empty($node['type'])) {
+    $node['type'] = $old_node->type;
+  }
+  elseif ($node['type'] != $old_node->type) {
+    // Node types cannot be changed once they are created.
+    return services_error(t('Node type cannot be changed'), 406);
+  }
 
   // Validate the node. If there is validation error Exception will be thrown
   // so code below won't be executed.
   _node_resource_validate_type($node);
 
-  if ($old_node->nid) {
-    // Node types cannot be changed once they are created.
-    if (isset($node['type']) && $node['type'] != $old_node->type) {
-      return services_error(t('Node type cannot be changed'), 406);
-    }
+  // Load the required includes for drupal_execute
+  module_load_include('inc', 'node', 'node.pages');
 
-    // Load the required includes for drupal_execute
-    module_load_include('inc', 'node', 'node.pages');
+  $node_type = $node['type'];
+  node_object_prepare($old_node);
 
-    $node_type = $node['type'];
+  // Setup form_state.
+  $form_state = array();
+  $form_state['values'] = $node;
+  $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_update', t('Save'));
+  $form_state['node'] = $old_node;
+  drupal_form_submit($node_type . '_node_form', $form_state, $old_node);
 
-    // Setup form_state.
-    $form_state = array();
-    $form_state['values'] = $node;
-    $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_update', t('Save'));
-    $form_state['node'] = $old_node;
-    drupal_form_submit($node_type . '_node_form', $form_state, $old_node);
-
-    if ($errors = form_get_errors()) {
-      return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
-    }
-  }
-  else {
-    return services_error(t('Node @nid not found', array('@nid' => $old_node->nid)), 404);
+  if ($errors = form_get_errors()) {
+    return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
 
   $node = array('nid' => $nid);
