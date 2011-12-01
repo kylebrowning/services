@@ -51,6 +51,7 @@ function _file_resource_definition() {
             'description'  => t('To return file contents or not.'),
             'source'       => array('param' => 'file_contents'),
             'default value' => TRUE,
+            'optional' => TRUE,
           ),
           array(
             'name'         => 'image_styles',
@@ -58,6 +59,7 @@ function _file_resource_definition() {
             'description'  => t('To return image styles or not.'),
             'source'       => array('param' => 'image_styles'),
             'default value' => FALSE,
+            'optional' => TRUE,
           ),
         ),
       ),
@@ -319,7 +321,7 @@ function _file_resource_index($page, $fields, $parameters, $page_size) {
 function _file_resource_access($op = 'view', $args = array()) {
   // Adds backwards compatability with regression fixed in #1083242
   if (isset($args[0])) {
-    $args[0] = _services_access_value($args[0], 'file'); 
+    $args[0] = _services_access_value($args[0], 'file');
   }
 
   global $user;
