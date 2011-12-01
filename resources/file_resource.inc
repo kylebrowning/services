@@ -50,7 +50,7 @@ function _file_resource_definition() {
             'type'         => 'int',
             'description'  => t('To return file contents or not.'),
             'source'       => array('param' => 'file_contents'),
-            'optional'     => FALSE,
+            'optional'     => TRUE,
             'default value' => TRUE,
           ),
         ),
