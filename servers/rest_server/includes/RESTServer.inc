@@ -188,10 +188,14 @@ class RESTServer {
     $data = $this->parseRequest($method, $controller);
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
+    $headers = $this->parseRequestHeaders();
+    drupal_alter('rest_server_headers_parsed', $headers);
+
     $sources = array(
       'path' => $path,
       'param' => $_GET,
       'data' => $data,
+      'headers' => $headers,
     );
 
     // Map source data to arguments.
@@ -229,6 +233,14 @@ class RESTServer {
       }
     }
     return $arguments;
+  }
+
+  private function parseRequestHeaders() {
+    $headers = array();
+    if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+      $headers['IF_MODIFIED_SINCE'] = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
+    }
+    return $headers;
   }
 
   private function parseRequest($method, $controller) {
