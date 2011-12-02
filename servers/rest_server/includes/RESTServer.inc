@@ -194,11 +194,13 @@ class RESTServer {
    */
   private function getControllerArguments($controller, $path, $method) {
     $data = $this->parseRequest($method, $controller);
+    $headers = $this->parseRequestHeaders();
 
     $sources = array(
       'path' => $path,
       'param' =>  $_GET,
       'data' => $data,
+      'headers' => $headers,
     );
 
     // Map source data to arguments.
@@ -238,6 +240,14 @@ class RESTServer {
       }
     }
     return $arguments;
+  }
+
+  private function parseRequestHeaders() {
+    $headers = array();
+    if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+      $headers['IF_MODIFIED_SINCE'] = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
+    }
+    return $headers;
   }
 
   private function parseRequest($method, $controller) {
