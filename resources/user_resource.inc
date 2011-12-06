@@ -361,6 +361,11 @@ function _user_resource_login($username, $password) {
     return services_error(t('Already logged in as @user.', array('@user' => $user->name)), 406);
   }
 
+  // Check if account is active.
+  if (user_is_blocked($username)) {
+    return services_error(t('The username %name has not been activated or is blocked.', array('%name' => $username)), 403);
+  }
+
   $uid = user_authenticate($username, $password);
 
   if ($uid) {
