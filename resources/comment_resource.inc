@@ -118,6 +118,14 @@ function _comment_resource_definition() {
             'default value' => array(),
             'source' => array('param' => 'parameters'),
           ),
+          array(
+            'name' => 'pagesize',
+            'optional' => TRUE,
+            'type' => 'int',
+            'description' => 'Number of records to get per page.',
+            'default value' => variable_get('services_comment_index_page_size', 20),
+            'source' => array('param' => 'pagesize'),
+          ),
         ),
         'access callback' => '_comment_resource_access',
         'access arguments' => array('view'),
@@ -195,13 +203,13 @@ function _comment_resource_definition() {
  *
  * @see _node_resource_index()
  */
-function _comment_resource_index($page, $fields, $parameters, $page_title) {
+function _comment_resource_index($page, $fields, $parameters, $page_size) {
   // Limit to published nodes if user doesn't have 'administer nodes'
   // permissions.
   if (!user_access('administer comments')) {
     $parameters['status'] = 1;
   }
-  $query = services_resource_build_index_query('comments', 'c.timestamp DESC', $page, $fields, $parameters, 'c', 'cid', $page_title, 'comment');
+  $query = services_resource_build_index_query('comments', 'c.timestamp DESC', $page, $fields, $parameters, 'c', 'cid', $page_size, 'comment');
   // Put together array of matching nodes to return.
   $results = array();
   while ($comments = db_fetch_object($query)) {
