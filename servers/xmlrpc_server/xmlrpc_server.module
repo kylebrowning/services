@@ -37,8 +37,8 @@ function xmlrpc_server_server() {
  */
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-  
-  $resources = services_get_resources();
+  module_load_include('runtime.inc', 'services');
+  $resources = services_get_resources(services_get_server_info('endpoint', ''));
   if (!empty($resources)) {
     // Translate all resources
     foreach ($resources as $name => $def) {
