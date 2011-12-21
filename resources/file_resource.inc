@@ -50,7 +50,7 @@ function _file_resource_definition() {
             'type'         => 'int',
             'description'  => t('To return file contents or not.'),
             'source'       => array('param' => 'file_contents'),
-            'optional'     => FALSE,
+            'optional'     => TRUE,
             'default value' => TRUE,
           ),
         ),
@@ -103,7 +103,7 @@ function _file_resource_definition() {
           array(
             'name' => 'pagesize',
             'optional' => TRUE,
-            'type' => 'init',
+            'type' => 'int',
             'description' => 'Number of records to get per page.',
             'default value' => variable_get('services_file_index_page_size', 20),
             'source' => array('param' => 'pagesize'),

@@ -18,7 +18,12 @@
  *  Returns nothing, or a error message if authentication fails
  */
 function _services_oauth_authenticate_call($settings, $method, $args) {
-  $endpoint   = $method['endpoint']['services_oauth'];
+  if (isset($method['endpoint']['services_oauth'])) {
+    $endpoint   = $method['endpoint']['services_oauth'];
+  }
+  else {
+    $endpoint = $settings;
+  }
   $cred       = isset($endpoint['credentials']) ? $endpoint['credentials'] : 'token';
   $auth_level = isset($endpoint['authorization']) ? $endpoint['authorization'] : '*';
 
@@ -62,9 +67,18 @@ function _services_oauth_authenticate_call($settings, $method, $args) {
 
     // Load the user if the request was authenticated using a token
     // that's associated with a account.
-    if ($token->uid) {
-      global $user;
-      $user = user_load($token->uid);
+    if ($cred == 'token') {
+       if ($token->uid) {
+         global $user;
+         $user = user_load($token->uid);
+       }
+    }
+    else if ($cred == 'consumer') {
+      if ($consumer->uid) {
+        // this authenticates as the user who owns 'key';  It is for 2-stage OAuth and is vastly inferior to 3-stage OAuth
+        global $user;
+        $user = user_load($consumer->uid);
+      }
     }
   }
   catch (OAuthException $e) {
@@ -84,10 +98,36 @@ function _services_oauth_security_settings($settings) {
     '#description'   => t('The OAuth contexts provides a scope for consumers and authorizations and have their own authorization levels. Different services endpoints may share OAuth contexts and thereby allow the use of consumers and tokens across the services endpoint boundraries.'),
   );
 
+  $form['authorization'] = array(
+    '#type'          => 'select',
+    '#options'       => array('' => t('-- Select an authorization level')),
+    '#default_value' => isset($settings['authorization']) ? $settings['authorization'] : '',
+    '#title'         => t('OAuth Authorization'),
+    '#required'      => TRUE,
+    '#description'   => t('This defines according to the OAuth context what the login will have access to, within this site,'),
+  );
+
   $contexts = oauth_common_context_load_all();
   foreach ($contexts as $context) {
     $form['oauth_context']['#options'][$context->name] = $context->title;
+    if (isset($context->authorization_levels)) {
+      foreach ($context->authorization_levels as $name => $level) {
+        $form['authorization']['#options'][$name] = $context->name . '/' . t($level['title']);
+      }
+    }
   }
+
+  $form['credentials'] = array(
+    '#type'          => 'select',
+    '#options'       => array(
+      'none'              => t('None'),
+      'consumer'          => t('Consumer key, also known as 2-legged OAuth'),
+      'token'             => t('Consumer key and access token, also known as 3-legged OAuth'),
+    ),
+    '#default_value' => isset($settings['credentials']) ? $settings['credentials'] : 'token',
+    '#title'         => t('Required authentication'),
+    '#description'   => t('Authorization levels will <em>not</em> be applied if the consumer isn\'t required to supply a access token.'),
+  );
 
   return $form;
 }
@@ -95,11 +135,23 @@ function _services_oauth_security_settings($settings) {
 function _services_oauth_controller_settings($settings, $controller, $endpoint, $class, $name) {
   $form = array();
 
-  $cc = $controller['endpoint']['services_oauth'];
+  if (isset($controller['settings']) && isset($controller['settings']['services_oauth'])) {
+     $cc = $controller['settings']['services_oauth'];
+  }
+  else {
+    $cc = $controller['endpoint']['services_oauth'];
+  }
   $auth_levels = array();
-  $context = oauth_common_context_load($settings['oauth_context']);
-  foreach ($context->authorization_levels as $name => $level) {
-    $auth_levels[$name] = t($level['title']);
+  if (is_array($settings)) {
+    $context = oauth_common_context_load($settings['oauth_context']);
+  }
+  else {
+    $context = new StdClass();
+  }
+  if (isset($context->authorization_levels)) {
+    foreach ($context->authorization_levels as $name => $level) {
+      $auth_levels[$name] = t($level['title']);
+    }
   }
 
   $form['credentials'] = array(
