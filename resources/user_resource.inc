@@ -112,7 +112,7 @@ function _user_resource_definition() {
           array(
             'name' => 'pagesize',
             'optional' => TRUE,
-            'type' => 'init',
+            'type' => 'int',
             'description' => 'Number of records to get per page.',
             'default value' => variable_get('services_user_index_page_size', 20),
             'source' => array('param' => 'pagesize'),
@@ -359,6 +359,11 @@ function _user_resource_login($username, $password) {
   if ($user->uid) {
     // user is already logged in
     return services_error(t('Already logged in as @user.', array('@user' => $user->name)), 406);
+  }
+
+  // Check if account is active.
+  if (user_is_blocked($username)) {
+    return services_error(t('The username %name has not been activated or is blocked.', array('%name' => $username)), 403);
   }
 
   $uid = user_authenticate($username, $password);

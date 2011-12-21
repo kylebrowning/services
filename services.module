@@ -160,10 +160,10 @@ function services_theme() {
  *  An associative array keyed after module name containing information about
  *  the installed server implementations.
  */
-function services_get_servers() {
-  static $servers;
+function services_get_servers($reset = FALSE) {
+  $servers = &drupal_static(__FUNCTION__);
 
-  if (!$servers) {
+  if (!$servers || $reset) {
     $servers = array();
     foreach (module_implements('server_info') as $module) {
       $servers[$module] = call_user_func($module . '_server_info');
