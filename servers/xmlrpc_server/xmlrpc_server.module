@@ -37,7 +37,7 @@ function xmlrpc_server_server() {
  */
 function xmlrpc_server_xmlrpc() {
   $callbacks = array();
-
+  module_load_include('runtime.inc', 'services');
   $resources = services_get_resources(services_get_server_info('endpoint', ''));
   if (!empty($resources)) {
     // Translate all resources
@@ -81,10 +81,10 @@ function xmlrpc_server_call_wrapper() {
     $code = $e->getCode();
     switch($code) {
       case 204:
-        drupal_add_http_header('HTTP/1.0 204 No Content', $exception->getMessage());
+        drupal_add_http_header('HTTP/1.0 204 No Content', $->getMessage());
         break;
       case 304:
-        drupal_add_http_header('HTTP/1.0 304 Not Modified', $exception->getMessage());
+        drupal_add_http_header('HTTP/1.0 304 Not Modified', $->getMessage());
         break;
       case 401:
         drupal_add_http_header('Status', '401 Unauthorized: ' . $e->getMessage());
