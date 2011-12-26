@@ -81,10 +81,10 @@ function xmlrpc_server_call_wrapper() {
     $code = $e->getCode();
     switch($code) {
       case 204:
-        drupal_add_http_header('HTTP/1.0 204 No Content', $->getMessage());
+        drupal_add_http_header('HTTP/1.0 204 No Content', $e->getMessage());
         break;
       case 304:
-        drupal_add_http_header('HTTP/1.0 304 Not Modified', $->getMessage());
+        drupal_add_http_header('HTTP/1.0 304 Not Modified', $e->getMessage());
         break;
       case 401:
         drupal_add_http_header('Status', '401 Unauthorized: ' . $e->getMessage());
