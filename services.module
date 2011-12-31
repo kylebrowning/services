@@ -193,7 +193,7 @@ function services_endpoint_callback($endpoint_name) {
       'endpoint'      => $endpoint_name,
       'endpoint_path' => $endpoint->path,
       'debug'         => $endpoint->debug,
-      'settings'      => $endpoint->server_settings[$server],
+      'settings'      => $endpoint->server_settings,
     ));
     if ($endpoint->debug) {
       watchdog('services', 'Calling server: %server', array('%server' => $server . '_server'), WATCHDOG_DEBUG);

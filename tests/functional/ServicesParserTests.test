@@ -37,18 +37,16 @@ class ServicesParserTests extends ServicesWebTestCase {
       'services' => 'services',
     );
     $endpoint->server_settings = array(
-      'rest_server' => array(
-        'formatters' => array(
-          'php' => TRUE,
-        ),
-        'parsers' => array(
-          'application/x-yaml' => TRUE,
-          'application/json' => TRUE,
-          'application/vnd.php.serialized' => TRUE,
-          'application/plist' => TRUE,
-          'application/plist+xml' => TRUE,
-          'application/x-www-form-urlencoded' => FALSE,
-        ),
+      'formatters' => array(
+        'php' => TRUE,
+      ),
+      'parsers' => array(
+        'application/x-yaml' => TRUE,
+        'application/json' => TRUE,
+        'application/vnd.php.serialized' => TRUE,
+        'application/plist' => TRUE,
+        'application/plist+xml' => TRUE,
+        'application/x-www-form-urlencoded' => FALSE,
       ),
     );
     $endpoint->resources = array(

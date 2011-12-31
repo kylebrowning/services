@@ -193,7 +193,7 @@ function services_update_7303() {
     ->execute()
     ->fetchAll();
   // Loop through every endpoint and update the authentication section.
-  // Note, this will not removw previous authentication settings, it will 
+  // Note, this will not remove previous authentication settings, it will
   // only add to them.
   foreach($result as $services_endpoint_object) {
     $new_authentication = array(
@@ -213,5 +213,25 @@ function services_update_7399() {
   $table = 'services_endpoint';
   if (db_field_exists($table, 'title')) {
     db_drop_field($table, 'title');
+  }
+}
+
+/**
+ * Update 7400 reduces nesting in the way server settings are stored
+ */
+function services_update_7400() {
+  $server_names = array_keys(services_get_servers());
+  foreach (services_endpoint_load_all() as $endpoint) {
+    $settings = $endpoint->server_settings;
+    if (!empty($settings)) {
+      if (in_array(key($settings), $server_names)) {
+        $settings = current($settings);
+      }
+    }
+    else {
+      $settings = array();
+    }
+    $endpoint->server_settings = $settings;
+    services_endpoint_save($endpoint);
   }
 }

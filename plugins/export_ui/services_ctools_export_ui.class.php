@@ -150,7 +150,7 @@ function services_edit_form_endpoint_server($form, &$form_state) {
   else {
     $definition = $server['settings'];
 
-    $settings = isset($endpoint->server_settings[$endpoint->server]) ? $endpoint->server_settings[$endpoint->server] : array();
+    $settings = isset($endpoint->server_settings) ? $endpoint->server_settings : array();
 
     if (!empty($definition['file'])) {
       call_user_func_array('module_load_include', $definition['file']);
@@ -189,7 +189,7 @@ function services_edit_form_endpoint_server_submit($form, $form_state) {
   }
 
   // Store the settings in the endpoint
-  $endpoint->server_settings[$endpoint->server] = $values;
+  $endpoint->server_settings = $values;
   services_endpoint_save($endpoint);
 
   drupal_set_message(t('Your server settings have been saved.'));

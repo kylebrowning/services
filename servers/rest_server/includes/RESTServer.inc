@@ -52,7 +52,7 @@ class RESTServer {
     $endpoint_definition = services_endpoint_load($endpoint);
 
     // Get the server settings from the endpoint.
-    $this->settings = !empty($endpoint_definition->server_settings['rest_server']) ? $endpoint_definition->server_settings['rest_server'] : array();
+    $this->settings = !empty($endpoint_definition->server_settings) ? $endpoint_definition->server_settings : array();
     // Normalize the settings so that we get the expected structure
     // and sensible defaults.
     $this->settings = rest_server_setup_settings($this->settings);
