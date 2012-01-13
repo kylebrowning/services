@@ -10,8 +10,8 @@ files[] = includes/RESTServer.inc
 
 files[] = lib/bencode.php
 files[] = lib/mimeparse.php
-files[] = lib/spyc.php
 
 dependencies[] = services
+dependencies[] = libraries
 
 core = 7.x
