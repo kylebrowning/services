@@ -29,7 +29,7 @@
   *     validation callback for the form defined in 'security_settings'.
   *   - _services_security_settings_submit: The name of a standard form
   *     submit callback for the form defined in 'security_settings'.
-  *   - alter_methods: The name of a callback function which will alter a
+  *   - alter_controllers: The name of a callback function which will alter a
   *     services method signature in order to add required arguments.
   *   - file: An include file which contains the authentication callbacks.
   */
