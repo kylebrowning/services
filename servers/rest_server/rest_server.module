@@ -219,7 +219,11 @@ function rest_server_services_resources_alter(&$resources, $endpoint) {
  * @return the location of the spyc library, if it exists; else return false.
  */
 function _rest_server_get_spyc_location() {
-  $libraries_spyc_loc = libraries_get_path('spyc') . '/spyc.php';
+  if (function_exists('libraries_get_path')) {
+    $libraries_spyc_loc = libraries_get_path('spyc') . '/spyc.php'; 
+  } else {
+    return false;
+  }
   $services_spyc_loc = dirname(__FILE__) . '/lib/spyc.php';
 
   if (file_exists($libraries_spyc_loc)) {
