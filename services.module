@@ -499,10 +499,35 @@ function services_resource_build_index_query($query, $page, $fields, $parameters
   }
   if (isset($parameters) && is_array($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
-      $query->condition($parameter, explode(',', $parameter_value), 'IN');
+      $query->condition($parameter, services_str_getcsv($parameter_value), 'IN');
     }
   }
 }
+
+
+/**
+ * Emulate str_getcsv on systems where it is not available.
+ *
+ * @ingroup php_wrappers
+ */
+function services_str_getcsv($input, $delimiter = ',', $enclosure = '"', $escape = '\\') {
+  $ret = array();
+
+  if (!function_exists('str_getcsv')) {
+    $temp = fopen("php://memory", "rw");
+    fwrite($temp, $input);
+    fseek($temp, 0);
+    while (($data = fgetcsv($temp, 0, $delimiter, $enclosure, $escape)) !== false) {
+      $ret[] = $data;
+    }
+    fclose($temp);
+  }
+  else {
+    $ret = str_getcsv($input, $delimiter, $enclosure, $escape);
+  }
+  return $ret;
+}
+
 
 /**
  * Helper function to build a list of items satisfying the index query.
