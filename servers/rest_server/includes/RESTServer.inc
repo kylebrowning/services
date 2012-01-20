@@ -464,7 +464,7 @@ class RESTServer {
   }
 
   public static function parseYAML($handle) {
-    module_load_include('php', 'rest_server', 'lib/spyc');
+    include_once _rest_server_get_spyc_location();
     return Spyc::YAMLLoadString(self::contentFromStream($handle));
   }
 

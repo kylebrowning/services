@@ -3,4 +3,5 @@ description = Provides an REST server.
 package = Services - servers
 dependencies[] = services
 dependencies[] = autoload
+dependencies[] = libraries
 core = 6.x
