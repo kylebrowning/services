@@ -401,11 +401,11 @@ function _user_resource_logout() {
 
   watchdog('user', 'Session closed for %name.', array('%name' => drupal_placeholder($user->name)));
 
-  // Destroy the current session:
-  session_destroy();
+  // Destroy the current session.
   module_invoke_all('user_logout', $user);
+  session_destroy();
 
-  // Load the anonymous user
+  // Load the anonymous user.
   $user = drupal_anonymous_user();
 
   return TRUE;
