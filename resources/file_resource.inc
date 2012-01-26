@@ -261,7 +261,7 @@ function _file_resource_create($file) {
 function _file_resource_retrieve($fid, $file_contents) {
   if ($file = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $fid))) {
     if ($file_contents) {
-      $absolute_file_path = $_SERVER['DOCUMENT_ROOT'] . '/' . file_create_path($file['filepath']);
+      $absolute_file_path = getcwd() . '/' . file_create_path($file['filepath']);
       $binaryfile = fopen($absolute_file_path, 'rb');
       if ($binaryfile === FALSE) {
         services_error(t('Cannot open file with ID %fid.', array('%fid' => $fid)));
