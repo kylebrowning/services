@@ -305,6 +305,11 @@ function _user_resource_update($uid, $account) {
     $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
+  // If user is changing name, make sure they have permission.
+  if (isset($account['name']) && $account['name'] != $account_loaded->name && !user_access('change own username')) {
+    return services_error(t('You are not allowed to change your username.'), 406);
+  }
+
   $form_state['values']['op'] = variable_get('services_user_save_button_resource_update', t('Save'));
   $form_state['values']['#user_category'] = $category;
   $form_state['values']['#account'] = $account_loaded;
