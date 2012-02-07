@@ -104,7 +104,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   $old_state = drupal_save_session();
   drupal_save_session(FALSE);
   $user = drupal_anonymous_user();
-
+  $user->timestamp = time();
   services_set_server_info('original_user', $original_user);
 
   // Check authentication.
