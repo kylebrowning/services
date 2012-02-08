@@ -508,9 +508,13 @@ class RESTServer {
 
   private function resolveController($resource, $method, $path) {
     $pc = count($path);
-    // Use the index handler for all empty path request, except on POST
-    if (!$pc && $method!='POST') {
-      return isset($resource['index']) ? $resource['index'] : NULL;
+    $class = NULL;
+    $operation = NULL;
+
+    // Use the index handler for all empty path GET-requests
+    if (!$pc && $method == 'GET') {
+      $class = 'operations';
+      $operation = 'index';
     }
     // Detect the standard crud operations
     elseif (($pc == 1 && ($method == 'GET' || $method == 'PUT' || $method == 'DELETE')) || ($pc == 0 && $method == 'POST')) {
@@ -520,31 +524,35 @@ class RESTServer {
         'PUT' => 'update',
         'DELETE' => 'delete',
       );
-      if (isset($resource[$action_mapping[$method]])) {
-        $controller = $resource[$action_mapping[$method]];
-        if (isset($resource['file'])) {
-          $controller['file'] = $resource['file'];
-        }
-        return $controller;
-      }
+      $class = 'operations';
+      $operation = $action_mapping[$method];
     }
     // Detect relationship requests
     elseif ($pc >= 2 && $method == 'GET') {
-      if (isset($resource['relationships']) && $resource['relationships'][$path[1]]) {
-        $relationship = $resource['relationships'][$path[1]];
-        return $relationship;
-      }
+      $class = 'relationships';
+      $operation = $path[1];
     }
     // Detect action requests
     elseif ($pc == 1 && $method == 'POST') {
-      return $resource['actions'][$path[0]];
+      $class = 'actions';
+      $operation = $path[0];
     }
     // Detect action requests targeted at specific resources
     elseif ($pc >= 2 && $method == 'POST') {
-      $action = $resource['targeted_actions'][$path[1]];
-      return $action;
+      $class = 'targeted_actions';
+      $operation = $path[1];
     }
+
+    $controller = FALSE;
+    if (!empty($class) && !empty($operation) && !empty($resource[$class][$operation])) {
+      $controller = $resource[$class][$operation];
+      if (isset($resource['file']) && empty($controller['file'])) {
+        $controller['file'] = $resource['file'];
+      }
+    }
+    return $controller;
   }
+
   function handleException($exception){
     $code = $exception->getCode();
     switch ($code) {

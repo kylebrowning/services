@@ -3,123 +3,125 @@
 function _user_resource_definition() {
   $definition = array(
     'user' => array(
-      'retrieve' => array(
-        'help' => 'Retrieves a user',
-        'callback' => '_user_resource_retrieve',
-        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-        'access callback' => '_user_resource_access',
-        'access arguments' => array('view'),
-        'access arguments append' => TRUE,
-        'args' => array(
-          array(
-            'name' => 'uid',
-            'type' => 'int',
-            'description' => 'The uid of the user to retrieve.',
-            'source' => array('path' => '0'),
-            'optional' => FALSE,
+      'operations' => array(
+        'retrieve' => array(
+          'help' => 'Retrieves a user',
+          'callback' => '_user_resource_retrieve',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('view'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'uid',
+              'type' => 'int',
+              'description' => 'The uid of the user to retrieve.',
+              'source' => array('path' => '0'),
+              'optional' => FALSE,
+            ),
           ),
         ),
-      ),
 
-      'create' => array(
-        'help' => 'Creates a user',
-        'callback' => '_user_resource_create',
-        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-        'access callback' => '_user_resource_access',
-        'access arguments' => array('create'),
-        'access arguments append' => FALSE,
-        'args' => array(
-          array(
-            'name' => 'account',
-            'type' => 'array',
-            'description' => 'The user object',
-            'source' => 'data',
-            'optional' => FALSE,
+        'create' => array(
+          'help' => 'Creates a user',
+          'callback' => '_user_resource_create',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('create'),
+          'access arguments append' => FALSE,
+          'args' => array(
+            array(
+              'name' => 'account',
+              'type' => 'array',
+              'description' => 'The user object',
+              'source' => 'data',
+              'optional' => FALSE,
+            ),
           ),
         ),
-      ),
 
-      'update' => array(
-        'help' => 'Updates a user',
-        'callback' => '_user_resource_update',
-        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-        'access callback' => '_user_resource_access',
-        'access arguments' => array('update'),
-        'access arguments append' => TRUE,
-        'args' => array(
-          array(
-            'name' => 'uid',
-            'type' => 'int',
-            'description' => 'Unique identifier for this user',
-            'source' => array('path' => 0),
-            'optional' => FALSE,
-          ),
-          array(
-            'name' => 'data',
-            'type' => 'array',
-            'description' => 'The user object with updated information',
-            'source' => 'data',
-            'optional' => FALSE,
+        'update' => array(
+          'help' => 'Updates a user',
+          'callback' => '_user_resource_update',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('update'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'uid',
+              'type' => 'int',
+              'description' => 'Unique identifier for this user',
+              'source' => array('path' => 0),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'The user object with updated information',
+              'source' => 'data',
+              'optional' => FALSE,
+            ),
           ),
         ),
-      ),
 
-      'delete' => array(
-        'help' => 'Deletes a user',
-        'callback' => '_user_resource_delete',
-        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-        'access callback' => '_user_resource_access',
-        'access arguments' => array('delete'),
-        'access arguments append' => TRUE,
-        'args' => array(
-          array(
-            'name' => 'nid',
-            'type' => 'int',
-            'description' => 'The id of the note to delete',
-            'source' => array('path' => '0'),
-            'optional' => FALSE,
+        'delete' => array(
+          'help' => 'Deletes a user',
+          'callback' => '_user_resource_delete',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('delete'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'nid',
+              'type' => 'int',
+              'description' => 'The id of the note to delete',
+              'source' => array('path' => '0'),
+              'optional' => FALSE,
+            ),
           ),
         ),
-      ),
-      'index' => array(
-        'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
-        'callback' => '_user_resource_index',
-        'args' => array(
-          array(
-            'name' => 'page',
-            'optional' => TRUE,
-            'type' => 'int',
-            'description' => 'The zero-based index of the page to get, defaults to 0.',
-            'default value' => 0,
-            'source' => array('param' => 'page'),
+        'index' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'callback' => '_user_resource_index',
+          'args' => array(
+            array(
+              'name' => 'page',
+              'optional' => TRUE,
+              'type' => 'int',
+              'description' => 'The zero-based index of the page to get, defaults to 0.',
+              'default value' => 0,
+              'source' => array('param' => 'page'),
+            ),
+            array(
+              'name' => 'fields',
+              'optional' => TRUE,
+              'type' => 'string',
+              'description' => 'The fields to get.',
+              'default value' => '*',
+              'source' => array('param' => 'fields'),
+            ),
+            array(
+              'name' => 'parameters',
+              'optional' => TRUE,
+              'type' => 'array',
+              'description' => 'Parameters',
+              'default value' => array(),
+              'source' => array('param' => 'parameters'),
+            ),
+            array(
+              'name' => 'pagesize',
+              'optional' => TRUE,
+              'type' => 'int',
+              'description' => 'Number of records to get per page.',
+              'default value' => variable_get('services_user_index_page_size', 20),
+              'source' => array('param' => 'pagesize'),
+            ),
           ),
-          array(
-            'name' => 'fields',
-            'optional' => TRUE,
-            'type' => 'string',
-            'description' => 'The fields to get.',
-            'default value' => '*',
-            'source' => array('param' => 'fields'),
-          ),
-          array(
-            'name' => 'parameters',
-            'optional' => TRUE,
-            'type' => 'array',
-            'description' => 'Parameters',
-            'default value' => array(),
-            'source' => array('param' => 'parameters'),
-          ),
-          array(
-            'name' => 'pagesize',
-            'optional' => TRUE,
-            'type' => 'int',
-            'description' => 'Number of records to get per page.',
-            'default value' => variable_get('services_user_index_page_size', 20),
-            'source' => array('param' => 'pagesize'),
-          ),
+          'access arguments' => array('access user profiles'),
+          'access arguments append' => FALSE,
         ),
-        'access arguments' => array('access user profiles'),
-        'access arguments append' => FALSE,
       ),
       'actions' => array(
         'login' => array(
@@ -155,7 +157,7 @@ function _user_resource_definition() {
     ),
   );
 
-  $definition['user']['actions']['register'] = array_merge($definition['user']['create'], array(
+  $definition['user']['actions']['register'] = array_merge($definition['user']['operations']['create'], array(
     'help' => 'Register a user',
   ));
 

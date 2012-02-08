@@ -18,12 +18,11 @@
  *  Returns nothing, or a error message if authentication fails
  */
 function _services_oauth_authenticate_call($settings, $method, $args) {
+  $endpoint = array();
   if (isset($method['endpoint']['services_oauth'])) {
-    $endpoint   = $method['endpoint']['services_oauth'];
+    $endpoint += array_filter($method['endpoint']['services_oauth']);
   }
-  else {
-    $endpoint = $settings;
-  }
+  $endpoint += $settings;
   $cred       = isset($endpoint['credentials']) ? $endpoint['credentials'] : 'token';
   $auth_level = isset($endpoint['authorization']) ? $endpoint['authorization'] : '*';
 
@@ -56,7 +55,7 @@ function _services_oauth_authenticate_call($settings, $method, $args) {
         throw new OAuthException('The access token is not authorized');
       }
       // Check that the consumer has been granted the required authorization level
-      if (!in_array('*', $token->services) && !in_array($auth_level, $token->services)) {
+      if (!empty($auth_level) && !in_array('*', $token->services) && !in_array($auth_level, $token->services)) {
         throw new OAuthException('The consumer is not authorized to access this service');
       }
     }
@@ -88,59 +87,83 @@ function _services_oauth_authenticate_call($settings, $method, $args) {
   }
 }
 
-function _services_oauth_security_settings($settings) {
+function _services_oauth_security_settings_authorization($settings) {
+  return isset($settings['authorization']) ? $settings['authorization'] : '';
+}
+
+function _services_oauth_security_settings($settings, &$form_state) {
+  if (isset($form_state['values']['services_oauth']['oauth_context'])) {
+    $settings['oauth_context'] = $form_state['values']['services_oauth']['oauth_context'];
+  }
+
   $form = array();
   $form['oauth_context'] = array(
     '#type'          => 'select',
     '#options'       => array('' => t('-- Select an OAuth context')),
-    '#default_value' => isset($settings['oauth_context']) ? $settings['oauth_context'] : '',
+    '#default_value' => $settings['oauth_context'],
     '#title'         => t('OAuth context'),
-    '#required'      => TRUE,
     '#description'   => t('The OAuth contexts provides a scope for consumers and authorizations and have their own authorization levels. Different services endpoints may share OAuth contexts and thereby allow the use of consumers and tokens across the services endpoint boundraries.'),
   );
 
   $form['authorization'] = array(
     '#type'          => 'select',
-    '#options'       => array('' => t('-- Select an authorization level')),
-    '#default_value' => isset($settings['authorization']) ? $settings['authorization'] : '',
-    '#title'         => t('OAuth Authorization'),
-    '#required'      => TRUE,
-    '#description'   => t('This defines according to the OAuth context what the login will have access to, within this site,'),
+    '#options'       => array(),
+    '#default_value' => $settings['authorization'],
+    '#title'         => t('Default required OAuth Authorization level'),
+    '#description'   => t('The default OAuth authorization level that will be required to access resources.'),
   );
 
   $contexts = oauth_common_context_load_all();
   foreach ($contexts as $context) {
     $form['oauth_context']['#options'][$context->name] = $context->title;
-    if (isset($context->authorization_levels)) {
+    if (isset($context->authorization_levels) && $context->name == $settings['oauth_context']) {
       foreach ($context->authorization_levels as $name => $level) {
-        $form['authorization']['#options'][$name] = $context->name . '/' . t($level['title']);
+        $form['authorization']['#options'][$name] = t($level['title']) . " ({$context->name})";
       }
     }
+  }
+  if (empty($form['authorization']['#options'])) {
+    $form['authorization'] = array(
+      '#type' => 'item',
+      '#title' => t('Select an OAuth context enable default required OAuth Authorization level')
+    ) + $form['authorization'];
+  }
+  else {
+    $form['authorization']['#options'] = array('' => t('None')) + $form['authorization']['#options'];
   }
 
   $form['credentials'] = array(
     '#type'          => 'select',
     '#options'       => array(
-      'none'              => t('None'),
+      'none'              => t('None, OAuth authentication will be disabled by default'),
+      'unsigned_consumer' => t('Unsigned with consumer key'),
       'consumer'          => t('Consumer key, also known as 2-legged OAuth'),
       'token'             => t('Consumer key and access token, also known as 3-legged OAuth'),
     ),
-    '#default_value' => isset($settings['credentials']) ? $settings['credentials'] : 'token',
-    '#title'         => t('Required authentication'),
+    '#default_value' => $settings['credentials'],
+    '#title'         => t('Default required authentication'),
     '#description'   => t('Authorization levels will <em>not</em> be applied if the consumer isn\'t required to supply a access token.'),
   );
 
   return $form;
 }
 
+function _services_oauth_default_security_settings() {
+  return array(
+    'oauth_context' => '',
+    'authorization' => '',
+    'credentials' => 'token',
+  );
+}
+
 function _services_oauth_controller_settings($settings, $controller, $endpoint, $class, $name) {
   $form = array();
-
-  if (isset($controller['settings']) && isset($controller['settings']['services_oauth'])) {
-     $cc = $controller['settings']['services_oauth'];
-  }
-  else {
-    $cc = $controller['endpoint']['services_oauth'];
+  $cc = array(
+    'credentials' => '',
+    'authorization' => '',
+  );
+  if (!empty($controller['endpoint']['services_oauth'])) {
+     $cc = $controller['endpoint']['services_oauth'] + $cc;
   }
   $auth_levels = array();
   if (is_array($settings)) {
@@ -158,20 +181,23 @@ function _services_oauth_controller_settings($settings, $controller, $endpoint, 
   $form['credentials'] = array(
     '#type'          => 'select',
     '#options'       => array(
+      ''                  => t('Default'),
       'none'              => t('None'),
       'unsigned_consumer' => t('Unsigned with consumer key'),
       'consumer'          => t('Consumer key'),
       'token'             => t('Consumer key and access token'),
     ),
-    '#default_value' => !empty($cc['credentials']) ? $cc['credentials'] : 'token',
+    '#default_value' => $cc['credentials'],
     '#title'         => t('Required authentication'),
     '#description'   => t('Authorization levels will <em>not</em> be applied if the consumer isn\'t required to supply a access token.'),
   );
 
   $form['authorization'] = array(
     '#type'          => 'select',
-    '#options'       => $auth_levels,
-    '#default_value' => !empty($cc['authorization']) ? $cc['authorization'] : '*',
+    '#options'       => array(
+      '' => t('Default'),
+    ) + $auth_levels,
+    '#default_value' => $cc['authorization'],
     '#title'         => t('Required authorization'),
   );
 
