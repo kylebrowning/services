@@ -401,10 +401,10 @@ function _user_resource_logout() {
 
   watchdog('user', 'Session closed for %name.', array('%name' => theme('placeholder', $user->name)));
 
-  // Destroy the current session:
-  session_destroy();
   $null = NULL; // Only variables can be passed by reference workaround
   user_module_invoke('logout', $null, $user );
+  // Destroy the current session.
+  session_destroy();
 
   // Load the anonymous user
   $user = drupal_anonymous_user();
