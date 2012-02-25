@@ -230,9 +230,7 @@ class RESTServer {
         // throw a exception if the argument isn't optional.
         if (!isset($arguments[$i])) {
           if (!isset($info['optional']) || !$info['optional']) {
-            return services_error(t('Missing required argument !arg', array(
-              '!arg' => $info['name'],
-            )), 406);
+            return services_error(t('Missing required argument @arg', array('@arg' => $info['name'])), 401);
           }
           // Set default value or NULL if default value is not set.
           $arguments[$i] = isset($info['default value']) ? $info['default value'] : NULL;
