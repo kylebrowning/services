@@ -155,19 +155,19 @@ function _file_resource_create($file) {
   global $user;
   $file = (object) $file;
 
-  // If the file data is empty then bail
-  if (!isset($file->file)) {
-    return FALSE;
+  // If the file data or filename is empty then bail.
+  if (!isset($file->file) || empty($file->filename)) {
+    return services_error(t("Missing data the file upload can not be completed"), 500);
   }
 
   // Make sure we create new file.
   $file->fid = NULL;
 
   // Get the directory name for the location of the file:
-  if (isset($file->filename) && !isset($file->filepath)) {
+  if (empty($file->filepath)) {
     $file->filepath = file_default_scheme() . '://' . $file->filename;
   }
-  $dir = file_default_scheme() . '://';
+  $dir = drupal_dirname($file->filepath);
   // Build the destination folder tree if it doesn't already exists.
   if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
     return services_error(t("Could not create destination directory for file."), 500);

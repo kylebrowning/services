@@ -95,9 +95,11 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
    */
   public function testResourceFileCreate() {
     // Create file argument with data.
+    $filepath = file_default_scheme() . '://' . rand() . '/' . rand() . '/' . $this->testfile->filename;
     $file = array(
       'filesize' => filesize($this->testfile->uri),
       'filename' => $this->testfile->filename,
+      'filepath' => $filepath,
       'file' => base64_encode(file_get_contents($this->testfile->uri)),
       'uid' => $this->privileged_user->uid,
     );
@@ -109,6 +111,7 @@ class ServicesResourceFileTests extends ServicesWebTestCase {
     // Load file and assert that it exists.
     $file_load = file_load($result['body']['fid']);
     $this->assertTrue(is_file($file_load->uri), t('New file saved to disk.'), 'FileResource: Create');
+    $this->assertEqual($file_load->uri, $filepath, t('The path of newly created file placed into directory with random name.'), 'FileResource: Create');
   }
   /**
    * Test create_raw method.
