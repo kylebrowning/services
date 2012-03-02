@@ -253,7 +253,7 @@ function _comment_resource_update($cid, $comment) {
 
   $old_comment = comment_load($cid);
   if (empty($old_comment)) {
-    return services_error(t('Comment @cid not found', array('@cid' => $cid), 404));
+    return services_error(t('Comment @cid not found', array('@cid' => $cid)), 404);
   }
   // Setup form_state.
   $form_state = array();
