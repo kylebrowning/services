@@ -307,11 +307,11 @@ function services_get_server_info($key, $default = NULL) {
  *  Returns the server info object.
  */
 function services_server_info_object($reset = FALSE) {
-  static $info;
-  if (!$info) {
-    $info = new stdClass();
+  static $drupal_static_fast;
+  if (!isset($drupal_static_fast) || $reset) {
+    $drupal_static_fast['info'] = &drupal_static(__FUNCTION__, new stdClass());
   }
-  return $info;
+  return $drupal_static_fast['info'];
 }
 
 /**
