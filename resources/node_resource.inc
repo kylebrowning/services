@@ -143,6 +143,7 @@ function _node_resource_definition() {
               'type'         => 'int',
               'description'  => t('To return image styles or not.'),
               'source'       => array('path' => 3),
+              'optional'     => TRUE,
               'default value' => FALSE,
             ),
           ),
