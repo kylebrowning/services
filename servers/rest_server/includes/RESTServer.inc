@@ -557,26 +557,26 @@ class RESTServer {
     $code = $exception->getCode();
     switch ($code) {
       case 204:
-        drupal_add_http_header('HTTP/1.0 204 No Content', $exception->getMessage());
+        drupal_add_http_header('Status', '204 No Content: ' . $exception->getMessage());
         break;
       case 304:
-        drupal_add_http_header('HTTP/1.0 304 Not Modified', $exception->getMessage());
+        drupal_add_http_header('Status', '304 Not Modified: ' . $exception->getMessage());
         break;
       case 401:
-        drupal_add_http_header('HTTP/1.0 401 Unauthorized', $exception->getMessage());
+        drupal_add_http_header('Status', '401 Unauthorized: ' . $exception->getMessage());
         break;
       case 404:
-        drupal_add_http_header('HTTP/1.0 404 Not found', $exception->getMessage());
+        drupal_add_http_header('Status', '404 Not found: ' . $exception->getMessage());
         break;
       case 406:
-        drupal_add_http_header('HTTP/1.0 406 Not Acceptable', $exception->getMessage());
+        drupal_add_http_header('Status', '406 Not Acceptable: ' . $exception->getMessage());
         break;
       default:
         if ($code >= 400 && $code < 600) {
-          drupal_add_http_header('HTTP/1.0 ' . $code, $exception->getMessage());
+          drupal_add_http_header('Status', $code . ':' . $exception->getMessage());
         }
         else {
-          drupal_add_http_header('HTTP/1.0 500 An error occurred: (' . $code . ')',  $exception->getMessage());
+          drupal_add_http_header('Status', '500 Internal Server Error: '. 'An error occurred (' . $code . '):' . $exception->getMessage());
         }
         break;
     }
