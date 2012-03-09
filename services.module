@@ -608,7 +608,7 @@ function services_resource_execute_index_query($query) {
   try {
     return $query->execute();
   }
-  catch (Exception $e) {
-    return services_error(t('Invalid query provided, double check that the fields and parameters you defined are correct and exist. ' . $e->message()), 406);
+  catch (PDOException $e) {
+    return services_error(t('Invalid query provided, double check that the fields and parameters you defined are correct and exist. ' . $e->getMessage()), 406);
   }
 }
