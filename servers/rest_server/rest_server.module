@@ -220,17 +220,13 @@ function rest_server_services_resources_alter(&$resources, $endpoint) {
  */
 function _rest_server_get_spyc_location() {
   if (function_exists('libraries_get_path')) {
-    $libraries_spyc_loc = libraries_get_path('spyc') . '/spyc.php'; 
-  } else {
-    return false;
+    $libraries_spyc_loc = libraries_get_path('spyc') . '/spyc.php';
+    if (file_exists($libraries_spyc_loc)) {
+      return $libraries_spyc_loc;
+    }
   }
-  $services_spyc_loc = dirname(__FILE__) . '/lib/spyc.php';
 
-  if (file_exists($libraries_spyc_loc)) {
-    return $libraries_spyc_loc;
-  }
-  else if (file_exists($services_spyc_loc)) {
-    return $services_spyc_loc;
-  }
-  return false;
+  // Libraries not in use fall back to straight look up.
+  $services_spyc_loc = dirname(__FILE__) . '/lib/spyc.php';
+  return file_exists($services_spyc_loc) ? $services_spyc_loc : false;
 }
