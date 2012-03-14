@@ -50,7 +50,7 @@ class RESTServer {
 
     $endpoint = services_get_server_info('endpoint', '');
     $endpoint_definition = services_endpoint_load($endpoint);
-
+    $this->endpoint = $endpoint_definition;
     // Get the server settings from the endpoint.
     $this->settings = !empty($endpoint_definition->server_settings) ? $endpoint_definition->server_settings : array();
     // Normalize the settings so that we get the expected structure
@@ -197,7 +197,6 @@ class RESTServer {
       'data' => $data,
       'headers' => $headers,
     );
-
     // Map source data to arguments.
     $arguments = array();
     if (isset($controller['args'])) {
@@ -579,6 +578,9 @@ class RESTServer {
           drupal_add_http_header('Status', '500 Internal Server Error: '. 'An error occurred (' . $code . '):' . $exception->getMessage());
         }
         break;
+    }
+    if($this->endpoint->debug) {
+      debug($exception);
     }
     if(method_exists($exception,'getData')){
       return $exception->getData();
