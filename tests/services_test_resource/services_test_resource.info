@@ -4,6 +4,7 @@ package = Services
 core = 7.x
 php = 5.x
 
-files[] = services_test_resource.module
+; This module for tests only.
+hidden = TRUE
 
 dependencies[] = services
