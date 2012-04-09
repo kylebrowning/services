@@ -36,7 +36,8 @@ function rest_server_enable() {
 function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
 
-  $canonical_path = str_replace($endpoint_path . '/', '', $_GET['q']);
+  $endpoint_path_len = drupal_strlen($endpoint_path) + 1;
+  $canonical_path = drupal_substr($_GET['q'], $endpoint_path_len, drupal_strlen($_GET['q']) - $endpoint_path_len);
   if (empty($canonical_path)) {
     return;
   }
