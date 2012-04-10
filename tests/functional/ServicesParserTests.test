@@ -10,6 +10,8 @@
  * Run test cases for the endpoint with no authentication turned on.
  *
  */
+require_once('ServicesWebTestCase.php');
+
 class ServicesParserTests extends ServicesWebTestCase {
   // Class variables
   protected $privilegedUser = NULL ;
