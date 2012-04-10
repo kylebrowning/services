@@ -39,7 +39,7 @@ function _services_build_resources($endpoint_name = '') {
       _services_resource_upgrade($api_version, $module_resources, $version_info);
     }
 
-    $resources = array_merge($resources, $module_resources);
+    $resources = array_merge_recursive($resources, $module_resources);
   }
 
   // Load the endpoint
