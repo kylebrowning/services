@@ -191,6 +191,9 @@ function _file_resource_create($file) {
     return services_error(t("Could not write file to destination"), 500);
   }
 
+  // Required to be able to reference this file.
+  file_usage_add($file, 'services', 'files', $file->fid);
+
   return array(
     'fid' => $file->fid,
     'uri' => services_resource_uri(array('file', $file->fid)),
@@ -212,6 +215,7 @@ function _file_resource_create_raw() {
     $file = file_save_upload($field_name, $validators, file_default_scheme() . "://");
     // Required to be able to reference this file.
     if ($file->fid) {
+      file_usage_add($file, 'services', 'files', $file->fid);
       $files[] = array(
         'fid' => $file->fid,
         'uri' => services_resource_uri(array('file', $file->fid)),
@@ -271,6 +275,7 @@ function _file_resource_retrieve($fid, $include_file_contents, $get_image_style)
  */
 function _file_resource_delete($fid) {
   if ($file = file_load($fid)) {
+    file_usage_delete($file, 'services');
     return file_delete($file);
   }
   return FALSE;
