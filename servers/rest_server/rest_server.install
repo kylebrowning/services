@@ -12,7 +12,7 @@ function rest_server_requirements($phase) {
   // Ensure translations don't break at install time
   $t = get_t();
 
-  if ($phase == 'install') {
+  if ($phase == 'runtime') {
     module_load_include('module', 'rest_server');
     module_load_include('module', 'libraries');
     if (_rest_server_get_spyc_location() === false) {
