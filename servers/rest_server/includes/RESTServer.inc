@@ -253,7 +253,9 @@ class RESTServer {
     switch ($method) {
       case 'POST':
       case 'PUT':
-        $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        if (isset($_SERVER['CONTENT_TYPE'])) {
+          $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        }
         // Get the mime type for the request, default to form-urlencoded
         if (isset($type['value'])) {
           $mime = $type['value'];
