@@ -16,7 +16,7 @@ function _user_resource_definition() {
               'name' => 'uid',
               'type' => 'int',
               'description' => 'The uid of the user to retrieve.',
-              'source' => array('path' => '0'),
+              'source' => array('path' => 0),
               'optional' => FALSE,
             ),
           ),
@@ -74,10 +74,10 @@ function _user_resource_definition() {
           'access arguments append' => TRUE,
           'args' => array(
             array(
-              'name' => 'nid',
+              'name' => 'uid',
               'type' => 'int',
-              'description' => 'The id of the note to delete',
-              'source' => array('path' => '0'),
+              'description' => 'The id of the user to delete',
+              'source' => array('path' => 0),
               'optional' => FALSE,
             ),
           ),
