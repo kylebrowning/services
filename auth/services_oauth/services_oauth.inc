@@ -20,9 +20,11 @@
 function _services_oauth_authenticate_call($settings, $method, $args) {
   $endpoint = array();
   if (isset($method['endpoint']['services_oauth'])) {
-    $endpoint += array_filter($method['endpoint']['services_oauth']);
+   $endpoint   = $method['endpoint']['services_oauth'];
   }
-  $endpoint += $settings;
+  else {
+    $endpoint = $settings;
+  }
   $cred       = isset($endpoint['credentials']) ? $endpoint['credentials'] : 'token';
   $auth_level = isset($endpoint['authorization']) ? $endpoint['authorization'] : '*';
 
