@@ -102,18 +102,17 @@ function _services_oauth_security_settings($settings, &$form_state) {
   $form['oauth_context'] = array(
     '#type'          => 'select',
     '#options'       => array('' => t('-- Select an OAuth context')),
-    '#default_value' => isset($settings['oauth_context']) ? $settings['oauth_context'] : '',
+    '#default_value' => $settings['oauth_context'],
     '#title'         => t('OAuth context'),
-    '#required'      => TRUE,
     '#description'   => t('The OAuth contexts provides a scope for consumers and authorizations and have their own authorization levels. Different services endpoints may share OAuth contexts and thereby allow the use of consumers and tokens across the services endpoint boundraries.'),
   );
 
   $form['authorization'] = array(
     '#type'          => 'select',
-    '#options'       => array('' => t('-- Select an authorization level')),
-    '#default_value' => isset($settings['authorization']) ? $settings['authorization'] : '',
-    '#title'         => t('OAuth Authorization'),
-    '#description'   => t('The default OAuth authorization level that will be required to access resources.'),
+     '#options'       => array(),
+     '#default_value' => $settings['authorization'],
+     '#title'         => t('Default required OAuth Authorization level'),
+     '#description'   => t('The default OAuth authorization level that will be required to access resources.'),
   );
 
   $contexts = oauth_common_context_load_all();
@@ -143,7 +142,7 @@ function _services_oauth_security_settings($settings, &$form_state) {
       'consumer'          => t('Consumer key, also known as 2-legged OAuth'),
       'token'             => t('Consumer key and access token, also known as 3-legged OAuth'),
     ),
-    '#default_value' => isset($settings['credentials']) ? $settings['credentials'] : 'token',
+    '#default_value' => $settings['credentials'],
     '#title'         => t('Default required authentication'),
     '#description'   => t('Authorization levels will <em>not</em> be applied if the consumer isn\'t required to supply a access token.'),
   );

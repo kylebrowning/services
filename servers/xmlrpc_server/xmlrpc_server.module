@@ -42,7 +42,7 @@ function xmlrpc_server_xmlrpc() {
   if (!empty($resources)) {
     // Translate all resources
     foreach ($resources as $name => $def) {
-      foreach (services_resources_as_procedures($def) as $method) {
+      foreach (services_resources_as_procedures($def, $name) as $method) {
         $callbacks[$method['method']] = 'xmlrpc_server_call_wrapper';
       }
     }
