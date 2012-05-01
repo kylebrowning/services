@@ -90,13 +90,10 @@ function _system_resource_definition() {
 function _system_resource_connect() {
   global $user;
   services_remove_user_data($user);
-  
+
   $return = new stdClass();
   $return->sessid = session_id();
   $return->user = $user;
-  
-  
 
   return $return;
 }
-

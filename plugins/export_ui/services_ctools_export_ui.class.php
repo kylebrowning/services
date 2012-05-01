@@ -42,7 +42,7 @@ class services_ctools_export_ui extends ctools_export_ui {
 
   // Avoid standard submit of edit form by ctools.
   function edit_save_form($form_state) { }
-    
+
   function set_item_state($state, $js, $input, $item) {
     ctools_export_set_object_status($item, $state);
 
@@ -264,12 +264,7 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
 
   // Call _services_build_resources() directly instead of
   // services_get_resources to bypass caching.
-  $resources = _services_build_resources();
-
-  // Apply the endpoint in a non-strict mode, so that the non-active resources
-  // are preserved.
-  _services_apply_endpoint($resources, $endpoint, FALSE);
-
+  $resources = _services_build_resources($endpoint->name);
   $form['instructions'] = array(
     '#type' => 'item',
     '#title' => t('Resources'),
@@ -290,11 +285,12 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
 
     // Append the default settings for the authentication module.
     $default_settings = services_auth_invoke($module, 'default_security_settings');
-    if (is_array($default_settings)) {
+    if (is_array($default_settings) && is_array($settings)) {
       $settings += $default_settings;
     }
     $endpoint->authentication[$module] = $settings;
   }
+
 
   // Generate the list of methods arranged by resource.
   foreach ($resources as $resource_name => $resource) {
@@ -319,14 +315,12 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
       '#default_value' => $alias,
       '#size' => 20,
     );
-
     foreach ($class_names as $class => $info) {
       if (!empty($resource[$class])) {
         $res_item[$class] = array(
           '#type' => 'item',
           '#title' => $info['title'],
         );
-
         foreach ($resource[$class] as $op_name => $op) {
           $description = isset($op['help']) ? $op['help'] : t('No description is available');
           $default_value = 0;
@@ -345,6 +339,31 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
           );
 
           $controller_settings = array();
+          // Let modules add their own settings.
+          drupal_alter('controller_settings', $controller_settings);
+          // Get service update versions.
+          $update_versions = services_get_update_versions($resource_name, $op_name);
+          $options = array(
+            '1.0' => '1.0',
+          );
+          $options = array_merge($options, $update_versions);
+          $default_api_value = 0;
+          if (isset($endpoint->resources[$resource_name][$class][$op_name]['settings']['services'])) {
+            $default_api_value = $endpoint->resources[$resource_name][$class][$op_name]['settings']['services'];
+          }
+
+          // Add the version information.
+          $controller_settings['services'] = array(
+            '#title' => 'Services',
+            '#type' => 'item',
+            'resource_api_version' => array(
+              '#type' => 'select',
+              '#options' => $options,
+              '#default_value' => $default_api_value,
+              '#title' => 'Resource API Version',
+              '#disabled' => count($options) == 1 ? TRUE : FALSE,
+            ),
+          );
           foreach ($endpoint->authentication as $module => $settings) {
             $auth_settings = services_auth_invoke($module, 'controller_settings', $settings, $op, $endpoint->authentication[$module], $class, $op_name);
             if (is_array($auth_settings)) {
@@ -400,7 +419,6 @@ function services_edit_form_endpoint_resources_validate($form, $form_state) {
 function services_edit_form_endpoint_resources_submit($form, $form_state) {
   $endpoint  = $form_state['values']['endpoint_object'];
   $resources = $form_state['input']['resources'];
-
   $class_names = services_operation_class_info();
   // Iterate over the resources, its operation classes and operations.
   // The main purpose is to remove empty configuration for disabled elements.
@@ -432,8 +450,30 @@ function services_edit_form_endpoint_resources_submit($form, $form_state) {
       $resources[$resource_name] = $resource;
     }
   }
-
   $endpoint->resources = $resources;
   services_endpoint_save($endpoint);
   drupal_set_message('Resources have been saved');
+}
+
+/**
+ * Returns the updates for a given resource method.
+ *
+ * @param $resource
+ *   A resource name.
+ * @param $method
+ *   A method name.
+ * @return
+ *   an array with the major and minor api versions
+ */
+function services_get_update_versions($resource, $method) {
+  $versions = array();
+  $updates = services_get_updates();
+  if (isset($updates[$resource][$method]) && is_array($updates[$resource][$method])) {
+    foreach ($updates[$resource][$method] as $update) {
+      extract($update);
+      $value = $major . '.' . $minor;
+      $versions[$value] = $value;
+    }
+  }
+  return $versions;
 }

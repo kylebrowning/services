@@ -464,6 +464,145 @@ function services_controller_get($name, $endpoint) {
     }
   }
 }
+/**
+ * Returns an array of available updates versions for a resource.
+ *
+ * @return
+ *   If services has updates, an array of available updates sorted by version.
+ *   Otherwise, array().
+ */
+function services_get_updates() {
+  $updates = &drupal_static(__FUNCTION__, array());
+  if (!isset($updates) || empty($updates)) {
+    $updates = array();
+    module_load_include('resource_build.inc', 'services');
+    // Load the resources for services.
+    _services_core_resources();
+    // Prepare regular expression to match all possible defined
+    // _resource_resource_method_update_N_N().
+    $regexp = '/_(?P<resource>.+)_resource_(?P<method>.+)_update_(?P<major>\d+)_(?P<minor>\d+)$/';
+    $functions = get_defined_functions();
+    // Narrow this down to functions ending with an integer, since all
+    // _resource_resource_method_update_N_N() functions end this way, and there are other
+    // possible functions which match '_update_'. We use preg_grep() here
+    // instead of foreaching through all defined functions, since the loop
+    // through all PHP functions can take significant page execution time.
+    // Luckily this only happens when the cache is cleared for an endpoint
+    // and resources are re-generated.
+    foreach (preg_grep('/_\d+$/', $functions['user']) as $function) {
+      // If this function is a service update function, add it to the list of
+      // services updates.
+      if (preg_match($regexp, $function, $matches)) {
+        extract($matches);
+        $updates[$resource][$method][] = array(
+          'version'  => $major .'_'. $minor,
+          'major'    => $major,
+          'minor'    => $minor,
+          'callback' => $function,
+          'resource' => $resource,
+          'method'   => $method,
+        );
+      }
+    }
+  }
+  return $updates;
+}
+
+/**
+ * Determine if any potential versions exist as valid headers.
+ * returns false if no version is present in the header for the specific call.
+ */
+function _services_version_header_options() {
+  $available_headers = array();
+  $updates = services_get_updates();
+  if(is_array($updates)) {
+    foreach ($updates as $resource => $update) {
+      foreach ($update as $method_name => $method) {
+        $available_headers[] = 'services_'. $resource .'_'.$method_name .'_version';
+      }
+    }
+  }
+  foreach($available_headers as $key => $version_header_option) {
+    if(array_key_exists($version_header_option, $headers = getallheaders())) {
+      $version = $headers[$version_header_option];
+    }
+  }
+  return isset($version) ? $version : FALSE;
+}
+
+/**
+ * Returns currently set api version for an endpoint resource method.
+ *
+ * @param $endpoint
+ *   A fully loadded endpoint.
+ * @param $resource
+ *   A resource name.
+ * @param $method
+ *   A method name.
+ * @return
+ *   an array with the major and minor api versions
+ */
+function services_get_resource_api_version($endpoint, $resource, $method) {
+  if (isset($endpoint->resources[$resource]) ) {
+    $class_info = services_operation_class_info();
+    foreach ($class_info as $class_name => $class) {
+      if (!empty($resource[$class_name])) {
+        if (isset($endpoint->resources[$resource][$class_name][$method]['settings']['services']['resource_api_version'])) {
+          if($version = _services_version_header_options()) {
+            $split = explode('.', $version);
+          } else {
+            $split = explode('.', $endpoint->resources[$resource][$class_name][$method]['settings']['services']['resource_api_version']);
+          }
+          return array(
+            'major' => $split[0],
+            'minor' => $split[1],
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Apply versions to the controller.
+ *
+ * @param $controller
+ *   A controller array.
+ * @param $options
+ *   A options array filled with verison information.
+ * @return
+ *   An array with the major and minor api versions
+ */
+function services_request_apply_version(&$controller, $options = array()) {
+  if (isset($options)) {
+    extract($options);
+  }
+  if (isset($version) && $version == '1.0') {
+    //do nothing
+    return;
+  }
+  $updates = services_get_updates();
+  if (isset($method) && isset($updates[$resource][$method])) {
+    foreach ($updates[$resource][$method] as $update) {
+      if (!isset($version)) {
+        $endpoint = services_get_server_info('endpoint', '');
+        $endpoint = services_endpoint_load($endpoint);
+        $default_version = services_get_resource_api_version($endpoint, $resource, $method);
+      }
+      else {
+        $default_version = explode('.', $version);
+        $default_version['major'] = $default_version[0];
+        $default_version['minor'] = $default_version[1];
+      }
+
+      // Apply updates until we hit our default update for the site.
+      if ($update['major'] <= $default_version['major'] && $update['minor'] <= $default_version['minor']) {
+        $update_data = call_user_func($update['callback']);
+        $controller = array_merge($controller, $update_data);
+      }
+    }
+  }
+}
 
 /**
  * Convert a resource to RPC-style methods.

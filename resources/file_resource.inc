@@ -368,4 +368,3 @@ function _file_resource_node_access($op = 'view', $args = array()) {
   }
   return FALSE;
 }
-

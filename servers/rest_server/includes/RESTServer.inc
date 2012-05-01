@@ -47,7 +47,6 @@ class RESTServer {
     if (empty($response_format)) {
       drupal_add_http_header('Vary', 'Accept');
     }
-
     $endpoint = services_get_server_info('endpoint', '');
     $endpoint_definition = services_endpoint_load($endpoint);
     $this->endpoint = $endpoint_definition;
@@ -63,7 +62,7 @@ class RESTServer {
       $resource = $resources[$resource_name];
 
       // Get the operation and fill with default values
-      $controller = $this->resolveController($resource, $method, $path);
+      $controller = $this->resolveController($resource, $method, $path, $endpoint_definition, $resource_name);
     }
     else {
       //This will stop the 404 from happening when you request just the endpoint.
@@ -78,6 +77,8 @@ class RESTServer {
     if (!$controller) {
       return services_error(t('Could not find the controller.'), 404);
     }
+    $options = array();
+
 
     // Parse the request data
     $arguments = $this->getControllerArguments($controller, $path, $method);
@@ -85,7 +86,7 @@ class RESTServer {
     $formats = $this->responseFormatters();
 
     // Negotiate response format based on accept-headers if we
-    // don't have a response format
+    // don't have a response format.
     if (empty($response_format)) {
       $mime_candidates = array();
       $mime_map = array();
@@ -146,7 +147,7 @@ class RESTServer {
     }
 
     try {
-      $result = services_controller_execute($controller, $arguments);
+      $result = services_controller_execute($controller, $arguments, $options);
     }
     catch (ServicesException $e) {
       $errors = $this->handleException($e);
@@ -246,7 +247,9 @@ class RESTServer {
     switch ($method) {
       case 'POST':
       case 'PUT':
-        $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        if (isset($_SERVER['CONTENT_TYPE'])) {
+          $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        }
 
         // Get the mime type for the request, default to form-urlencoded
         if (isset($type['value'])) {
@@ -505,7 +508,7 @@ class RESTServer {
     }
   }
 
-  private function resolveController($resource, $method, $path) {
+  private function resolveController($resource, $method, $path, $endpoint, $resource_name) {
     $pc = count($path);
     $class = NULL;
     $operation = NULL;
@@ -549,6 +552,7 @@ class RESTServer {
         $controller['file'] = $resource['file'];
       }
     }
+    services_request_apply_version($controller, array('method' => $operation, 'resource' => $resource_name));
     return $controller;
   }
 

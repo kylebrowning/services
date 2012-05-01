@@ -32,7 +32,7 @@ class ServicesXMLRPCTestCase extends DrupalWebTestCase {
    */
   function testlistMethods() {
     $result = $this->servicesXMLRPC('system.listMethods', array());
-    $this->assertFalse(in_array('node.index', $result['body']), t('Not able to find not enabled node.index method.'), 'XMLRPC: listMethods');
+    $this->assertTrue(in_array('node.index', $result['body']), t('node.index method found.'), 'XMLRPC: listMethods');
   }
 
   /**

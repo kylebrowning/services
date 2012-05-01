@@ -28,7 +28,7 @@ function _services_build_resources($endpoint_name = '') {
       continue;
     }
 
-    // Check resource versions
+    // Check resource versions.
     $api_version = $version_info['default_version'];
     if (!empty($module_resources['#api_version'])) {
       $api_version = $module_resources['#api_version'];
@@ -42,16 +42,14 @@ function _services_build_resources($endpoint_name = '') {
     $resources = array_merge_recursive($resources, $module_resources);
   }
 
-  // Load the endpoint
+  // Load the endpoint.
   $endpoint = NULL;
   if (!empty($endpoint_name)) {
     $endpoint = services_endpoint_load($endpoint_name);
     // Apply the endpoint on the services
-    _services_apply_endpoint($resources, $endpoint, TRUE);
+    _services_apply_endpoint($resources, $endpoint, FALSE);
   }
-
   drupal_alter('services_resources', $resources, $endpoint);
-
   // Process the resources, and collect all controllers in the process
   $controllers = array();
   $class_info = services_operation_class_info();
@@ -79,13 +77,11 @@ function _services_build_resources($endpoint_name = '') {
       $controller['access callback'] = 'user_access';
     }
   }
-  drupal_alter('services_resources_controller_post_processing', $controllers, $endpoint);
-
   // This hook is deprecated and will be removed in next versions of services.
   // Use hook_services_resources_alter instead.
   drupal_alter('services_resources_post_processing', $resources, $endpoint);
 
-  // Do some endpoint-dependent processing
+  // Do some endpoint-dependent processing.
   if ($endpoint) {
     // Let the authentication modules alter our controllers
     foreach ($endpoint->authentication as $auth_module => $auth_settings) {
@@ -155,7 +151,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
   $classes = array_keys(services_operation_class_info());
   foreach ($resources as $name => &$resource) {
     $cres = ($endpoint && isset($endpoint->resources[$name])) ? $endpoint->resources[$name] : array();
-    $resource['endpoint'] = $cres;
+    $resource['settings'] = $cres;
 
     if ($strict && empty($cres)) {
       unset($resources[$name]);
@@ -171,7 +167,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
               }
             }
             else {
-              $resource[$class][$op]['endpoint'] = empty($cop['settings']) ? array() : $cop['settings'];
+              $resource[$class][$op]['settings'] = empty($cop['settings']) ? array() : $cop['settings'];
             }
           }
         }
