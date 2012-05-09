@@ -208,7 +208,7 @@ function _file_resource_create_raw() {
   foreach ($_FILES['files']['name'] as $field_name => $file_name) {
     $file = file_save_upload($field_name, $validators, file_default_scheme() . "://");
     // Required to be able to reference this file.
-    if ($file->fid) {
+    if (!empty($file->fid)) {
       file_usage_add($file, 'services', 'files', $file->fid);
       $files[] = array(
         'fid' => $file->fid,
@@ -216,7 +216,7 @@ function _file_resource_create_raw() {
       );
     }
     else {
-      return services_error(t('An unknown error occured', 500));
+      return services_error(t('An unknown error occured'), 500);
     }
   }
   return $files;
