@@ -423,7 +423,7 @@ function services_controller_get($name, $endpoint) {
       return $res[$method];
     }
     else {
-      $class_info = services_operations_class_info();
+      $class_info = services_operation_class_info();
       // Handle extended operatios
       foreach ($class_info as $class => $info) {
         if (isset($res[$class]) && isset($res[$class][$method])) {
