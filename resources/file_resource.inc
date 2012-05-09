@@ -173,18 +173,12 @@ function _file_resource_create($file) {
     return services_error(t("Could not create destination directory for file."), 500);
   }
 
-  $file->filemime = file_get_mimetype($file->filename);
-
   // Rename potentially executable files, to help prevent exploits.
   if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (drupal_substr($file->filename, -4) != '.txt')) {
     $file->filemime = 'text/plain';
     $file->filepath .= '.txt';
     $file->filename .= '.txt';
   }
-
-  // Update the timestamp to the current time, otherwise the file could
-  // get deleted on the next cron run if its status is set to 0.
-  $file->timestamp = time();
 
   // Write the file
   if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
