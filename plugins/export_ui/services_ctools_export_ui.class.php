@@ -99,7 +99,7 @@ function services_edit_form_endpoint_authentication($form_state) {
     );
     // Append the default settings for the authentication module.
     $default_security_settings = services_auth_invoke($module, 'default_security_settings');
-    if (is_array($default_security_settings)) {
+    if ($settings == $module && is_array($default_security_settings)) {
       $settings += $default_security_settings;
     }
 
