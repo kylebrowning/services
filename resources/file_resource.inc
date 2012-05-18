@@ -142,7 +142,7 @@ function _file_resource_definition() {
  * Adds a new file and returns the fid.
  *
  * @param $file
- *   An object as representing the file with a base64 encoded $file->file
+ *   An array as representing the file with a base64 encoded $file['file']
  * @return
  *   Unique identifier for the file (fid) or errors if there was a problem.
  */
@@ -152,45 +152,38 @@ function _file_resource_create($file) {
   // file array or file data.
   $file = _services_arg_value($file, 'file');
 
-  global $user;
-  $file = (object) $file;
-
   // If the file data or filename is empty then bail.
-  if (!isset($file->file) || empty($file->filename)) {
+  if (!isset($file['file']) || empty($file['filename'])) {
     return services_error(t("Missing data the file upload can not be completed"), 500);
   }
 
-  // Make sure we create new file.
-  $file->fid = NULL;
-
   // Get the directory name for the location of the file:
-  if (empty($file->filepath)) {
-    $file->filepath = file_default_scheme() . '://' . $file->filename;
+  if (empty($file['filepath'])) {
+    $file['filepath'] = file_default_scheme() . '://' . $file['filename'];
   }
-  $dir = drupal_dirname($file->filepath);
+  $dir = drupal_dirname($file['filepath']);
   // Build the destination folder tree if it doesn't already exists.
   if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
     return services_error(t("Could not create destination directory for file."), 500);
   }
 
   // Rename potentially executable files, to help prevent exploits.
-  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (drupal_substr($file->filename, -4) != '.txt')) {
-    $file->filemime = 'text/plain';
-    $file->filepath .= '.txt';
-    $file->filename .= '.txt';
+  if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file['filename']) && (drupal_substr($file['filename'], -4) != '.txt')) {
+    $file['filepath'] .= '.txt';
+    $file['filename'] .= '.txt';
   }
 
   // Write the file
-  if (!$file = file_save_data(base64_decode($file->file), $file->filepath)) {
+  if (!$file_saved = file_save_data(base64_decode($file['file']), $file['filepath'])) {
     return services_error(t("Could not write file to destination"), 500);
   }
 
   // Required to be able to reference this file.
-  file_usage_add($file, 'services', 'files', $file->fid);
+  file_usage_add($file_saved, 'services', 'files', $file_saved->fid);
 
   return array(
-    'fid' => $file->fid,
-    'uri' => services_resource_uri(array('file', $file->fid)),
+    'fid' => $file_saved->fid,
+    'uri' => services_resource_uri(array('file', $file_saved->fid)),
   );
 }
 /**
