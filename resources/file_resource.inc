@@ -197,12 +197,19 @@ function _file_resource_create_raw() {
     'file_validate_extensions' => array(),
     'file_validate_size' => array(),
   );
+
   $files = array();
   foreach ($_FILES['files']['name'] as $field_name => $file_name) {
     $file = file_save_upload($field_name, $validators, file_default_scheme() . "://");
-    // Required to be able to reference this file.
+
     if (!empty($file->fid)) {
+      // Change the file status from temporary to permanent.
+      $file->status = FILE_STATUS_PERMANENT;
+      file_save($file);
+
+      // Required to be able to reference this file.
       file_usage_add($file, 'services', 'files', $file->fid);
+
       $files[] = array(
         'fid' => $file->fid,
         'uri' => services_resource_uri(array('file', $file->fid)),
