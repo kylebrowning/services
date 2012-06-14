@@ -3,6 +3,7 @@ description = Provide an API for creating web services.
 package = Services
 core = 7.x
 php = 5.x
+configure = admin/structure/services
 
 files[] = services.runtime.inc
 files[] = tests/functional/NoAuthEndpointTestRunner.test
