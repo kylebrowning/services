@@ -105,24 +105,36 @@ class ServicesWebTestCase extends DrupalWebTestCase {
 
     $this->verbose('POST request to: ' . $url .
                    '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Raw POST body: ' . $post .
                    '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
                    '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
                    '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
 
-  protected function servicesPut($url, $data = NULL, $headers = array()) {
-    $options = array();
-    $url = $this->getAbsoluteUrl($url) . '.php';
-
-    $serialize_args = serialize($data);
-
-    // Set up headers so arguments will be unserialized.
-    $headers = array("Content-type: application/vnd.php.serialized; charset=iso-8859-1");
+  protected function servicesPut($url, $data = NULL, $headers = array(), $call_type = 'php') {
+    switch ($call_type) {
+      case 'php':
+        // Add .php to get serialized response.
+        $url = $this->getAbsoluteUrl($url) . '.php';
+        // Otherwise Services will reject arguments.
+        $headers = array("Content-type: application/x-www-form-urlencoded");
+        // Prepare arguments.
+        $post = drupal_http_build_query($data, '', '&');
+        break;
+      case 'json':
+        // Add .json to get json encoded response.
+        $url = $this->getAbsoluteUrl($url) . '.json';
+        // Set proper headers.
+        $headers = array("Content-type: application/json");
+        // Prepare arguments.
+        $post = json_encode($data);
+        break;
+    }
 
     // Emulate file.
     $putData = fopen('php://temp', 'rw+');
-    fwrite($putData, $serialize_args);
+    fwrite($putData, $post);
     fseek($putData, 0);
 
     $content = $this->curlExec(array(
@@ -132,15 +144,16 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       CURLOPT_HEADER => TRUE,
       CURLOPT_HTTPHEADER => $headers,
       CURLOPT_INFILE => $putData,
-      CURLOPT_INFILESIZE => drupal_strlen($serialize_args)
+      CURLOPT_INFILESIZE => drupal_strlen($post)
     ));
     fclose($putData);
 
     // Parse response.
-    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content, $call_type);
 
     $this->verbose('PUT request to: ' . $url .
                    '<hr />Arguments: ' . highlight_string('<?php ' . var_export($data, TRUE), TRUE) .
+                   '<hr />Raw POST body: ' . $post .
                    '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
                    '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
                    '<hr />Raw response: ' . $content);
