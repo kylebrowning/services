@@ -141,7 +141,6 @@ function services_edit_form_endpoint_authentication_submit($form, $form_state) {
 function services_edit_form_endpoint_server($form, &$form_state) {
   list($endpoint) = $form_state['build_info']['args'];
   $servers = services_get_servers();
-
   $server = !empty($servers[$endpoint->server]) ? $servers[$endpoint->server] : FALSE;
 
   $form['endpoint_object'] = array(
@@ -290,23 +289,22 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
     }
     $endpoint->authentication[$module] = $settings;
   }
-
-
   // Generate the list of methods arranged by resource.
   foreach ($resources as $resource_name => $resource) {
     $resource_conf = array();
-    if (isset($endpoint->resources[$resource_name])) {
-      $resource_conf = $endpoint->resources[$resource_name];
+    $resource_key = $resource['key'];
+    if (isset($endpoint->resources[$resource_key])) {
+      $resource_conf = $endpoint->resources[$resource_key];
     }
+
     $res_item = array(
       '#collapsed' => TRUE,
     );
-
     $alias = '';
-    if (isset($form_state['input'][$resource_name]['alias'])) {
-      $alias = $form_state['input'][$resource_name]['alias'];
+    if (isset($form_state['input'][$resource_key]['alias'])) {
+      $alias = $form_state['input'][$resource_key]['alias'];
     }
-    else if (isset($resource_conf['alias'])) {
+    elseif (isset($resource_conf['alias'])) {
       $alias = $resource_conf['alias'];
     }
 
@@ -342,28 +340,30 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
           // Let modules add their own settings.
           drupal_alter('controller_settings', $controller_settings);
           // Get service update versions.
-          $update_versions = services_get_update_versions($resource_name, $op_name);
+          $update_versions = services_get_update_versions($resource_key, $op_name);
           $options = array(
             '1.0' => '1.0',
           );
           $options = array_merge($options, $update_versions);
           $default_api_value = 0;
-          if (isset($endpoint->resources[$resource_name][$class][$op_name]['settings']['services'])) {
-            $default_api_value = $endpoint->resources[$resource_name][$class][$op_name]['settings']['services'];
+          if (isset($endpoint->resources[$resource_key][$class][$op_name]['endpoint']['services'])) {
+            $default_api_value = $endpoint->resources[$resource_key][$class][$op_name]['endpoint']['services'];
           }
-
-          // Add the version information.
-          $controller_settings['services'] = array(
-            '#title' => 'Services',
-            '#type' => 'item',
-            'resource_api_version' => array(
-              '#type' => 'select',
-              '#options' => $options,
-              '#default_value' => $default_api_value,
-              '#title' => 'Resource API Version',
-              '#disabled' => count($options) == 1 ? TRUE : FALSE,
-            ),
-          );
+          $disabled = (count($options) == 1);
+          // Add the version information if it has any
+          if (!$disabled) {
+            $controller_settings['services'] = array(
+              '#title' => 'Services',
+              '#type' => 'item',
+              'resource_api_version' => array(
+                '#type' => 'select',
+                '#options' => $options,
+                '#default_value' => $default_api_value,
+                '#title' => 'Resource API Version',
+                '#disabled' => $disabled,
+              ),
+            );
+          }
           foreach ($endpoint->authentication as $module => $settings) {
             $auth_settings = services_auth_invoke($module, 'controller_settings', $settings, $op, $endpoint->authentication[$module], $class, $op_name);
             if (is_array($auth_settings)) {
@@ -372,14 +372,16 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
                 '#type' => 'item',
               ) + $auth_settings;
               $controller_settings[$module] = $auth_settings;
+              $disabled = FALSE;
             }
           }
-          $res_item[$class][$op_name]['settings'] = $controller_settings;
+          if (!$disabled) {
+            $res_item[$class][$op_name]['settings'] = $controller_settings;
+          }
         }
       }
     }
-
-    $form['resources'][$resource_name] = $res_item;
+    $form['resources'][$resource_key] = $res_item;
   }
   $form['save'] = array(
      '#type'  => 'submit',

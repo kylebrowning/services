@@ -91,6 +91,7 @@ function _services_build_resources($endpoint_name = '') {
     // Apply any aliases from endpoint
     $aliased = array();
     foreach ($resources as $key => $def) {
+      $def['key'] = $key;
       if (!empty($def['endpoint']['alias'])) {
         $aliased[$def['endpoint']['alias']] = $def;
       }
@@ -151,8 +152,7 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
   $classes = array_keys(services_operation_class_info());
   foreach ($resources as $name => &$resource) {
     $cres = ($endpoint && isset($endpoint->resources[$name])) ? $endpoint->resources[$name] : array();
-    $resource['settings'] = $cres;
-
+    $resource['endpoint'] = $cres;
     if ($strict && empty($cres)) {
       unset($resources[$name]);
     }
@@ -167,7 +167,10 @@ function _services_apply_endpoint(&$resources, $endpoint, $strict = TRUE) {
               }
             }
             else {
-              $resource[$class][$op]['settings'] = empty($cop['settings']) ? array() : $cop['settings'];
+              $resource[$class][$op]['endpoint'] = empty($cop['endpoint']) ? array() : $cop['endpoint'];
+              if (isset($cres['alias'])) {
+                $resource[$class][$op]['endpoint']['alias'] =  $cres['alias'];
+              }
             }
           }
         }

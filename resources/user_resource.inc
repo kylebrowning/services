@@ -419,6 +419,39 @@ function _user_resource_logout() {
 }
 
 /**
+ *  Update the current user logout callback to the new callback with a better return value.
+ */
+function _user_resource_logout_update_1_1() {
+  $new_set = array(
+    'callback' => '_user_resource_logout_1_1',
+  );
+  return $new_set;
+}
+
+/**
+ * Logs out the currently logged in user and returns the new user object.
+ */
+function _user_resource_logout_1_1() {
+  global $user;
+
+  if (!$user->uid) {
+    // User is not logged in
+    return services_error(t('User is not logged in.'), 406);
+  }
+
+  watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
+
+  // Destroy the current session.
+  module_invoke_all('user_logout', $user);
+  session_destroy();
+
+  // Load the anonymous user.
+  $user = drupal_anonymous_user();
+
+  return $user;
+}
+
+/**
  * Return an array of optionally paged uids baed on a set of criteria.
  *
  * An example request might look like

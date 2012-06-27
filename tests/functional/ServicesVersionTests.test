@@ -50,10 +50,10 @@ class ServicesVersionTests extends ServicesWebtestCase {
       foreach ($updates as $key => $update) {
         foreach ($update as $resource_key => $updates) {
           $versions = services_get_update_versions($key, $resource_key);
-          if(count($versions) == 2) {
-            $this->pass('Detected 2 versions for a resource', 'Services Version System');
+          if(count($versions)) {
+            $this->pass('Detected multiple versions for a resource', 'Services Version System');
           } else {
-            $this->fail('Failed to detect 2 versions for our test resource.', 'Services Version System');
+            $this->fail('Failed to detect any versions for our test resource.', 'Services Version System');
           }
 
         }

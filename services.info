@@ -15,6 +15,7 @@ files[] = tests/functional/ServicesResourceTaxonomyTests.test
 files[] = tests/functional/ServicesResourceFileTests.test
 files[] = tests/functional/ServicesEndpointTests.test
 files[] = tests/functional/ServicesParserTests.test
+files[] = tests/functional/ServicesAliasTests.test
 files[] = tests/functional/ServicesXMLRPCTests.test
 files[] = tests/functional/ServicesVersionTests.test
 files[] = tests/unit/TestServicesModule.test
