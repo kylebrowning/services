@@ -546,9 +546,7 @@ function services_str_getcsv($input, $delimiter = ',', $enclosure = '"', $escape
     $temp = fopen("php://memory", "rw");
     fwrite($temp, $input);
     fseek($temp, 0);
-    while (($data = fgetcsv($temp, 0, $delimiter, $enclosure, $escape)) !== false) {
-      $ret[] = $data;
-    }
+    $ret = fgetcsv($temp, 0, $delimiter, $enclosure);
     fclose($temp);
   }
   else {
