@@ -178,8 +178,15 @@ function _file_resource_create($file) {
     return services_error(t("Could not write file to destination"), 500);
   }
 
-  // Required to be able to reference this file.
-  file_usage_add($file_saved, 'services', 'files', $file_saved->fid);
+  if (isset($file['status']) && $file['status'] == 0) {
+    // Save as temporary file.
+    $file_saved->status = 0;
+    file_save($file_saved);
+  }
+  else {
+    // Required to be able to reference this file.
+    file_usage_add($file_saved, 'services', 'files', $file_saved->fid);
+  }
 
   return array(
     'fid' => $file_saved->fid,
