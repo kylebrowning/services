@@ -36,7 +36,14 @@ class ServicesWebTestCase extends DrupalWebTestCase {
                    '<hr />Raw response: ' . $content);
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
-  protected function servicesPostFile($url, $filepath, $headers = array()) {
+
+  /**
+   * Post file as multipart/form-data.
+   */
+  protected function servicesPostFile($url, $filepath, $headers = array(), $additional_arguments = array()) {
+    if (!is_array($filepath)) {
+      $filepath = array($filepath);
+    }
     $options = array();
     // Add .php to get serialized response.
     $url = $this->getAbsoluteUrl($url) . '.php';
@@ -44,8 +51,12 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     // Otherwise Services will reject arguments.
     $headers[] = "Content-type: multipart/form-data";
     // Prepare arguments.
-    $filepath = variable_get('file_public_path', '') . '/' . file_uri_target($filepath);
-    $post = array('files[file_contents]'=>'@'.$filepath);
+    $post = $additional_arguments;
+    $i = 0;
+    foreach ($filepath as $path) {
+      $post['files[file_contents' . $i . ']'] = '@' . variable_get('file_public_path', '') . '/' . file_uri_target($path);
+      $i++;
+    }
 
     $content = $this->curlExec(array(
       CURLOPT_URL => $url,
@@ -62,7 +73,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     list($info, $header, $status, $code, $body) = $this->parseHeader($content);
 
     $this->verbose('POST request to: ' . $url .
-                   '<hr />File Name: ' . highlight_string('<?php . ' . var_export($filepath, TRUE), TRUE) .
+                   '<hr />File Name(s): ' . highlight_string('<?php . ' . var_export($filepath, TRUE), TRUE) .
                    '<hr />Response: ' . highlight_string('<?php ' . var_export($body, TRUE), TRUE) .
                    '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
                    '<hr />Raw response: ' . $content);

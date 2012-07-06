@@ -114,6 +114,40 @@ function _node_resource_definition() {
           'access arguments' => array('access content'),
         ),
       ),
+      'targeted_actions' => array(
+        'attach_file' => array(
+          'help' => 'Upload and attach file(s) to a node. POST multipart/form-data to node/123/attach_file',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+          'callback' => '_node_resource_attach_file',
+          'access callback' => '_node_resource_access',
+          'access arguments' => array('update'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'nid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The nid of the node to attach a file to',
+            ),
+            array(
+              'name' => 'field_name',
+              'optional' => FALSE,
+              'source' => array('data' => 'field_name'),
+              'description' => 'The file parameters',
+              'type' => 'string',
+            ),
+            array(
+              'name' => 'attach',
+              'optional' => TRUE,
+              'source' => array('data' => 'attach'),
+              'description' => 'Attach the file(s) to the node. If FALSE, this clears ALL files attached, and attaches the files',
+              'type' => 'int',
+              'default value' => TRUE,
+            ),
+          ),
+        ),
+      ),
       'relationships' => array(
         'files' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
@@ -533,4 +567,160 @@ function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
   }
 
   return !empty($cids) ? comment_load_multiple($cids) : array();
+}
+
+/**
+ * Attaches or overwrites file(s) to an existing node.
+ *
+ * Example form element used to post files to attach_file:
+ * <form action="site.com/endpoint/node/1234/attach_file" method="post"
+ * enctype="multipart/form-data">
+ * <input name="files[anything1]" type="file" />
+ * <input name="files[anything2]" type="file" />
+ * <input name="field_name" type="text" value="field_image" />
+ * <input name="attach" type="text" value="0" />
+ *
+ * The name="files[anything]" format is required to use file_save_upload().
+ *
+ * @param $nid
+ *   Node ID of the node the file(s) is being attached to.
+ * @param $field_name
+ *   Machine name of the field that is attached to the node.
+ * @param $attach
+ *   Optional. Defaults to true. This means that files will be attached to the
+ *   node, alongside existing files. If the maximum number of files have already
+ *   been uploaded to this node an error is given.
+ *   If false, it removes the files, and attaches the new files uploaded.
+ * @return
+ *   An array of files that were attached in the form:
+ *   array(
+ *     array(
+ *       fid => N,
+ *       uri => http://site.com/endpoint/file/N
+ *     ),
+ *     ...
+ *   )
+ *
+ * @see file_save_upload()
+ * @see file
+ */
+function _node_resource_attach_file($nid, $field_name, $attach) {
+  $node = node_load($nid);
+  $node_type=$node->type;
+
+  if (empty($node->{$field_name}[LANGUAGE_NONE] )) {
+    $node->{$field_name}[LANGUAGE_NONE] = array();
+  }
+
+  // Validate whether field instance exists and this node type can be edited.
+  _node_resource_validate_node_type_field_name('update', array($node_type, $field_name));
+
+  $counter = 0;
+  if ($attach) {
+    $counter = count($node->{$field_name}[LANGUAGE_NONE]);
+  }
+  else {
+    $node->{$field_name}[LANGUAGE_NONE] = array();
+  }
+
+  $options = array('attach' => $attach, 'file_count' => $counter);
+
+  list($files, $file_objs) = _node_resource_file_save_upload($node_type, $field_name, $options);
+
+  foreach ($file_objs as $file_obj) {
+    $node->{$field_name}[LANGUAGE_NONE][$counter++] = (array)$file_obj;
+  }
+
+  node_save($node);
+
+  return $files;
+}
+
+/**
+ * Services wrapper for file_save_upload.
+ *
+ * @see file_save_upload()
+ * @see file_managed_file_save_upload()
+ */
+function _node_resource_file_save_upload($node_type, $field_name, $options= array() ) {
+  // The field_name on node_type should be checked in the access callback.
+  $instance = field_info_instance('node', $field_name, $node_type);
+  $field = field_read_field($field_name);
+  $cardinality = $field['cardinality'];
+
+  // If cardinality is not unlimited check the how many 'slots' we have left.
+  if (($cardinality > 0) && isset($options['file_count'])) {
+    // Already uploaded files
+    $file_already_uploaded_count = $options['file_count'];
+    // How many files we are going to upload.
+    $file_upload_count = count($_FILES['files']['name']);
+           // If we add new files and not replace already uploaded.
+    if (   (isset($options['attach']) && ($options['attach']) && ($file_already_uploaded_count + $file_upload_count > $cardinality))
+           // If we replace existing files.
+        || ((!isset($options['attach']) || !$options['attach']) && $file_upload_count > $cardinality)) {
+      return services_error(t('You cannot upload so many files.'));
+    }
+  }
+
+  $destination = file_field_widget_uri($field, $instance );
+  if (isset($destination) && !file_prepare_directory($destination, FILE_CREATE_DIRECTORY)) {
+    return services_error(t('The upload directory %directory for the file field !name could not be created or is not accessible. A newly uploaded file could not be saved in this directory as a consequence, and the upload was canceled.', array('%directory' => $destination, '!name' => $field_name)));
+  }
+
+  $validators = array(
+    'file_validate_extensions' =>  (array)$instance['settings']['file_extensions'],
+    'file_validate_size' => array(0 => parse_size($instance['settings']['max_filesize'])),
+  );
+
+  $files = $file_objs = array();
+
+  foreach ($_FILES['files']['name'] as $key => $val) {
+
+    // Let the file module handle the upload and moving.
+    if (!$file = file_save_upload($key, $validators, $destination, FILE_EXISTS_RENAME) ) {
+      return services_error(t('Failed to upload file. @upload', array('@upload' => $key)), 406);
+    }
+
+    if ($file->fid) {
+      // Add info to the array that will be returned/encdoed to xml/json.
+      $files[] = array(
+        'fid' => $file->fid,
+        'uri' => services_resource_uri(array('file', $file->fid)),
+      );
+      $file_objs[] = $file;
+    }
+    else {
+      return services_error(t('An unknown error occurred'), 500);
+    }
+  }
+
+  return array($files, $file_objs);
+}
+
+/**
+ * Helper function to validate data.
+ *
+ * @param $op
+ *   Array representing the attributes a node edit form would submit.
+ * @param $args
+ *   Resource arguments passed through from the original request (node_type,
+ *   field_name).
+ *
+ * @return bool
+ *   TRUE/FALSE based on access.
+ */
+function _node_resource_validate_node_type_field_name($op = 'create', $args = array()) {
+  $node_type = $args[0];
+  $field_name = $args[1];
+
+  $temp_node= array('type' => $node_type);
+
+  // An invalid node type throws an exception, and stops before the return below.
+  _node_resource_validate_type($temp_node);
+
+  if (!field_info_instance('node', $field_name, $node_type)) {
+    return services_error(t('Field name \'@field_name\' not found on node type \'@node_type\'', array('@field_name' => $field_name, '@node_type' => $node_type)), 406);
+  }
+
+  return TRUE;
 }
