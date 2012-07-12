@@ -74,6 +74,12 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
   // Loading runtime include as needed by services_auth_info().
   module_load_include('runtime.inc', 'services');
   $endpoint = $form_state['item'];
+
+  $form['info']['name'] = array_merge($form['info']['name'], array(
+    '#title' => t('Machine-readable name of the endpoint'),
+    '#description' => t('The endpoint name can only consist of lowercase letters, underscores, and numbers.'),
+  ));
+
   $form['eid'] = array(
     '#type'  => 'value',
     '#value' => isset($endpoint->eid) ? $endpoint->eid : '',
@@ -136,7 +142,7 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
         $default_values[] = $auth_module;
       }
     }
-    
+
     $form['authentication'] = array(
       '#type'          => 'checkboxes',
       '#options'       => $auth_options,
@@ -183,7 +189,7 @@ function services_ctools_export_ui_form_validate(&$form, &$form_state) {
  * Submit handler for endpoint.
  */
 function services_ctools_export_ui_form_submit(&$form, &$form_state) {
-  
+
   variable_set('services_use_content_permissions', $form_state['values']['services_use_content_permissions']);
 
   $endpoint = $form_state['values']['endpoint_object'];
@@ -204,11 +210,11 @@ function services_ctools_export_ui_form_submit(&$form, &$form_state) {
         //If existing settings are set, preserve them
         if (isset($endpoint->authentication[$module]) &&  is_array($endpoint->authentication[$module])) {
           $auth[$module] = $endpoint->authentication[$module];
-        } 
+        }
         else {
           $auth[$module] = array();
         }
-      } 
+      }
       elseif ($auth_module == 0) {
         unset($auth[$module]);
       }
