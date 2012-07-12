@@ -438,7 +438,7 @@ function _user_resource_logout() {
  */
 function _user_resource_index($page, $fields, $parameters, $page_size) {
   if (!user_access('administer users')) {
-    $parameters['active'] = 1;
+    $parameters['status'] = 1;
   }
   $query = services_resource_build_index_query('users', 'u.created DESC', $page, $fields, $parameters, 'u', 'uid', $page_size, 'user');
 
