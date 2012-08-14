@@ -24,4 +24,3 @@ files[] = tests/services.test
 
 dependencies[] = ctools
 
-configure = admin/structure/services
