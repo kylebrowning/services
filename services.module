@@ -352,7 +352,7 @@ function services_services_resources() {
 }
 
 /**
- * Implementation of hook_services_authentication().
+ * Implementation of hook_services_authentication_info().
  */
 function services_services_authentication_info() {
   return array(
