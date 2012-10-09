@@ -6,7 +6,7 @@
  */
 
 class RESTServer {
-  private $endpoint;
+  protected $endpoint;
 
   /**
    * Handles the call to the REST server
@@ -187,7 +187,7 @@ class RESTServer {
    *  The method used to make the request
    * @return void
    */
-  private function getControllerArguments($controller, $path, $method) {
+  protected function getControllerArguments($controller, $path, $method) {
     $data = $this->parseRequest($method, $controller);
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
@@ -237,7 +237,7 @@ class RESTServer {
     return $arguments;
   }
 
-  private function parseRequestHeaders() {
+  protected function parseRequestHeaders() {
     $headers = array();
     if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
       $headers['IF_MODIFIED_SINCE'] = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
@@ -245,7 +245,7 @@ class RESTServer {
     return $headers;
   }
 
-  private function parseRequest($method, $controller) {
+  protected function parseRequest($method, $controller) {
     switch ($method) {
       case 'POST':
       case 'PUT':
@@ -384,7 +384,7 @@ class RESTServer {
     }
   }
 
-  private function renderFormatterView($controller, $formatter, $result) {
+  protected function renderFormatterView($controller, $formatter, $result) {
     // Wrap the results in a model class if required by the formatter
     if (isset($formatter['model'])) {
       $cm = $controller['models'][$formatter['model']];
@@ -403,7 +403,7 @@ class RESTServer {
   /**
    * Get best match parser for $controller based on $mime type.
    */
-  private function requestParser($mime, $controller = NULL) {
+  protected function requestParser($mime, $controller = NULL) {
     // Check if the controller has declared support for parsing the mime type.
     if ($controller && !empty($controller['rest request parsers'])) {
       $parser = $this->matchParser($mime, $controller['rest request parsers']);
@@ -429,7 +429,7 @@ class RESTServer {
    *
    * @return Mimeparse
    */
-  private function mimeParse() {
+  protected function mimeParse() {
     static $mimeparse;
     if (!$mimeparse) {
       module_load_include('php', 'rest_server', 'lib/mimeparse');
@@ -448,7 +448,7 @@ class RESTServer {
    * @return mixed
    *  Returns a parser callback or FALSE if no match was found.
    */
-  private function matchParser($mime, $parsers) {
+  protected function matchParser($mime, $parsers) {
     $mimeparse = $this->mimeParse();
     $mime_type = $mimeparse->best_match(array_keys($parsers), $mime);
 
@@ -549,7 +549,7 @@ class RESTServer {
     return Spyc::YAMLLoadString(self::contentFromStream($handle));
   }
 
-  private function responseFormatters($format = NULL) {
+  protected function responseFormatters($format = NULL) {
     $formatters = rest_server_response_formatters();
 
     // Remove formatters that have been disabled for this endpoint.
@@ -566,7 +566,7 @@ class RESTServer {
     return $formatters;
   }
 
-  private function supportedControllerModel($controller, $format) {
+  protected function supportedControllerModel($controller, $format) {
     if (
       // The format uses models
       isset($format['model']) &&
@@ -578,7 +578,7 @@ class RESTServer {
     }
   }
 
-  private function resolveController($resource, $method, $path, $endpoint, $resource_name) {
+  protected function resolveController($resource, $method, $path, $endpoint, $resource_name) {
     $pc = count($path);
     $class = NULL;
     $operation = NULL;
