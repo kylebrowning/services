@@ -52,6 +52,8 @@ function rest_server_request_parsers() {
       'application/json' => 'RESTServer::parseJSON',
       'application/vnd.php.serialized' => 'RESTServer::parsePHP',
       'multipart/form-data' => 'RESTServer::parseMultipart',
+      'application/xml' => 'RESTServer::parseXML',
+      'text/xml' => 'RESTServer::parseXML',
     );
 
     if (_rest_server_get_spyc_location() !== false) {
