@@ -13,6 +13,7 @@ files[] = tests/functional/ServicesResourceSystemTests.test
 files[] = tests/functional/ServicesResourceCommentTests.test
 files[] = tests/functional/ServicesResourceTaxonomyTests.test
 files[] = tests/functional/ServicesResourceFileTests.test
+files[] = tests/functional/ServicesResourceDisabledTests.test
 files[] = tests/functional/ServicesEndpointTests.test
 files[] = tests/functional/ServicesParserTests.test
 files[] = tests/functional/ServicesAliasTests.test
