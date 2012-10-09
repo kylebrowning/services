@@ -508,6 +508,9 @@ function services_resource_build_index_query($schema, $order, $page, $fields, $s
   // db_query().
   if (is_array($service_params)) {
     foreach ($service_params as $param_field => $param_value) {
+      if (!$schema['fields'][$param_field]) {
+        services_error('Parameter "' . $param_field . '" is not valid.');
+      }
       $in_placeholders = array();
       foreach (services_str_getcsv($param_value) as $single_value) {
         $in_placeholders[] = db_type_placeholder($schema['fields'][$param_field]['type']);
