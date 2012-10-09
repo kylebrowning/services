@@ -239,6 +239,9 @@ function _file_resource_create($file) {
   }
   $file['filepath'] = $destination;
 
+  // Set the file user id.
+  $file['uid'] = $user->uid;
+
   // Update the timestamp to the current time, otherwise the file could
   // get deleted on the next cron run if its status is set to 0.
   $file['timestamp'] = time();
