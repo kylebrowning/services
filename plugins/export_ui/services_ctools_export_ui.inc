@@ -208,8 +208,10 @@ function services_ctools_export_ui_form_submit(&$form, &$form_state) {
       $auth_module = $form_state['values']['authentication'][$module];
       if ($module === $auth_module) {
         //If existing settings are set, preserve them
-        if (isset($endpoint->authentication[$module]) &&  is_array($endpoint->authentication[$module])) {
+        if (isset($endpoint->authentication[$module]) && !empty($endpoint->authentication[$module])) {
           $auth[$module] = $endpoint->authentication[$module];
+        } else if(isset($endpoint->authentication[$module]) && empty($endpoint->authentication[$module])) {
+          $auth[$module] = $module;
         }
         else {
           $auth[$module] = array();
