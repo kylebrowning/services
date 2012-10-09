@@ -583,34 +583,63 @@ class RESTServer {
     $class = NULL;
     $operation = NULL;
 
-    // Use the index handler for all empty path GET-requests
-    if (!$pc && $method == 'GET') {
+    // We do not group "if" conditions on purpose for better readability.
+
+    // 'index' method.
+    if ($method == 'GET' && isset($resource['operations']['index']) && $this->checkNumberOfArguments($pc, $resource['operations']['index'])) {
       $class = 'operations';
       $operation = 'index';
     }
-    // Detect the standard crud operations
-    elseif (($pc == 1 && ($method == 'GET' || $method == 'PUT' || $method == 'DELETE')) || ($pc == 0 && $method == 'POST')) {
-      $action_mapping = array(
-        'GET' => 'retrieve',
-        'POST' => 'create',
-        'PUT' => 'update',
-        'DELETE' => 'delete',
-      );
+
+    // 'retrieve' method.
+    // First path element should be not empty.
+    if ($method == 'GET' && isset($resource['operations']['retrieve']) && $this->checkNumberOfArguments($pc, $resource['operations']['retrieve']) && !empty($path[0]) && $pc >= 1) {
       $class = 'operations';
-      $operation = $action_mapping[$method];
+      $operation = 'retrieve';
     }
-    // Detect relationship requests
-    elseif ($pc >= 2 && $method == 'GET') {
+
+    // 'relationships'
+    // First path element should be not empty,
+    // second should be name of targeted action.
+    if ($method == 'GET' && $pc >= 2 && isset($resource['relationships'][$path[1]])
+         && $this->checkNumberOfArguments($pc, $resource['relationships'][$path[1]], 1) && is_numeric($path[0])) {
       $class = 'relationships';
       $operation = $path[1];
     }
-    // Detect action requests
-    elseif ($pc == 1 && $method == 'POST') {
+
+    // 'update'
+    // First path element should be not empty.
+    if ($method == 'PUT' && isset($resource['operations']['update']) && $this->checkNumberOfArguments($pc, $resource['operations']['update']) && !empty($path[0]) && $pc >= 1) {
+      $class = 'operations';
+      $operation = 'update';
+    }
+
+    // 'delete'
+    // First path element should be not empty.
+    if ($method == 'DELETE' && isset($resource['operations']['delete']) && $this->checkNumberOfArguments($pc, $resource['operations']['delete']) && !empty($path[0]) && $pc >= 1) {
+      $class = 'operations';
+      $operation = 'delete';
+    }
+
+    // 'create' method.
+    // First path element should be not empty.
+    if ($method == 'POST' && isset($resource['operations']['create']) && $this->checkNumberOfArguments($pc, $resource['operations']['create'])) {
+      $class = 'operations';
+      $operation = 'create';
+    }
+
+    // 'actions'
+    // Forst path element should be action name
+    if ($method == 'POST' && $pc >= 1 && isset($resource['actions'][$path[0]]) && $this->checkNumberOfArguments($pc, $resource['actions'][$path[0]], 1)) {
       $class = 'actions';
       $operation = $path[0];
     }
-    // Detect action requests targeted at specific resources
-    elseif ($pc >= 2 && $method == 'POST') {
+
+    // 'targeted_actions'
+    // First path element should be not empty,
+    // second should be name of targeted action.
+    if ($method == 'POST' && $pc >= 2 && isset($resource['targeted_actions'][$path[1]])
+         && $this->checkNumberOfArguments($pc, $resource['targeted_actions'][$path[1]], 1) && !empty($path[0])) {
       $class = 'targeted_actions';
       $operation = $path[1];
     }
@@ -624,6 +653,28 @@ class RESTServer {
     }
     services_request_apply_version($controller, array('method' => $operation, 'resource' => $resource_name));
     return $controller;
+  }
+
+  /**
+   * Count possible numbers of 'path' arguments of the method.
+   */
+  private function checkNumberOfArguments($args_number, $resource_operation, $required_args = 0) {
+    $not_required_args = 0;
+
+    if (isset($resource_operation['args'])) {
+      foreach ($resource_operation['args'] as $argument) {
+        if (is_array($argument['source']) && isset($argument['source']['path'])) {
+          if (!empty($argument['optional'])) {
+            $not_required_args++;
+          }
+          else {
+            $required_args++;
+          }
+        }
+      }
+    }
+
+    return $args_number >= $required_args && $args_number <= $required_args + $not_required_args;
   }
 
   function handleException($exception){
