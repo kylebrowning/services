@@ -434,7 +434,12 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
           'logout' => array(
-            'enabled' => 1,
+            'enabled' => '1',
+            'settings' => array(
+              'services' => array(
+                'resource_api_version' => '1.1',
+              ),
+            ),
           ),
           'register' => array(
             'enabled' => 1,
