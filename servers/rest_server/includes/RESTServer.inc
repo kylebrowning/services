@@ -545,8 +545,13 @@ class RESTServer {
   }
 
   public static function parseYAML($handle) {
-    include_once _rest_server_get_spyc_location();
-    return Spyc::YAMLLoadString(self::contentFromStream($handle));
+    if (($library = libraries_load('spyc')) && !empty($library['loaded'])) {
+      return Spyc::YAMLLoadString(self::contentFromStream($handle));
+    }
+    else {
+      watchdog('REST Server', 'Spyc library not found!', array(), WATCHDOG_ERROR);
+      return array();
+    }
   }
 
   protected function responseFormatters($format = NULL) {
