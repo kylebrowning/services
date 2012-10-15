@@ -204,8 +204,8 @@ function services_endpoint_callback($endpoint_name) {
     print call_user_func($server . '_server');
 
     // Do not let this output
-    module_invoke_all('exit');
-    exit;
+    drupal_page_footer();
+    exit();
   }
   // return 404 if the server doesn't exist
   drupal_not_found();
