@@ -13,6 +13,6 @@ files[] = lib/bencode.php
 files[] = lib/mimeparse.php
 
 dependencies[] = services
-dependencies[] = libraries
+dependencies[] = libraries (>=2.x)
 
 core = 7.x
