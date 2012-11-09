@@ -12,8 +12,14 @@ http://drupal.org/node/109782
 
 Installation
 ============
-If you are using the rest server you will need to download the latest version of SYPC:
+If you are using the rest server you will need to download the latest version of SPYC:
 wget https://raw.github.com/mustangostang/spyc/master/Spyc.php -O  servers/rest_server/lib/spyc.php
 
 Once downloaded you need to add spyc.php to the rest_server/lib folder which exists under
 the location you have installed services in.
+
+Documentation files
+===================
+services.authentication.api.php -- hooks related to authentication plugins
+services.servers.api.php -- servers definition hooks
+services.services.api.php -- definition of new services

@@ -61,3 +61,14 @@ function hook_rest_server_response_formatters_alter(&$formatters) {
   unset($formatters['jsonp']);
 }
 
+/**
+ * Alter error messages right before delivering.
+ *
+ * @param array $errors
+ *  Array of errors to be delivered.
+ * @param type $controller
+ *  Executed controller.
+ * @param type $arguments
+ *  Arguments of the controller.
+ */
+function hook_rest_server_execute_errors_alter(&$errors, $controller, $arguments) {}
