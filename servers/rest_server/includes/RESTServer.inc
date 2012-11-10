@@ -520,6 +520,18 @@ class RESTServer {
 		$array[$child->getName()] = $new_array;
 	  }
 	  else {
+    // Use the is_raw attribute on value elements for select type fields to
+    // pass form validation. Example:
+    // <field_terms_select>
+    //    <und is_array="true">
+    //      <item>
+    //        <tid is_raw="true">10513</tid>
+    //      </item>
+    //      <item>
+    //        <tid is_raw="true">10523</tid>
+    //      </item>
+    //    </und>
+    //  </field_terms_select>
 		if ($child->attributes()->is_raw) {
 			return (string) $child;
 		}
