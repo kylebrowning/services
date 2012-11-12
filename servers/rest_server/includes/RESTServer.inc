@@ -52,7 +52,7 @@ class RESTServer {
     $endpoint = services_get_server_info('endpoint', '');
 
     $endpoint_definition = services_endpoint_load($endpoint);
-
+    $this->endpoint = $endpoint_definition;
     // Get the server settings from the endpoint.
     $this->settings = !empty($endpoint_definition->server_settings['rest_server']) ? $endpoint_definition->server_settings['rest_server'] : array();
     // Normalize the settings so that we get the expected structure
@@ -522,6 +522,9 @@ class RESTServer {
           drupal_set_header('HTTP/1.0 500 An error occurred: (' . $code . ') ' . $e->getMessage());
         }
         break;
+    }
+    if($this->endpoint->debug) {
+      watchdog('services', 'Exception throw: <pre>@arguments</pre>', array('@arguments' => print_r($e, TRUE)), WATCHDOG_DEBUG);
     }
     if (method_exists($e, 'getData')) {
       return $e->getData();
