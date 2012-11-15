@@ -751,6 +751,11 @@ function services_resource_build_index_list($results, $type, $field) {
 function services_remove_user_data(&$account) {
   // Remove the users password from the account object.
   unset($account->pass);
+  if (!user_access('administer users')) {
+    unset($account->mail);
+    unset($account->init);
+  }
+  drupal_alter('services_account_object', $account);
 }
 
 /**
