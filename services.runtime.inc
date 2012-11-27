@@ -158,7 +158,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   // Preprocess controller and arguments.
   $controller['__drupal_alter_by_ref'] = array(&$args);
-  drupal_alter('services_request_preprocess', $controller);
+  drupal_alter('services_request_preprocess', $controller, $args, $options);
 
   // Execute the controller callback.
   $result = call_user_func_array($controller['callback'], $args);
