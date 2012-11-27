@@ -236,6 +236,7 @@ function services_authentication_info($module) {
 function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$arg3 = NULL) {
   // Get information about the auth module
   $info = services_authentication_info($module);
+  drupal_alter('services_authentication_info', $info, $module);
   $func = $info && !empty($info[$method]) ? $info[$method] : FALSE;
   if ($func) {
     if (!empty($info['file'])) {
