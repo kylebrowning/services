@@ -145,6 +145,14 @@ function _node_resource_definition() {
               'type' => 'int',
               'default value' => TRUE,
             ),
+            array(
+              'name' => 'field_values',
+              'optional' => TRUE,
+              'source' => array('data' => 'field_values'),
+              'description' => 'The extra field values',
+              'type' => 'array',
+              'default value' => array(),
+            ),
           ),
         ),
       ),
@@ -604,7 +612,7 @@ function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
  * @see file_save_upload()
  * @see file
  */
-function _node_resource_attach_file($nid, $field_name, $attach) {
+function _node_resource_attach_file($nid, $field_name, $attach, $field_values) {
   $node = node_load($nid);
   $node_type=$node->type;
 
@@ -627,7 +635,13 @@ function _node_resource_attach_file($nid, $field_name, $attach) {
 
   list($files, $file_objs) = _node_resource_file_save_upload($node_type, $field_name, $options);
 
-  foreach ($file_objs as $file_obj) {
+  foreach ($file_objs as $key => $file_obj) {
+    if (isset($field_values[$key])) {
+      foreach ($field_values[$key] as $key => $value) {
+        $file_obj->$key = $value;
+      }
+    }
+
     $node->{$field_name}[LANGUAGE_NONE][$counter++] = (array)$file_obj;
   }
 
