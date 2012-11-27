@@ -185,6 +185,12 @@ function services_get_servers($reset = FALSE) {
 function services_endpoint_callback($endpoint_name) {
   module_load_include('runtime.inc', 'services');
 
+  // Explicitly set the title to avoid expensive menu calls in token
+  // and elsewhere.
+  if (!($title = drupal_set_title())) {
+    drupal_set_title('Services endpoint');
+  }
+
   $endpoint = services_endpoint_load($endpoint_name);
   $server = $endpoint->server;
 
