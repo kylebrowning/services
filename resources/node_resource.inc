@@ -634,7 +634,9 @@ function _node_resource_attach_file($nid, $field_name, $attach, $field_values) {
   $options = array('attach' => $attach, 'file_count' => $counter);
 
   list($files, $file_objs) = _node_resource_file_save_upload($node_type, $field_name, $options);
-
+  // Retrieve the field settings.
+  $field = field_info_field($field_name);
+  
   foreach ($file_objs as $key => $file_obj) {
     if (isset($field_values[$key])) {
       foreach ($field_values[$key] as $key => $value) {
@@ -642,7 +644,13 @@ function _node_resource_attach_file($nid, $field_name, $attach, $field_values) {
       }
     }
 
-    $node->{$field_name}[LANGUAGE_NONE][$counter++] = (array)$file_obj;
+    $counter++;
+    $node->{$field_name}[LANGUAGE_NONE][$counter] = (array)$file_obj;
+    // Check the field display settings.
+    if (isset($field['settings']['display_field'])) {
+      // Set the display option.
+      $node->{$field_name}[LANGUAGE_NONE][$counter]['display'] = $field['settings']['display_field'];
+    }
   }
 
   node_save($node);
