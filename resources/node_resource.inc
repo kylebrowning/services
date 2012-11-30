@@ -280,7 +280,9 @@ function _node_resource_create($node) {
     global $user;
     $node['name'] = $user->name;
   }
-
+  if(!isset($node['language'])) {
+    $node['language'] = LANGUAGE_NONE;
+  }
   // Validate the node. If there is validation error Exception will be thrown
   // so code below won't be executed.
   _node_resource_validate_type($node);
