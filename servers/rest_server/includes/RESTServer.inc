@@ -617,7 +617,7 @@ class RESTServer {
     // First path element should be not empty,
     // second should be name of targeted action.
     if ($method == 'GET' && $pc >= 2 && isset($resource['relationships'][$path[1]])
-         && $this->checkNumberOfArguments($pc, $resource['relationships'][$path[1]], 1) && is_numeric($path[0])) {
+         && $this->checkNumberOfArguments($pc, $resource['relationships'][$path[1]], 1) && isset($path[0])) {
       $class = 'relationships';
       $operation = $path[1];
     }
