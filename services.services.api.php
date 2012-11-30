@@ -81,7 +81,16 @@
  *       'data' (indicating the POST data), 'param' (indicating the query
  *       string) or 'path' (indicating the url path). In the case of path,
  *       an additional parameter must be passed indicating the index to be used.
- *     - default value: this is a value that will be passed to the method for this particular argument if no argument value is passed
+ *       In the case of 'data' unless you put things in an array, you will get 
+ *       passed to your functions. 'source' => array('data' => 'nid'), will pass
+ *       them off as a single variable, 'source' => array('data') will give you 
+ *       all argument values to each argument. 
+ *     - default value: this is a value that will be passed to the method for
+ *       this particular argument if no argument value is passed
+ *
+ *   A detailed example of creating a new resource can be found at
+ *   http://drupal.org/node/783460 and more information about how
+ *   REST resources are managed can be found at http://drupal.org/node/783254.
  */
 function hook_services_resources() {
 $node_resource = array(
