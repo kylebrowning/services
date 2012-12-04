@@ -2,6 +2,8 @@
 
 class ServicesWebTestCase extends DrupalWebTestCase {
 
+  protected $previousExecHadInfile = FALSE;
+
   public function setUp() {
     $args = func_get_args();
 
@@ -11,6 +13,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     array_unshift($modules, 'ctools', 'services', 'rest_server');
 
     parent::setUp($modules);
+    // Use a cookie file, so login sessions will survive, even if we
+    // reinitialize Curl.
+    $this->cookieFile = drupal_tempnam($this->temp_files_directory, 'services_cookiejar');
+    // Load the cookie file when initializing Curl.
+    $this->additionalCurlOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
   }
 
 
@@ -720,6 +727,16 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       // not overwritten by Curl.
       $curl_options[CURLOPT_HTTPHEADER][] = 'Expect:';
     }
+
+    if ($this->previousExecHadInfile) {
+      // If the previous exec used CURLOPT_INFILE, we have to reinitialize curl
+      // to loose the option, as to not cause curl to complain that the file has
+      // disappeared.
+      curl_close($this->curlHandle);
+      unset($this->curlHandle);
+      $this->curlInitialize();
+    }
+    $this->previousExecHadInfile = isset($curl_options[CURLOPT_INFILE]);
     curl_setopt_array($this->curlHandle, $this->additionalCurlOptions + $curl_options);
 
     if (!$redirect) {
