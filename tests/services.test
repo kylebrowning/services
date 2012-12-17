@@ -15,7 +15,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     parent::setUp($modules);
     // Use a cookie file, so login sessions will survive, even if we
     // reinitialize Curl.
-    $this->cookieFile = drupal_tempnam($this->temp_files_directory, 'services_cookiejar');
+    $this->cookieFile = drupal_tempnam(variable_get('file_temporary_path'), 'services_cookiejar');
     // Load the cookie file when initializing Curl.
     $this->additionalCurlOptions[CURLOPT_COOKIEFILE] = $this->cookieFile;
   }
