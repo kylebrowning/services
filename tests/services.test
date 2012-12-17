@@ -2,8 +2,6 @@
 
 class ServicesWebTestCase extends DrupalWebTestCase {
 
-  protected $previousExecHadInfile = FALSE;
-
   public function setUp() {
     $args = func_get_args();
 
@@ -185,6 +183,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $content = $this->curlExec(array(
       CURLOPT_URL => $url,
       CURLOPT_CUSTOMREQUEST => "DELETE",
+      CURLOPT_HEADER => TRUE,
       CURLOPT_HTTPHEADER => $headers,
       CURLOPT_RETURNTRANSFER => TRUE
     ));
@@ -705,6 +704,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
    *   Content returned from the exec.
    */
   protected function curlExec($curl_options, $redirect = FALSE) {
+    // Some Curl options might leave the handle in a state where subsequent
+    // request can cause warnings or even weird failures, so to be on the safe
+    // side we reinitialize Curl for each request.
+    $this->curlClose();
+
     $this->curlInitialize();
 
     // cURL incorrectly handles URLs with a fragment by including the
@@ -728,15 +732,6 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       $curl_options[CURLOPT_HTTPHEADER][] = 'Expect:';
     }
 
-    if ($this->previousExecHadInfile) {
-      // If the previous exec used CURLOPT_INFILE, we have to reinitialize curl
-      // to loose the option, as to not cause curl to complain that the file has
-      // disappeared.
-      curl_close($this->curlHandle);
-      unset($this->curlHandle);
-      $this->curlInitialize();
-    }
-    $this->previousExecHadInfile = isset($curl_options[CURLOPT_INFILE]);
     curl_setopt_array($this->curlHandle, $this->additionalCurlOptions + $curl_options);
 
     if (!$redirect) {
