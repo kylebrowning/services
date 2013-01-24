@@ -479,7 +479,7 @@ function services_controller_get($name, $endpoint) {
     }
     else {
       $class_info = services_operation_class_info();
-      // Handle extended operatios
+      // Handle extended operations
       foreach ($class_info as $class => $info) {
         if (isset($res[$class]) && isset($res[$class][$method])) {
           return $res[$class][$method];
@@ -488,6 +488,7 @@ function services_controller_get($name, $endpoint) {
     }
   }
 }
+
 /**
  * Returns an array of available updates versions for a resource.
  *
@@ -517,7 +518,11 @@ function services_get_updates() {
       // If this function is a service update function, add it to the list of
       // services updates.
       if (preg_match($regexp, $function, $matches)) {
-        extract($matches);
+        $resource = $matches['resource'];
+        $method   = $matches['method'];
+        $major    = $matches['major'];
+        $minor    = $matches['minor'];
+
         $updates[$resource][$method][] = array(
           'version'  => $major .'_'. $minor,
           'major'    => $major,

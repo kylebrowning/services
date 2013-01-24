@@ -170,7 +170,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
     $options['method'] = $path[0];
   }
 
-  if(!empty($options['version'])) {
+  if (!empty($options['version'])) {
     services_request_apply_version($controller, $options);
   }
 
@@ -238,20 +238,19 @@ function services_auth_invoke($module, $method, &$arg1 = NULL, &$arg2 = NULL, &$
   $info = services_authentication_info($module);
   drupal_alter('services_authentication_info', $info, $module);
   $func = $info && !empty($info[$method]) ? $info[$method] : FALSE;
-  if ($func) {
-    if (!empty($info['file'])) {
-      require_once(drupal_get_path('module', $module) . '/' . $info['file']);
-    }
-
-    if (is_callable($func)) {
-      $args = func_get_args();
-      // Replace module and method name and arg1 with reference to $arg1 and $arg2.
-      array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3));
-      return call_user_func_array($func, $args);
-    }
-  }
-  else {
+  if (!$func) {
     return TRUE;
+  }
+
+  if (!empty($info['file'])) {
+    require_once(drupal_get_path('module', $module) . '/' . $info['file']);
+  }
+
+  if (is_callable($func)) {
+    $args = func_get_args();
+    // Replace module and method name and arg1 with reference to $arg1 and $arg2.
+    array_splice($args, 0, 5, array(&$arg1, &$arg2, &$arg3));
+    return call_user_func_array($func, $args);
   }
 }
 
