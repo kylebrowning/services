@@ -101,8 +101,9 @@ function services_controller_execute($controller, $args = array(), $options = ar
   }
 
   $original_user = $user;
-  
-  if (strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE) {
+
+  $preserve_session = strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE;
+  if ($preserve_session) {
     $old_state = drupal_save_session();
     drupal_save_session(FALSE);
   }
@@ -113,53 +114,18 @@ function services_controller_execute($controller, $args = array(), $options = ar
   $endpoint_name = services_get_server_info('endpoint');
   $endpoint = services_endpoint_load($endpoint_name);
 
-  // Check authentication.
-  if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
-    foreach ($endpoint->authentication as $auth_module => $settings) {
-      if (isset($settings) && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $settings, $controller, $args)) {
-        return services_error($auth_error, 401);
-      }
-    }
-  }
+  _services_authenticate_user($controller, $endpoint, $args, $options);
+
   // Load the proper file.
   if (!empty($controller['file']) && $file = $controller['file']) {
     module_load_include($file['type'], $file['module'], (isset($file['name']) ? $file['name'] : NULL));
   }
 
-  // Construct access arguments array.
-  if (isset($controller['access arguments'])) {
-    $access_arguments = $controller['access arguments'];
-    if (isset($controller['access arguments append']) && $controller['access arguments append']) {
-      $access_arguments[] = $args;
-    }
-  }
-  else {
-    // Just use the arguments array if no access arguments have been specified
-    $access_arguments = $args;
-  }
+  _services_run_access_callback($controller, $args);
 
-  // Load the proper file for the access callback.
-  if (!empty($controller['access callback file']) && $access_cb_file = $controller['access callback file']) {
-    $access_cb_file_name = isset($access_cb_file['name']) ? $access_cb_file['name'] : NULL;
-    module_load_include($access_cb_file['type'], $access_cb_file['module'], $access_cb_file_name);
-  }
-
-  // Call default or custom access callback.
-  if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
-    return services_error(t('Access denied for user @user', array(
-      '@user' => isset($user->name) ? $user->name : 'anonymous',
-    )), 401);
-  }
   $endpoint_path = services_get_server_info('endpoint_path', '');
   $endpoint_path_len = drupal_strlen($endpoint_path) + 1;
   $canonical_path = drupal_substr($_GET['q'], $endpoint_path_len, drupal_strlen($_GET['q']) - $endpoint_path_len);
-  // Extract response format info from the canonical path.
-  $matches = array();
-  $response_format = '';
-  if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
-    $canonical_path = $matches[1];
-    $response_format = $matches[2];
-  }
 
   // Prepare $path array and $resource_name.
   $path = explode('/', $canonical_path);
@@ -186,7 +152,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   drupal_alter('services_request_postprocess', $controller, $args, $result);
 
-  if (strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE) {
+  if ($preserve_session) {
     drupal_save_session($old_state);
   }
 
@@ -420,4 +386,49 @@ function _services_access_value($data, $fields) {
     }
   }
   return $data;
+}
+
+/**
+ * Run enabled authentication plugins.
+ *
+ * Plugin that authenticate user will change global $user.
+ */
+function _services_authenticate_user($controller, $endpoint, $args, $options) {
+  if (!isset($options['skip_authentication']) || !$options['skip_authentication']) {
+    foreach ($endpoint->authentication as $auth_module => $auth_settings) {
+      if (isset($auth_settings) && $auth_error = services_auth_invoke($auth_module, 'authenticate_call', $auth_settings, $controller, $args)) {
+        return services_error($auth_error, 401);
+      }
+    }
+  }
+}
+
+/**
+ * Call access callback of the method.
+ */
+function _services_run_access_callback($controller, $args) {
+  // Construct access arguments array.
+  if (isset($controller['access arguments'])) {
+    $access_arguments = $controller['access arguments'];
+    if (isset($controller['access arguments append']) && $controller['access arguments append']) {
+      $access_arguments[] = $args;
+    }
+  }
+  else {
+    // Just use the arguments array if no access arguments have been specified
+    $access_arguments = $args;
+  }
+
+  // Load the proper file for the access callback.
+  if (!empty($controller['access callback file']) && $access_cb_file = $controller['access callback file']) {
+    $access_cb_file_name = isset($access_cb_file['name']) ? $access_cb_file['name'] : NULL;
+    module_load_include($access_cb_file['type'], $access_cb_file['module'], $access_cb_file_name);
+  }
+
+  // Call default or custom access callback.
+  if (call_user_func_array($controller['access callback'], $access_arguments) != TRUE) {
+    return services_error(t('Access denied for user @user', array(
+      '@user' => isset($user->name) ? $user->name : 'anonymous',
+    )), 401);
+  }
 }
