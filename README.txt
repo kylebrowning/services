@@ -20,6 +20,8 @@ the location you have installed services in.
 
 Documentation files
 ===================
+You can find these files in /docs folder.
 services.authentication.api.php -- hooks related to authentication plugins
 services.servers.api.php -- servers definition hooks
 services.services.api.php -- definition of new services
+services.versions.api.php -- how to write versioned resources
