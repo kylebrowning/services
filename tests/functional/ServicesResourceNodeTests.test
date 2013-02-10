@@ -458,7 +458,7 @@ class ServicesResourceNodetests extends ServicesWebTestCase {
 /**
  * Test create node with taxonomy terms attached.
  */
-class ServicesResourceNodeTaxonomytests extends ServicesResourceNodetests {
+class ServicesResourceNodeTaxonomytests extends ServicesWebTestCase {
   // Class variables
   protected $admin_user = NULL ;
   // Endpoint details.
