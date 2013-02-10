@@ -57,7 +57,7 @@ class RESTServer {
     $this->settings = rest_server_setup_settings($this->settings);
 
     $resources = services_get_resources($endpoint);
-    module_load_include('resource_build.inc', 'services');
+    module_load_include('inc', 'services', 'includes/services.resource_build');
     _services_apply_endpoint($resources, $endpoint_definition, TRUE);
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {

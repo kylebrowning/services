@@ -5,7 +5,7 @@ core = 7.x
 php = 5.x
 configure = admin/structure/services
 
-files[] = services.runtime.inc
+files[] = includes/services.runtime.inc
 files[] = tests/functional/NoAuthEndpointTestRunner.test
 files[] = tests/functional/ServicesResourceNodeTests.test
 files[] = tests/functional/ServicesResourceUserTests.test

@@ -183,7 +183,7 @@ function services_get_servers($reset = FALSE) {
  * @return void
  */
 function services_endpoint_callback($endpoint_name) {
-  module_load_include('runtime.inc', 'services');
+  module_load_include('inc', 'services', 'includes/services.runtime');
 
   // Explicitly set the title to avoid expensive menu calls in token
   // and elsewhere.
@@ -320,7 +320,7 @@ function services_get_resources($endpoint_name = '') {
     $resources = $cache->data;
   }
   else {
-    module_load_include('resource_build.inc', 'services');
+    module_load_include('inc', 'services', 'includes/services.resource_build');
     $resources = _services_build_resources($endpoint_name);
     cache_set($cache_key, $resources);
   }
@@ -352,7 +352,7 @@ function services_resource_api_version_info() {
  * Implements hook_services_resources().
  */
 function services_services_resources() {
-  module_load_include('resource_build.inc', 'services');
+  module_load_include('inc', 'services', 'includes/services.resource_build');
   // Return resources representing legacy services
   return _services_core_resources();
 }
@@ -486,7 +486,7 @@ function services_get_updates() {
   $updates = &drupal_static(__FUNCTION__, array());
   if (!isset($updates) || empty($updates)) {
     $updates = array();
-    module_load_include('resource_build.inc', 'services');
+    module_load_include('inc', 'services', 'includes/services.resource_build');
     // Load the resources for services.
     _services_core_resources();
     // Prepare regular expression to match all possible defined
