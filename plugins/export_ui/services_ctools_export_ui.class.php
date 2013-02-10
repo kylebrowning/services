@@ -325,6 +325,10 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
           if (isset($resource_conf[$class][$op_name]['enabled'])) {
             $default_value = $resource_conf[$class][$op_name]['enabled'];
           }
+          // If any component of a resource is enabled, expand the resource.
+          if ($default_value) {
+            $res_item['#collapsed'] = FALSE;
+          }
           $res_item[$class][$op_name] = array(
             '#type' => 'item',
             '#title' => $op_name,
