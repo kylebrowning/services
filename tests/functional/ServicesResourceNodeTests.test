@@ -521,6 +521,8 @@ class ServicesResourceNodeTaxonomytests extends ServicesWebTestCase {
       ),
     );
     field_create_instance($this->instance);
+
+    $this->endpoint =  $this->saveNewEndpoint();
   }
 
   /**
