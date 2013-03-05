@@ -199,37 +199,55 @@ class RESTServer {
       'headers' => $headers,
     );
     // Map source data to arguments.
+    return $this->getControllerArgumentsFromSources($controller, $sources);
+  }
+
+  /**
+   * array $controller
+   *   Controller definition
+   * array $sources
+   *   Array of sources for arguments. Consists of following elements:
+   *  'path' - path requested
+   *  'params' - GET variables
+   *  'data' - parsed POST data
+   *  'headers' - request headers
+   *
+   * @return array
+   */
+  protected function getControllerArgumentsFromSources($controller, $sources) {
     $arguments = array();
-    if (isset($controller['args'])) {
-      foreach ($controller['args'] as $i => $info) {
-        // Fill in argument from source
-        if (isset($info['source'])) {
-          if (is_array($info['source'])) {
-            list($source) = array_keys($info['source']);
-            $key = $info['source'][$source];
-            if (isset($sources[$source][$key])) {
-              $arguments[$i] = $sources[$source][$key];
-            }
-          }
-          else {
-            if (isset($sources[$info['source']])) {
-              $arguments[$i] = $sources[$info['source']];
-            }
-          }
-          // Convert to array if argument expected to be array.
-          if (isset($info['type']) && $info['type'] == 'array' && isset($arguments[$i])) {
-            $arguments[$i] = (array)$arguments[$i];
+    if (!isset($controller['args'])) {
+      return array();
+    }
+
+    foreach ($controller['args'] as $argument_number => $argument_info) {
+      // Fill in argument from source
+      if (isset($argument_info['source'])) {
+        if (is_array($argument_info['source'])) {
+          list($source) = array_keys($argument_info['source']);
+          $key = $argument_info['source'][$source];
+          if (isset($sources[$source][$key])) {
+            $arguments[$argument_number] = $sources[$source][$key];
           }
         }
-        // When argument isn't set, insert default value if provided or
-        // throw a exception if the argument isn't optional.
-        if (!isset($arguments[$i])) {
-          if (!isset($info['optional']) || !$info['optional']) {
-            return services_error(t('Missing required argument @arg', array('@arg' => $info['name'])), 401);
+        else {
+          if (isset($sources[$argument_info['source']])) {
+            $arguments[$argument_number] = $sources[$argument_info['source']];
           }
-          // Set default value or NULL if default value is not set.
-         $arguments[$i] = isset($info['default value']) ? $info['default value'] : NULL;
         }
+        // Convert to array if argument expected to be array.
+        if (isset($argument_info['type']) && $argument_info['type'] == 'array' && isset($arguments[$argument_number])) {
+          $arguments[$argument_number] = (array)$arguments[$argument_number];
+        }
+      }
+      // When argument isn't set, insert default value if provided or
+      // throw a exception if the argument isn't optional.
+      if (!isset($arguments[$argument_number])) {
+        if (!isset($argument_info['optional']) || !$argument_info['optional']) {
+          return services_error(t('Missing required argument @arg', array('@arg' => $argument_info['name'])), 401);
+        }
+        // Set default value or NULL if default value is not set.
+        $arguments[$argument_number] = isset($argument_info['default value']) ? $argument_info['default value'] : NULL;
       }
     }
     return $arguments;
