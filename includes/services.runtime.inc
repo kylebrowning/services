@@ -93,24 +93,69 @@ class ServicesArgumentException extends ServicesException {
  *  made.
  */
 function services_controller_execute($controller, $args = array(), $options = array()) {
-  global $user;
   $server_info =  services_server_info_object();
   if ($server_info->debug) {
     watchdog('services', 'Controller: <pre>@controller</pre>', array('@controller' => print_r($controller, TRUE)), WATCHDOG_DEBUG);
     watchdog('services', 'Passed arguments: <pre>@arguments</pre>', array('@arguments' => print_r($args, TRUE)), WATCHDOG_DEBUG);
   }
 
-  $original_user = $user;
+  // Switch to anonymous user preserving currently session authenticated user.
+  _services_controller_execute_preserve_user_switch_anonymous($controller);
 
-  $preserve_session = strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE;
+  try {
+    $result = _services_controller_execute_internals($controller, $args, $options);
+  }
+  catch (Exception $exception) {
+    _services_controller_execute_restore_user();
+    throw $exception;
+  }
+
+  _services_controller_execute_restore_user();
+
+  if ($server_info->debug) {
+    watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
+  }
+  return $result;
+}
+
+/**
+ * As authentication methods should authenticate user themselves changing global $user variable
+ * we preserve incoming session authenticated user and his session so changes made by authentication
+ * do not interfere.
+ */
+function _services_controller_execute_preserve_user_switch_anonymous($controller) {
+  global $user;
+  services_set_server_info('original_user', $user);
+
+  $preserve_session = strpos($controller['callback'], 'login') === FALSE && strpos($controller['callback'], 'logout') === FALSE;
+  services_set_server_info('preserve_session', $preserve_session);
   if ($preserve_session) {
-    $old_state = drupal_save_session();
+    $original_session_state = drupal_save_session();
+    services_set_server_info('original_session_state', $original_session_state);
     drupal_save_session(FALSE);
   }
+
   $user = drupal_anonymous_user();
   $user->timestamp = time();
-  services_set_server_info('original_user', $original_user);
+}
 
+function _services_controller_execute_restore_user() {
+  if (services_get_server_info('preserve_session', FALSE)) {
+    $original_user = services_get_server_info('original_user');
+    $original_session_state = services_get_server_info('original_session_state');
+    global $user;
+    $user = $original_user;
+    drupal_save_session($original_session_state);
+  }
+}
+
+/**
+ * Internals of the services_controller_execute().
+ *
+ * Arguments are the same as services_controller_execute().
+ */
+function _services_controller_execute_internals($controller, $args, $options) {
+  $server_info =  services_server_info_object();
   $endpoint_name = services_get_server_info('endpoint');
   $endpoint = services_endpoint_load($endpoint_name);
 
@@ -152,13 +197,6 @@ function services_controller_execute($controller, $args = array(), $options = ar
 
   drupal_alter('services_request_postprocess', $controller, $args, $result);
 
-  if ($preserve_session) {
-    drupal_save_session($old_state);
-  }
-
-  if ($server_info->debug) {
-    watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
-  }
   return $result;
 }
 
