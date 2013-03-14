@@ -86,7 +86,7 @@ function _system_resource_definition() {
  * Returns the details of currently logged in user.
  *
  * @return
- *   An object with an session id and user object.
+ *   object with session id, session name and a user object.
  */
 function _system_resource_connect() {
   global $user;
@@ -94,6 +94,7 @@ function _system_resource_connect() {
 
   $return = new stdClass();
   $return->sessid = session_id();
+  $return->session_name = session_name();
   $return->user = $user;
 
   return $return;
