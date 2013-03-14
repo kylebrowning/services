@@ -74,7 +74,7 @@ function _services_oauth_authenticate_call($settings, $method, $args) {
     }
     else if ($cred == 'consumer') {
       if ($consumer->uid) {
-        // This authenticates as the user who owns 'key';  It is for 2-stage 
+        // This authenticates as the user who owns 'key';  It is for 2-stage
         // OAuth and is vastly inferior to 3-stage OAuth.
         global $user;
         $user = user_load($consumer->uid);
@@ -167,13 +167,10 @@ function _services_oauth_controller_settings($settings, $controller, $endpoint, 
   $auth_levels = array();
   if (is_array($endpoint) && isset($endpoint['oauth_context'])) {
     $context = oauth_common_context_load($endpoint['oauth_context']);
-  }
-  else {
-    $context = new StdClass();
-  }
-  if (isset($context->authorization_levels)) {
-    foreach ($context->authorization_levels as $name => $level) {
-      $auth_levels[$name] = t($level['title']);
+    if (isset($context->authorization_levels)) {
+      foreach ($context->authorization_levels as $name => $level) {
+        $auth_levels[$name] = t($level['title']);
+      }
     }
   }
 
