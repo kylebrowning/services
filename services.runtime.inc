@@ -28,7 +28,7 @@ class ServicesException extends Exception {
   public function __construct($message, $code = 0, $data = NULL) {
     parent::__construct($message, $code);
 
-    $this->data = $message;
+    $this->data = !empty($data) ? $data : $message;
   }
 
   /**
