@@ -63,7 +63,7 @@ function services_permission() {
     // Query-limiting permissions
     'perform unlimited index queries' => array(
       'title' => t('Perform unlimited index queries'),
-      'description' => t(''),
+      'description' => t('This permission will allow user to perform index queries with unlimited number of results.'),
     ),
   );
 }
