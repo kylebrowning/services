@@ -25,3 +25,9 @@ services.authentication.api.php -- hooks related to authentication plugins
 services.servers.api.php -- servers definition hooks
 services.services.api.php -- definition of new services
 services.versions.api.php -- how to write versioned resources
+
+Settings via variables
+======================
+
+'services_{$resource}_index_page_size' -- this variable controls maximum number of results that
+will be displayed by index query. See services_resource_build_index_query() for more information.
