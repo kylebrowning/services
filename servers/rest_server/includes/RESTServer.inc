@@ -19,17 +19,8 @@ class RESTServer {
     $this->endpoint_path = $endpoint_path;
     services_set_server_info('resource_uri_formatter', array(&$this, 'uri_formatter'));
 
-    // Determine the request method
-    $method = $_SERVER['REQUEST_METHOD'];
-    if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
-      $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
-    }
-    if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
-      $method = $_GET['_method'];
-    }
-    if (isset($_GET['_method'])) {
-      unset($_GET['_method']);
-    }
+    $request_method = $this->getRequestMethod();
+
     // Extract response format info from the canonical path.
     $matches = array();
     $response_format = '';
@@ -64,7 +55,7 @@ class RESTServer {
       $resource = $resources[$resource_name];
 
       // Get the operation and fill with default values
-      $controller = $this->resolveController($resource, $method, $path, $endpoint_definition, $resource_name);
+      $controller = $this->resolveController($resource, $request_method, $path, $endpoint_definition, $resource_name);
     }
     else {
       //This will stop the 404 from happening when you request just the endpoint.
@@ -83,7 +74,7 @@ class RESTServer {
 
 
     // Parse the request data
-    $arguments = $this->getControllerArguments($controller, $path, $method);
+    $arguments = $this->getControllerArguments($controller, $path, $request_method);
 
     $formats = $this->responseFormatters();
 
@@ -159,6 +150,24 @@ class RESTServer {
     // Set the content type and render output
     drupal_add_http_header('Content-type', $mime_type);
     return $this->renderFormatterView($controller, $formatter, $result);
+  }
+
+  /**
+   * Determine the request method
+   */
+  protected function getRequestMethod() {
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+      $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+    }
+    if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
+      $method = $_GET['_method'];
+    }
+    if (isset($_GET['_method'])) {
+      unset($_GET['_method']);
+    }
+
+    return $method;
   }
 
   /**
