@@ -21,23 +21,13 @@ class RESTServer {
 
     $request_method = $this->getRequestMethod();
 
-    // Extract response format info from the canonical path.
-    $matches = array();
-    $response_format = '';
-    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
-      $canonical_path = $matches[1];
-      $response_format = $matches[2];
-    }
+    $mime_type = '';
+    $response_format = $this->getResponseFormatFromURL($canonical_path);
 
     // Prepare $path array and $resource_name.
     $path = explode('/', $canonical_path);
     $resource_name = array_shift($path);
 
-    // Response will vary with accept headers
-    // if no format was supplied as path suffix
-    if (empty($response_format)) {
-      drupal_add_http_header('Vary', 'Accept');
-    }
     $endpoint = services_get_server_info('endpoint', '');
     $endpoint_definition = services_endpoint_load($endpoint);
     $this->endpoint = $endpoint_definition;
@@ -58,7 +48,7 @@ class RESTServer {
       $controller = $this->resolveController($resource, $request_method, $path, $endpoint_definition, $resource_name);
     }
     else {
-      //This will stop the 404 from happening when you request just the endpoint.
+      // This will stop the 404 from happening when you request just the endpoint.
       if ($endpoint_definition->path == $resource_name) {
         $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint));
         drupal_alter('services_endpoint_response', $response);
@@ -72,51 +62,122 @@ class RESTServer {
     }
     $options = array();
 
-
     // Parse the request data
     $arguments = $this->getControllerArguments($controller, $path, $request_method);
 
     $formats = $this->responseFormatters();
-
-    // Negotiate response format based on accept-headers if we
-    // don't have a response format.
     if (empty($response_format)) {
-      $mime_candidates = array();
-      $mime_map = array();
-      // Add all formatters that accepts raw data, or supports the format model
-      foreach ($formats as $format => $formatter) {
-        if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
-          foreach ($formatter['mime types'] as $m) {
-            $mime_candidates[] = $m;
-            $mime_map[$m] = $format;
-          }
-        }
-      }
+      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
+    }
 
-      // Get the best matching format, default to json
-      $response_format = 'json';
-      if (isset($_SERVER['HTTP_ACCEPT'])) {
-        $mime = $this->mimeParse();
-        $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
-        $response_format = $mime_map[$mime_type];
-      }
+    $formatter = array();
+    if (isset($formats[$response_format])) {
+      $formatter = $formats[$response_format];
     }
 
     // Check if we support the response format and determine the mime type
-    if (empty($mime_type) && isset($formats[$response_format])) {
-      $formatter = $formats[$response_format];
-      if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
-        $mime_type = $formatter['mime types'][0];
-      }
+    if (empty($mime_type) && !empty($formatter) && (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter))) {
+      $mime_type = $formatter['mime types'][0];
     }
 
     if (empty($response_format) || empty($mime_type)) {
       return services_error(t('Unknown or unsupported response format.'), 406);
     }
 
-    // Give the model (if any) a opportunity to alter the arguments.
-    // This might be needed for the model to ensure that all the required
-    // information is requested.
+    $this->modelAlterArguments($arguments, $formatter, $controller);
+
+    try {
+      $result = services_controller_execute($controller, $arguments, $options);
+    }
+    catch (ServicesException $e) {
+      $result = $this->handleException($e);
+    }
+
+    // Set the content type and render output.
+    drupal_add_http_header('Content-type', $mime_type);
+
+    return $this->renderFormatterView($controller, $formatter, $result);
+  }
+
+  /**
+   * Retrieve formatter from URL. If format is in the path, we remove it from $canonical_path.
+   *
+   * For example <endpoint>/<path>.<format>
+   *
+   * @param $canonical_path
+   *
+   * @return string
+   */
+  protected function getResponseFormatFromURL(&$canonical_path) {
+    $matches = array();
+    $response_format = '';
+    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
+      $canonical_path = $matches[1];
+      $response_format = $matches[2];
+    }
+
+    return $response_format;
+  }
+
+  /**
+   * Determine response format and mime type using headers to negotiate content types.
+   */
+  protected function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats) {
+    drupal_add_http_header('Vary', 'Accept');
+
+    // Negotiate response format based on accept-headers if we
+    // don't have a response format.
+    $mime_candidates = array();
+    $mime_map = array();
+    // Add all formatters that accepts raw data, or supports the format model
+    foreach ($formats as $format => $formatter) {
+      if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
+        foreach ($formatter['mime types'] as $m) {
+          $mime_candidates[] = $m;
+          $mime_map[$m] = $format;
+        }
+      }
+    }
+
+    // Get the best matching format, default to json
+    $response_format = 'json';
+    if (isset($_SERVER['HTTP_ACCEPT'])) {
+      $mime = $this->mimeParse();
+      $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
+      $response_format = $mime_map[$mime_type];
+    }
+
+    return $response_format;
+  }
+
+
+  /**
+   * Determine the request method
+   */
+  protected function getRequestMethod() {
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+      $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
+    }
+    if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
+      $method = $_GET['_method'];
+    }
+    if (isset($_GET['_method'])) {
+      unset($_GET['_method']);
+    }
+
+    return $method;
+  }
+
+  /**
+   * Give the model (if any) a opportunity to alter the arguments.
+   * This might be needed for the model to ensure that all the required
+   * information is requested.
+   *
+   * @param $arguments
+   */
+  protected function modelAlterArguments(&$arguments, $formatter, $controller) {
+    //
     if (isset($formatter['model'])) {
       $cm = &$controller['models'][$formatter['model']];
       if (!isset($cm['arguments'])) {
@@ -138,36 +199,6 @@ class RESTServer {
         }
       }
     }
-
-    try {
-      $result = services_controller_execute($controller, $arguments, $options);
-    }
-    catch (ServicesException $e) {
-      $result = $this->handleException($e);
-    }
-    $formatter = $formats[$response_format];
-
-    // Set the content type and render output
-    drupal_add_http_header('Content-type', $mime_type);
-    return $this->renderFormatterView($controller, $formatter, $result);
-  }
-
-  /**
-   * Determine the request method
-   */
-  protected function getRequestMethod() {
-    $method = $_SERVER['REQUEST_METHOD'];
-    if ($method == 'POST' && isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
-      $method = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'];
-    }
-    if ($method == 'POST' && (isset($_GET['_method']) && $_GET['_method'])) {
-      $method = $_GET['_method'];
-    }
-    if (isset($_GET['_method'])) {
-      unset($_GET['_method']);
-    }
-
-    return $method;
   }
 
   /**
