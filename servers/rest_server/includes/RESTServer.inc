@@ -741,7 +741,7 @@ class RESTServer {
 
     if (isset($resource_operation['args'])) {
       foreach ($resource_operation['args'] as $argument) {
-        if (is_array($argument['source']) && isset($argument['source']['path'])) {
+        if (isset($argument['source']) && is_array($argument['source']) && isset($argument['source']['path'])) {
           if (!empty($argument['optional'])) {
             $not_required_args++;
           }
