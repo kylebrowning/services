@@ -39,18 +39,19 @@ class RESTServer {
     $mime_type = '';
     $response_format = $this->getResponseFormatFromURL($canonical_path);
 
-    $path = explode('/', $canonical_path);
-    $resource_name = array_shift($path);
+    $canonical_path_array = explode('/', $canonical_path);
+    $resource_name = array_shift($canonical_path_array);
 
     $resources = services_get_resources($this->endpoint->name);
     module_load_include('inc', 'services', 'includes/services.resource_build');
     _services_apply_endpoint($resources, $this->endpoint, TRUE);
+
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
       $resource = $resources[$resource_name];
 
       // Get the operation and fill with default values
-      $controller = $this->resolveController($resource, $request_method, $path, $this->endpoint, $resource_name);
+      $controller = $this->resolveController($resource, $request_method, $canonical_path_array, $this->endpoint, $resource_name);
     }
     else {
       // This will stop the 404 from happening when you request just the endpoint.
@@ -65,10 +66,9 @@ class RESTServer {
     if (!$controller) {
       return services_error(t('Could not find the controller.'), 404);
     }
-    $options = array();
 
     // Parse the request data
-    $arguments = $this->getControllerArguments($controller, $path, $request_method);
+    $arguments = $this->getControllerArguments($controller, $canonical_path_array, $request_method);
 
     $formats = $this->responseFormatters();
     if (empty($response_format)) {
@@ -92,7 +92,7 @@ class RESTServer {
     $this->modelAlterArguments($arguments, $formatter, $controller);
 
     try {
-      $result = services_controller_execute($controller, $arguments, $options);
+      $result = services_controller_execute($controller, $arguments);
     }
     catch (ServicesException $e) {
       $result = $this->handleException($e);
@@ -393,7 +393,7 @@ class RESTServer {
     $type = RESTServer::parseContentHeader($_SERVER['CONTENT_TYPE']);
     $disposition = RESTServer::parseContentHeader($_SERVER['HTTP_CONTENT_DISPOSITION']);
 
-    $filename = file_munge_filename(trim(basename(($disposition['params']['filename']))));
+    $filename = file_munge_filename(trim(basename($disposition['params']['filename'])));
 
     // Rename potentially executable files, to help prevent exploits.
     if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $filename) && (drupal_substr($filename, -4) != '.txt')) {
@@ -526,36 +526,36 @@ class RESTServer {
   }
 
   public static function parseXML($handle) {
-	// get/hold the old error state
+    // get/hold the old error state
     $old_error_state = libxml_use_internal_errors(1);
 
-	// clear all libxml errors
+    // clear all libxml errors
     libxml_clear_errors();
 
-	// get a now SimpleXmlElement object from the XML string
+    // get a now SimpleXmlElement object from the XML string
     $xml_data = simplexml_load_string(self::contentFromStream($handle));
 
-	// if $xml_data is Null then we expect errors
+    // if $xml_data is Null then we expect errors
     if (!$xml_data) {
-	  // build an error message string
+      // build an error message string
       $message = '';
       $errors = libxml_get_errors();
       foreach ($errors as $error) {
         $message .= t('Line @line, Col @column: @message', array('@line' => $error->line, '@column' => $error->column, '@message' => $error->message)) . "\n\n";
       }
 
-	  // clear all libxml errors and restore the old error state
+      // clear all libxml errors and restore the old error state
       libxml_clear_errors();
       libxml_use_internal_errors($old_error_state);
 
-	  // throw an error
+      // throw an error
       services_error($message, 406);
     }
-	// whew, no errors, restore the old error state
+    // whew, no errors, restore the old error state
     libxml_use_internal_errors($old_error_state);
 
-	// unmarshal the SimpleXmlElement, and return the resulting array
-	$php_array = self::unmarshalXML($xml_data, NULL);
+    // unmarshal the SimpleXmlElement, and return the resulting array
+    $php_array = self::unmarshalXML($xml_data, NULL);
     return (array) $php_array;
   }
 
