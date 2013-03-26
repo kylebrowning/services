@@ -7,13 +7,20 @@
 
 class RESTServer {
   protected $endpoint;
+  protected $settings;
 
   /**
-   * Constructor. Initialize endpoint variable.
+   * Constructor. Initialize properties.
    */
   function __construct() {
     $endpoint_name = services_get_server_info('endpoint', '');
     $this->endpoint = services_endpoint_load($endpoint_name);
+
+    // Get the server settings from the endpoint.
+    $this->settings = !empty($this->endpoint->server_settings) ? $this->endpoint->server_settings : array();
+    // Normalize the settings so that we get the expected structure
+    // and sensible defaults.
+    $this->settings = rest_server_setup_settings($this->settings);
   }
 
   /**
@@ -32,15 +39,8 @@ class RESTServer {
     $mime_type = '';
     $response_format = $this->getResponseFormatFromURL($canonical_path);
 
-    // Prepare $path array and $resource_name.
     $path = explode('/', $canonical_path);
     $resource_name = array_shift($path);
-
-    // Get the server settings from the endpoint.
-    $this->settings = !empty($this->endpoint->server_settings) ? $this->endpoint->server_settings : array();
-    // Normalize the settings so that we get the expected structure
-    // and sensible defaults.
-    $this->settings = rest_server_setup_settings($this->settings);
 
     $resources = services_get_resources($this->endpoint->name);
     module_load_include('inc', 'services', 'includes/services.resource_build');
