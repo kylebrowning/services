@@ -9,6 +9,14 @@ class RESTServer {
   protected $endpoint;
 
   /**
+   * Constructor. Initialize endpoint variable.
+   */
+  function __construct() {
+    $endpoint_name = services_get_server_info('endpoint', '');
+    $this->endpoint = services_endpoint_load($endpoint_name);
+  }
+
+  /**
    * Handles the call to the REST server
    *
    * @param string $canonical_path
@@ -28,29 +36,26 @@ class RESTServer {
     $path = explode('/', $canonical_path);
     $resource_name = array_shift($path);
 
-    $endpoint = services_get_server_info('endpoint', '');
-    $endpoint_definition = services_endpoint_load($endpoint);
-    $this->endpoint = $endpoint_definition;
     // Get the server settings from the endpoint.
-    $this->settings = !empty($endpoint_definition->server_settings) ? $endpoint_definition->server_settings : array();
+    $this->settings = !empty($this->endpoint->server_settings) ? $this->endpoint->server_settings : array();
     // Normalize the settings so that we get the expected structure
     // and sensible defaults.
     $this->settings = rest_server_setup_settings($this->settings);
 
-    $resources = services_get_resources($endpoint);
+    $resources = services_get_resources($this->endpoint->name);
     module_load_include('inc', 'services', 'includes/services.resource_build');
-    _services_apply_endpoint($resources, $endpoint_definition, TRUE);
+    _services_apply_endpoint($resources, $this->endpoint, TRUE);
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
       $resource = $resources[$resource_name];
 
       // Get the operation and fill with default values
-      $controller = $this->resolveController($resource, $request_method, $path, $endpoint_definition, $resource_name);
+      $controller = $this->resolveController($resource, $request_method, $path, $this->endpoint, $resource_name);
     }
     else {
       // This will stop the 404 from happening when you request just the endpoint.
-      if ($endpoint_definition->path == $resource_name) {
-        $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint));
+      if ($this->endpoint->path == $resource_name) {
+        $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $this->endpoint->name));
         drupal_alter('services_endpoint_response', $response);
         return $response;
       }
