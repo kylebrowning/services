@@ -30,8 +30,8 @@ function rest_server_server() {
   }
 
   try {
-    $rest_server_class = variable_get('services_rest_server_handle_class', 'RESTServer');
-    $server = new $rest_server_class();
+    $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
+    $server = $services_rest_server_factory::getRESTServer();
     return $server->handle($canonical_path, $endpoint_path);
   }
   catch (Exception $e) {
