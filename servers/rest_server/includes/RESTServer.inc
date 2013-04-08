@@ -92,8 +92,6 @@ class RESTServer {
     return $canonical_path;
   }
 
-
-
   public function getCanonicalPathArray() {
     $canonical_path = $this->getCanonicalPath();
     $canonical_path_array = explode('/', $canonical_path);
@@ -358,24 +356,11 @@ class RESTServer {
         if (!$parser) {
           return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
-        // php://input is not available with enctype="multipart/form-data".
-        // see http://php.net/manual/en/wrappers.php.php
-        if ($mime == 'multipart/form-data') {
-          $data = call_user_func($parser);
-        }
-        else {
-          // Read the raw input stream
-          if (module_exists('inputstream')) {
-            $handle = fopen('drupal://input', 'r');
-          }
-          else {
-            $handle = fopen('php://input', 'r');
-          }
 
-          if ($handle) {
-            $data = call_user_func($parser, $handle);
-            fclose($handle);
-          }
+        $data = array();
+        if (class_exists($parser) && in_array('ServicesParserInterface', class_implements($parser))) {
+          $parser_object = new $parser;
+          $data = $parser_object->parse($this->context);
         }
         return $data;
 
@@ -408,72 +393,6 @@ class RESTServer {
     }
 
     return $ret_val;
-  }
-
-  public static function contentFromStream($handle) {
-    $content = '';
-    while (!feof($handle)) {
-      $content .= fread($handle, 8192);
-    }
-    return $content;
-  }
-
-  public static function fileRecieve($handle, $validators = array()) {
-    $validators['file_validate_name_length'] = array();
-
-    $type = RESTServer::parseContentHeader($_SERVER['CONTENT_TYPE']);
-    $disposition = RESTServer::parseContentHeader($_SERVER['HTTP_CONTENT_DISPOSITION']);
-
-    $filename = file_munge_filename(trim(basename($disposition['params']['filename'])));
-
-    // Rename potentially executable files, to help prevent exploits.
-    if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $filename) && (drupal_substr($filename, -4) != '.txt')) {
-      $type['value'] = 'text/plain';
-      $filename .= '.txt';
-    }
-
-    $filepath = file_destination(file_create_path(file_directory_temp() . '/' . $filename), FILE_EXISTS_RENAME);
-    $file = (object)array(
-      'uid' => 0,
-      'filename' => $filename,
-      'filepath' => $filepath,
-      'filemime' => $type['value'],
-      'status' => FILE_STATUS_TEMPORARY,
-      'timestamp' => time(),
-    );
-    RESTServer::streamToFile($handle, $filepath);
-    $file->filesize = filesize($filepath);
-
-    // Call the validation functions.
-    $errors = array();
-    foreach ($validators as $function => $args) {
-      array_unshift($args, $file);
-      $errors = array_merge($errors, call_user_func_array($function, $args));
-    }
-    if (!empty($errors)) {
-      return services_error(t('Errors while validating the file - @errors', array('@errors' => implode(" ", $errors))), 406);
-    }
-
-    drupal_write_record('files', $file);
-
-    return $file;
-  }
-
-  public static function streamToFile($source, $file) {
-    $fp = fopen($file, 'w');
-    if ($fp) {
-      self::streamCopy($source, $fp);
-      fclose($fp);
-      return TRUE;
-    }
-    return FALSE;
-  }
-
-  public static function streamCopy($source, $destination) {
-    while (!feof($source)) {
-      $content = fread($source, 8192);
-      fwrite($destination, $content);
-    }
   }
 
   protected function renderFormatterView($controller, $formatter, $result) {
@@ -531,117 +450,6 @@ class RESTServer {
     $mime_type = $mimeparse->best_match(array_keys($parsers), $mime);
 
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
-  }
-
-  public static function parseURLEncoded($handle) {
-    parse_str(self::contentFromStream($handle), $data);
-    return $data;
-  }
-
-  public static function parsePHP($handle) {
-    return unserialize(self::contentFromStream($handle));
-  }
-
-  public static function parseXML($handle) {
-    // get/hold the old error state
-    $old_error_state = libxml_use_internal_errors(1);
-
-    // clear all libxml errors
-    libxml_clear_errors();
-
-    // get a now SimpleXmlElement object from the XML string
-    $xml_data = simplexml_load_string(self::contentFromStream($handle));
-
-    // if $xml_data is Null then we expect errors
-    if (!$xml_data) {
-      // build an error message string
-      $message = '';
-      $errors = libxml_get_errors();
-      foreach ($errors as $error) {
-        $message .= t('Line @line, Col @column: @message', array('@line' => $error->line, '@column' => $error->column, '@message' => $error->message)) . "\n\n";
-      }
-
-      // clear all libxml errors and restore the old error state
-      libxml_clear_errors();
-      libxml_use_internal_errors($old_error_state);
-
-      // throw an error
-      services_error($message, 406);
-    }
-    // whew, no errors, restore the old error state
-    libxml_use_internal_errors($old_error_state);
-
-    // unmarshal the SimpleXmlElement, and return the resulting array
-    $php_array = self::unmarshalXML($xml_data, NULL);
-    return (array) $php_array;
-  }
-
-  /**
-   * A recusive function that unmarshals an XML string, into a php array.
-   */
-  protected static function unmarshalXML($node, $array) {
-	// For all child XML elements
-	foreach ($node->children() as $child) {
-	  if (count($child->children()) > 0) {
-		// if the child has children
-		$att = 'is_array';
-		if ($child->attributes()->$att) {
-			$new_array = array();
-			// recursive through <item>
-			foreach($child->children() as $item){
-				$new_array[] = self::unmarshalXML($item, $array[$item->getName()]);
-			}
-		}
-		else {
-      // else, simply create an array where the key is name of the element
-		  $new_array = self::unmarshalXML($child, $array[$child->getName()]);
-		}
-		// add $new_array to $array
-		$array[$child->getName()] = $new_array;
-	  }
-	  else {
-    // Use the is_raw attribute on value elements for select type fields to
-    // pass form validation. Example:
-    // <field_terms_select>
-    //    <und is_array="true">
-    //      <item>
-    //        <tid is_raw="true">10513</tid>
-    //      </item>
-    //      <item>
-    //        <tid is_raw="true">10523</tid>
-    //      </item>
-    //    </und>
-    //  </field_terms_select>
-		if ($child->attributes()->is_raw) {
-			return (string) $child;
-		}
-		$array[$child->getName()] = (string) $child;
-	  }
-	}
-	// return the resulting array
-	return $array;
-  }
-
-  public static function parseJSON($handle) {
-    return json_decode(self::contentFromStream($handle), TRUE);
-  }
-
-  public static function parseFile($handle) {
-    return self::contentFromStream($handle);
-  }
-
-  public static function parseMultipart() {
-    return $_POST;
-  }
-
-  public static function parseYAML($handle) {
-    if (($library = libraries_load('spyc')) && !empty($library['loaded'])) {
-      return Spyc::YAMLLoadString(self::contentFromStream($handle));
-    }
-    else {
-      watchdog('REST Server', 'Spyc library not found!', array(), WATCHDOG_ERROR);
-      return array();
-    }
   }
 
   protected function responseFormatters($format = NULL) {

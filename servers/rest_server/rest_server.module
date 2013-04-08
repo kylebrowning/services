@@ -49,16 +49,16 @@ function rest_server_request_parsers() {
   static $parsers = NULL;
   if (!$parsers) {
     $parsers = array(
-      'application/x-www-form-urlencoded' => 'RESTServer::parseURLEncoded',
-      'application/json' => 'RESTServer::parseJSON',
-      'application/vnd.php.serialized' => 'RESTServer::parsePHP',
-      'multipart/form-data' => 'RESTServer::parseMultipart',
-      'application/xml' => 'RESTServer::parseXML',
-      'text/xml' => 'RESTServer::parseXML',
+      'application/x-www-form-urlencoded' => 'ServicesParserURLEncoded',
+      'application/json' => 'ServicesParserJSON',
+      'application/vnd.php.serialized' => 'ServicesParserPHP',
+      'multipart/form-data' => 'ServicesParserMultipart',
+      'application/xml' => 'ServicesParserXML',
+      'text/xml' => 'ServicesParserXML',
     );
 
     if (($library = libraries_load('spyc')) && !empty($library['loaded'])) {
-      $parsers['application/x-yaml'] = 'RESTServer::parseYAML';
+      $parsers['application/x-yaml'] = 'ServicesParserYAML';
     }
 
     drupal_alter('rest_server_request_parsers', $parsers);

@@ -26,9 +26,10 @@ class ServicesContext implements ServicesContextInterface {
   public function buildFromGlobals() {
     $this->data['get'] = $_GET;
     $this->data['server'] = $_SERVER;
-    $this->data['post'] = '';
+    $this->data['post'] = $_POST;
+    $this->data['request_body'] = '';
     if ($this->isRequestHasPostBody()) {
-//      $this->data['post'] = $this->getRawPostData();
+      $this->data['request_body'] = $this->getRequestBodyData();
     }
   }
 
@@ -83,7 +84,7 @@ class ServicesContext implements ServicesContextInterface {
     return (in_array($method, array('POST', 'PUT')));
   }
 
-  protected function getRawPostData() {
+  protected function getRequestBodyData() {
     $handle = fopen('php://input', 'r');
     $content = '';
     while (!feof($handle)) {
@@ -95,5 +96,9 @@ class ServicesContext implements ServicesContextInterface {
 
   public function getPostData() {
     return $this->data['post'];
+  }
+
+  public function getRequestBody() {
+    return $this->data['request_body'];
   }
 }
