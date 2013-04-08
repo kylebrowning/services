@@ -62,7 +62,7 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
     return $response_format;
   }
 
-  protected function supportedControllerModel($controller, $format) {
+  public function supportedControllerModel($controller, $format) {
     if (
       // The format uses models
       isset($format['model']) &&
@@ -79,7 +79,7 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
    *
    * @return Mimeparse
    */
-  protected function mimeParse() {
+  public function mimeParse() {
     static $mimeparse;
     if (!$mimeparse) {
       module_load_include('php', 'rest_server', 'lib/mimeparse');
