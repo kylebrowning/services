@@ -23,16 +23,16 @@ function rest_server_server_info() {
 function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
 
-  $endpoint_path_len = drupal_strlen($endpoint_path) + 1;
-  $canonical_path = drupal_substr($_GET['q'], $endpoint_path_len, drupal_strlen($_GET['q']) - $endpoint_path_len);
+  $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
+  $server = $services_rest_server_factory::getRESTServer($endpoint_path);
+
+  $canonical_path = $server->getCanonicalPath();
   if (empty($canonical_path)) {
     return;
   }
 
   try {
-    $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
-    $server = $services_rest_server_factory::getRESTServer();
-    return $server->handle($canonical_path, $endpoint_path);
+    return $server->handle();
   }
   catch (Exception $e) {
     $server->handleException($e);

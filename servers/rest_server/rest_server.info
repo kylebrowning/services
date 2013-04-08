@@ -9,6 +9,7 @@ files[] = includes/rest_server.views.inc
 files[] = includes/RESTServer.inc
 files[] = includes/ServicesContentTypeNegotiator.inc
 files[] = includes/ServicesRESTServerFactory.inc
+files[] = includes/ServicesContext.inc
 files[] = includes/node_resource.models.inc
 files[] = formats/RssFormatView.inc
 files[] = lib/bencode.php

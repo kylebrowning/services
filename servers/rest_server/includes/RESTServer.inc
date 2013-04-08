@@ -9,11 +9,13 @@ class RESTServer {
   protected $endpoint;
   protected $settings;
   protected $negotiator;
+  protected $context;
 
   /**
    * Constructor. Initialize properties.
    */
-  function __construct(ServicesContentTypeNegotiatorInterface $negotiator) {
+  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator) {
+    $this->context = $context;
     $this->negotiator = $negotiator;
 
     $endpoint_name = services_get_server_info('endpoint', '');
@@ -33,8 +35,8 @@ class RESTServer {
    * @param string $endpoint_path
    * @return void
    */
-  public function handle($canonical_path, $endpoint_path) {
-    $this->endpoint_path = $endpoint_path;
+  public function handle() {
+    $canonical_path = $this->context->getCanonicalPath();
     services_set_server_info('resource_uri_formatter', array(&$this, 'uri_formatter'));
 
     $request_method = $this->getRequestMethod();
@@ -75,7 +77,7 @@ class RESTServer {
 
     $formats = $this->responseFormatters();
     if (empty($response_format)) {
-      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
+      $response_format = $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
     }
 
     $formatter = array();
@@ -107,7 +109,9 @@ class RESTServer {
     return $this->renderFormatterView($controller, $formatter, $result);
   }
 
-
+  public function getCanonicalPath() {
+    return $this->context->getCanonicalPath();
+  }
 
 
   /**
@@ -169,7 +173,7 @@ class RESTServer {
    *  Returns the formatted resource uri
    */
   public function uri_formatter($path) {
-    return url($this->endpoint_path . '/' . join($path, '/'), array(
+    return url($this->context->getEndpointPath() . '/' . join($path, '/'), array(
       'absolute' => TRUE,
     ));
   }
