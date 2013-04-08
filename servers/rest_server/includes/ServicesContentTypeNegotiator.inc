@@ -1,7 +1,7 @@
 <?php
 
 interface ServicesContentTypeNegotiatorInterface {
-  public function getResponseFormatFromURL(&$canonical_path);
+  public function getResponseFormatFromURL($canonical_path);
   public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats);
 }
 
@@ -20,15 +20,22 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
    *
    * @return string
    */
-  public function getResponseFormatFromURL(&$canonical_path) {
-    $matches = array();
-    $response_format = '';
-    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
-      $canonical_path = $matches[1];
-      $response_format = $matches[2];
-    }
+  public function getResponseFormatFromURL($canonical_path) {
+    $matches = $this->getCanonicalPathMatches($canonical_path);
+    return $matches[2];
+  }
 
-    return $response_format;
+  public function getParsedCanonicalPath($canonical_path) {
+    $matches = $this->getCanonicalPathMatches($canonical_path);
+    return $matches[1];
+  }
+
+  public function getCanonicalPathMatches($canonical_path) {
+    $matches = array();
+    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
+      return $matches;
+    }
+    return array('', $canonical_path, '');
   }
 
   /**

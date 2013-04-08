@@ -28,7 +28,7 @@ class ServicesContext implements ServicesContextInterface {
     $this->data['server'] = $_SERVER;
     $this->data['post'] = '';
     if ($this->isRequestHasPostBody()) {
-      $this->data['post'] = $this->getRawPostData();
+//      $this->data['post'] = $this->getRawPostData();
     }
   }
 
@@ -52,7 +52,7 @@ class ServicesContext implements ServicesContextInterface {
    * @return string
    *   Name of request method (i.e. GET, POST, PUT ...).
    */
-  protected function getRequestMethod() {
+  public function getRequestMethod() {
     if (!isset($this->data['request_method'])) {
       $this->data['request_method'] = $this->getRequestMethodFromGlobals();
     }
@@ -84,12 +84,16 @@ class ServicesContext implements ServicesContextInterface {
   }
 
   protected function getRawPostData() {
-    $handle = fopen('drupal://input', 'r');
+    $handle = fopen('php://input', 'r');
     $content = '';
     while (!feof($handle)) {
       $content .= fread($handle, 8192);
     }
     fclose($handle);
     return $content;
+  }
+
+  public function getPostData() {
+    return $this->data['post'];
   }
 }
