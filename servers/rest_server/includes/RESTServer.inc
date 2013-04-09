@@ -16,13 +16,12 @@ class RESTServer {
   /**
    * Constructor. Initialize properties.
    */
-  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources) {
+  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources, $endpoint) {
     $this->context = $context;
     $this->negotiator = $negotiator;
     $this->resources = $resources;
 
-    $endpoint_name = services_get_server_info('endpoint', '');
-    $this->endpoint = services_endpoint_load($endpoint_name);
+    $this->endpoint = $endpoint;
 
     // Get the server settings from the endpoint.
     $this->settings = !empty($this->endpoint->server_settings) ? $this->endpoint->server_settings : array();
@@ -84,7 +83,7 @@ class RESTServer {
   }
 
   public function getCanonicalPath() {
-    static $canonical_path;
+    $canonical_path = &drupal_static('RESTServerGetCanonicalPath');
     if (empty($canonical_path)) {
       $canonical_path = $this->context->getCanonicalPath();
       $canonical_path = $this->negotiator->getParsedCanonicalPath($canonical_path);
@@ -99,7 +98,7 @@ class RESTServer {
     return $canonical_path_array;
   }
 
-  protected function getResourceName() {
+  public function getResourceName() {
     $canonical_path_array = $this->getCanonicalPathArray();
     $resource_name = array_shift($canonical_path_array);
 
