@@ -24,18 +24,19 @@ function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
 
   $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
-  $server = $services_rest_server_factory::getRESTServer($endpoint_path);
+  $rest_server_factory = new $services_rest_server_factory();
+  $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
 
-  $canonical_path = $server->getCanonicalPath();
+  $canonical_path = $rest_server->getCanonicalPath();
   if (empty($canonical_path)) {
     return;
   }
 
   try {
-    return $server->handle();
+    return $rest_server->handle();
   }
   catch (Exception $e) {
-    $server->handleException($e);
+    $rest_server->handleException($e);
   }
 }
 

@@ -7,24 +7,33 @@
  */
 
 class ServicesRESTServerFactory {
-  public static function getRESTServer($endpoint_path) {
+  protected $data = array();
+
+  /**
+   * We need data property to pass additional arguments to methods.
+   */
+  public function __construct($data = array()) {
+    $this->data = $data;
+  }
+
+  public function getRESTServer($endpoint_path) {
     $content_type_negotiator = self::getContentTypeNegotiator();
-    $context = self::getContext($endpoint_path);
-    $resources = self::getResources();
+    $context = $this->getContext($endpoint_path);
+    $resources = $this->getResources();
     return new RESTServer($context, $content_type_negotiator, $resources);
   }
 
-  protected static function getContentTypeNegotiator() {
+  protected function getContentTypeNegotiator() {
     return new ServicesContentTypeNegotiator();
   }
 
-  protected static function getContext($endpoint_path) {
+  protected function getContext($endpoint_path) {
     $context = new ServicesContext($endpoint_path);
     $context->buildFromGlobals();
     return $context;
   }
 
-  protected static function getResources() {
+  protected function getResources() {
     $endpoint_name = services_get_server_info('endpoint', '');
     $endpoint = services_endpoint_load($endpoint_name);
     $resources = services_get_resources($endpoint->name);
