@@ -10,6 +10,7 @@ class RESTServer {
   protected $settings;
   protected $negotiator;
   protected $context;
+  protected $controller;
 
   /**
    * Constructor. Initialize properties.
@@ -30,43 +31,12 @@ class RESTServer {
 
   /**
    * Handles the call to the REST server
-   *
-   * @param string $canonical_path
-   * @param string $endpoint_path
-   * @return void
    */
   public function handle() {
-    $request_method = $this->getRequestMethod();
-
-    $resource_name = $this->getResourceName();
-
-    $resources = services_get_resources($this->endpoint->name);
-    module_load_include('inc', 'services', 'includes/services.resource_build');
-    _services_apply_endpoint($resources, $this->endpoint, TRUE);
-
-    $controller = FALSE;
-    if (!empty($resource_name) && isset($resources[$resource_name])) {
-      $resource = $resources[$resource_name];
-
-      // Get the operation and fill with default values
-      $controller = $this->resolveController($resource, $request_method, $resource_name);
-    }
-    else {
-      // This will stop the 404 from happening when you request just the endpoint.
-      if ($this->endpoint->path == $resource_name) {
-        $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $this->endpoint->name));
-        drupal_alter('services_endpoint_response', $response);
-        return $response;
-      }
-      return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
-    }
-
-    if (!$controller) {
-      return services_error(t('Could not find the controller.'), 404);
-    }
+    $controller = $this->getController();
 
     // Parse the request data
-    $arguments = $this->getControllerArguments($controller, $request_method);
+    $arguments = $this->getControllerArguments($controller);
 
     $formatter = $this->getResponseFormatter($controller);
 
@@ -81,6 +51,38 @@ class RESTServer {
     }
 
     return $this->renderFormatterView($controller, $formatter, $result);
+  }
+
+  protected function getController() {
+    if (empty($this->controller)) {
+      $resource_name = $this->getResourceName();
+
+      $resources = services_get_resources($this->endpoint->name);
+      module_load_include('inc', 'services', 'includes/services.resource_build');
+      _services_apply_endpoint($resources, $this->endpoint, TRUE);
+
+      if (!empty($resource_name) && isset($resources[$resource_name])) {
+        $resource = $resources[$resource_name];
+
+        // Get the operation and fill with default values
+        $this->controller = $this->resolveController($resource, $resource_name);
+      }
+      else {
+        // This will stop the 404 from happening when you request just the endpoint.
+        if ($this->endpoint->path == $resource_name) {
+          $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $this->endpoint->name));
+          drupal_alter('services_endpoint_response', $response);
+          return $response;
+        }
+        return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
+      }
+
+      if (empty($this->controller)) {
+        return services_error(t('Could not find the controller.'), 404);
+      }
+    }
+
+    return $this->controller;
   }
 
   public function getCanonicalPath() {
@@ -446,7 +448,9 @@ class RESTServer {
     return $formatters;
   }
 
-  protected function resolveController($resource, $method, $resource_name) {
+  protected function resolveController($resource, $resource_name) {
+    $request_method = $this->getRequestMethod();
+
     $canonical_path_array = $this->getCanonicalPathArray();
     array_shift($canonical_path_array);
 
@@ -457,14 +461,14 @@ class RESTServer {
     // We do not group "if" conditions on purpose for better readability.
 
     // 'index' method.
-    if ($method == 'GET' && isset($resource['operations']['index']) && $this->checkNumberOfArguments($pc, $resource['operations']['index'])) {
+    if ($request_method == 'GET' && isset($resource['operations']['index']) && $this->checkNumberOfArguments($pc, $resource['operations']['index'])) {
       $class = 'operations';
       $operation = 'index';
     }
 
     // 'retrieve' method.
     // First path element should be not empty.
-    if ($method == 'GET' && isset($resource['operations']['retrieve']) && $this->checkNumberOfArguments($pc, $resource['operations']['retrieve']) && !empty($canonical_path_array[0]) && $pc >= 1) {
+    if ($request_method == 'GET' && isset($resource['operations']['retrieve']) && $this->checkNumberOfArguments($pc, $resource['operations']['retrieve']) && !empty($canonical_path_array[0]) && $pc >= 1) {
       $class = 'operations';
       $operation = 'retrieve';
     }
@@ -472,7 +476,7 @@ class RESTServer {
     // 'relationships'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if ($method == 'GET' && $pc >= 2 && isset($resource['relationships'][$canonical_path_array[1]])
+    if ($request_method == 'GET' && $pc >= 2 && isset($resource['relationships'][$canonical_path_array[1]])
          && $this->checkNumberOfArguments($pc, $resource['relationships'][$canonical_path_array[1]], 1) && isset($canonical_path_array[0])) {
       $class = 'relationships';
       $operation = $canonical_path_array[1];
@@ -480,28 +484,28 @@ class RESTServer {
 
     // 'update'
     // First path element should be not empty.
-    if ($method == 'PUT' && isset($resource['operations']['update']) && $this->checkNumberOfArguments($pc, $resource['operations']['update']) && !empty($canonical_path_array[0]) && $pc >= 1) {
+    if ($request_method == 'PUT' && isset($resource['operations']['update']) && $this->checkNumberOfArguments($pc, $resource['operations']['update']) && !empty($canonical_path_array[0]) && $pc >= 1) {
       $class = 'operations';
       $operation = 'update';
     }
 
     // 'delete'
     // First path element should be not empty.
-    if ($method == 'DELETE' && isset($resource['operations']['delete']) && $this->checkNumberOfArguments($pc, $resource['operations']['delete']) && !empty($canonical_path_array[0]) && $pc >= 1) {
+    if ($request_method == 'DELETE' && isset($resource['operations']['delete']) && $this->checkNumberOfArguments($pc, $resource['operations']['delete']) && !empty($canonical_path_array[0]) && $pc >= 1) {
       $class = 'operations';
       $operation = 'delete';
     }
 
     // 'create' method.
     // First path element should be not empty.
-    if ($method == 'POST' && isset($resource['operations']['create']) && $this->checkNumberOfArguments($pc, $resource['operations']['create'])) {
+    if ($request_method == 'POST' && isset($resource['operations']['create']) && $this->checkNumberOfArguments($pc, $resource['operations']['create'])) {
       $class = 'operations';
       $operation = 'create';
     }
 
     // 'actions'
     // Forst path element should be action name
-    if ($method == 'POST' && $pc >= 1 && isset($resource['actions'][$canonical_path_array[0]]) && $this->checkNumberOfArguments($pc, $resource['actions'][$canonical_path_array[0]], 1)) {
+    if ($request_method == 'POST' && $pc >= 1 && isset($resource['actions'][$canonical_path_array[0]]) && $this->checkNumberOfArguments($pc, $resource['actions'][$canonical_path_array[0]], 1)) {
       $class = 'actions';
       $operation = $canonical_path_array[0];
     }
@@ -509,7 +513,7 @@ class RESTServer {
     // 'targeted_actions'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if ($method == 'POST' && $pc >= 2 && isset($resource['targeted_actions'][$canonical_path_array[1]])
+    if ($request_method == 'POST' && $pc >= 2 && isset($resource['targeted_actions'][$canonical_path_array[1]])
          && $this->checkNumberOfArguments($pc, $resource['targeted_actions'][$canonical_path_array[1]], 1) && !empty($canonical_path_array[0])) {
       $class = 'targeted_actions';
       $operation = $canonical_path_array[1];
