@@ -95,7 +95,7 @@ class RESTServer {
       $result = services_controller_execute($controller, $arguments);
     }
     catch (ServicesException $e) {
-      $result = $this->handleException($e);
+      $result = $this->handleException($e, $controller, $arguments);
     }
 
     // Set the content type and render output.
@@ -755,7 +755,7 @@ class RESTServer {
     return $args_number >= $required_args && $args_number <= $required_args + $not_required_args;
   }
 
-  function handleException($exception){
+  function handleException($exception, $controller = array(), $arguments = array()){
     $error_code = $exception->getCode();
     $error_message = $exception->getMessage();
     $error_data = method_exists($exception, 'getData') ? $exception->getData() : '';
