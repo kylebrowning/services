@@ -591,9 +591,6 @@ class RESTServer {
     drupal_alter('rest_server_execute_errors', $error_alter_array, $controller, $arguments);
 
     drupal_add_http_header('Status', $error_header_status_message);
-    if ($this->endpoint->debug) {
-      debug($exception);
-    }
 
     return $error_data;
   }
