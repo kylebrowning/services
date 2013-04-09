@@ -228,16 +228,13 @@ class RESTServer {
    *
    * @param array $controller
    *  The controller definition
-   * @param array $path_array
-   * @param string $method
-   *  The method used to make the request
    * @return void
    */
-  protected function getControllerArguments($controller, $method) {
+  protected function getControllerArguments($controller) {
     $path_array = $this->getCanonicalPathArray();
     array_shift($path_array);
 
-    $data = $this->parseRequest($method, $controller);
+    $data = $this->parseRequest($controller);
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
     $headers = $this->parseRequestHeaders();
@@ -313,13 +310,14 @@ class RESTServer {
     return $headers;
   }
 
-  protected function parseRequest($method, $controller) {
+  protected function parseRequest($controller) {
+    $method = $this->getRequestMethod();
     switch ($method) {
       case 'POST':
       case 'PUT':
         $server_content_type = $this->context->getServerVariable('CONTENT_TYPE');
         if (!empty($server_content_type)) {
-          $type = self::parseContentHeader($server_content_type);
+          $type = $this->parseContentHeader($server_content_type);
         }
 
         // Get the mime type for the request, default to form-urlencoded
@@ -348,7 +346,7 @@ class RESTServer {
     }
   }
 
-  public static function parseContentHeader($value) {
+  protected function parseContentHeader($value) {
     $ret_val = array();
     $value_pattern = '/^([^;]+)(;\s*(.+)\s*)?$/';
     $param_pattern = '/([a-z]+)=(([^\"][^;]+)|(\"(\\\"|[^"])+\"))/';
