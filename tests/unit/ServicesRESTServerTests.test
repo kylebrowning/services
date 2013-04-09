@@ -20,8 +20,11 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
   public function setUp() {
     parent::setUp();
 
-    module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
     module_load_include('inc', 'rest_server', 'includes/RESTServer');
+    module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
+    module_load_include('inc', 'rest_server', 'includes/ServicesContext');
+    module_load_include('inc', 'rest_server', 'includes/ServicesParser');
+    module_load_include('inc', 'rest_server', 'includes/ServicesRESTServerFactory');
   }
 
   /**
