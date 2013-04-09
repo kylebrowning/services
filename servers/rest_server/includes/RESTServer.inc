@@ -11,13 +11,15 @@ class RESTServer {
   protected $negotiator;
   protected $context;
   protected $controller;
+  protected $resources;
 
   /**
    * Constructor. Initialize properties.
    */
-  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator) {
+  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources) {
     $this->context = $context;
     $this->negotiator = $negotiator;
+    $this->resources = $resources;
 
     $endpoint_name = services_get_server_info('endpoint', '');
     $this->endpoint = services_endpoint_load($endpoint_name);
@@ -57,12 +59,8 @@ class RESTServer {
     if (empty($this->controller)) {
       $resource_name = $this->getResourceName();
 
-      $resources = services_get_resources($this->endpoint->name);
-      module_load_include('inc', 'services', 'includes/services.resource_build');
-      _services_apply_endpoint($resources, $this->endpoint, TRUE);
-
-      if (!empty($resource_name) && isset($resources[$resource_name])) {
-        $resource = $resources[$resource_name];
+      if (!empty($resource_name) && isset($this->resources[$resource_name])) {
+        $resource = $this->resources[$resource_name];
 
         // Get the operation and fill with default values
         $this->controller = $this->resolveController($resource, $resource_name);
