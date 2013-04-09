@@ -115,7 +115,7 @@ class RESTServer {
     $formats = $this->responseFormatters();
 
     if (empty($response_format)) {
-      $response_format = $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
+      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
     }
 
     $formatter = array();
@@ -165,33 +165,9 @@ class RESTServer {
    * Determine response format and mime type using headers to negotiate content types.
    */
   protected function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats) {
-    drupal_add_http_header('Vary', 'Accept');
-
-    // Negotiate response format based on accept-headers if we
-    // don't have a response format.
-    $mime_candidates = array();
-    $mime_map = array();
-    // Add all formatters that accepts raw data, or supports the format model
-    foreach ($formats as $format => $formatter) {
-      if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
-        foreach ($formatter['mime types'] as $m) {
-          $mime_candidates[] = $m;
-          $mime_map[$m] = $format;
-        }
-      }
-    }
-
-    // Get the best matching format, default to json
-    $response_format = 'json';
-    if (isset($_SERVER['HTTP_ACCEPT'])) {
-      $mime = $this->mimeParse();
-      $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
-      $response_format = $mime_map[$mime_type];
-    }
-
+    $response_format = $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats, $this->context);
     return $response_format;
   }
-
 
   /**
    * Determine the request method
@@ -218,8 +194,9 @@ class RESTServer {
       // Check if any of the model arguments have been overridden
       if (isset($cm['allow_overrides'])) {
         foreach ($cm['allow_overrides'] as $arg) {
-          if (isset($_GET[$formatter['model'] . ':' . $arg])) {
-            $cm['arguments'][$arg] = $_GET[$formatter['model'] . ':' . $arg];
+          $get_formatter_model = $this->context->getGetVariable($formatter['model'] . ':' . $arg);
+          if (!empty($get_formatter_model)) {
+            $cm['arguments'][$arg] = $get_formatter_model;
           }
         }
       }
@@ -268,7 +245,7 @@ class RESTServer {
 
     $sources = array(
       'path' => $path_array,
-      'param' => $_GET,
+      'param' => $this->context->getGetVariable(),
       'data' => $data,
       'headers' => $headers,
     );
@@ -329,8 +306,9 @@ class RESTServer {
 
   protected function parseRequestHeaders() {
     $headers = array();
-    if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-      $headers['IF_MODIFIED_SINCE'] = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
+    $http_if_modified_since = $this->context->getServerVariable('HTTP_IF_MODIFIED_SINCE');
+    if (!empty($http_if_modified_since)) {
+      $headers['IF_MODIFIED_SINCE'] = strtotime(preg_replace('/;.*$/', '', $http_if_modified_since));
     }
     return $headers;
   }
@@ -339,8 +317,9 @@ class RESTServer {
     switch ($method) {
       case 'POST':
       case 'PUT':
-        if (isset($_SERVER['CONTENT_TYPE'])) {
-          $type = self::parseContentHeader($_SERVER['CONTENT_TYPE']);
+        $server_content_type = $this->context->getServerVariable('CONTENT_TYPE');
+        if (!empty($server_content_type)) {
+          $type = self::parseContentHeader($server_content_type);
         }
 
         // Get the mime type for the request, default to form-urlencoded

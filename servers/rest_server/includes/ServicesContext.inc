@@ -9,6 +9,10 @@ interface ServicesContextInterface {
   public function buildFromGlobals();
   public function getEndpointPath();
   public function getCanonicalPath();
+  public function getPostData();
+  public function getRequestBody();
+  public function getServerVariable($variable_name);
+  public function getGetVariable($variable_name = NULL);
 }
 
 class ServicesContext implements ServicesContextInterface {
@@ -100,5 +104,20 @@ class ServicesContext implements ServicesContextInterface {
 
   public function getRequestBody() {
     return $this->data['request_body'];
+  }
+
+  public function getServerVariable($variable_name) {
+    if (isset($this->data['server'][$variable_name])) {
+      return $this->data['server'][$variable_name];
+    }
+  }
+
+  public function getGetVariable($variable_name = NULL) {
+    if (empty($variable_name)) {
+      return $this->data['get'];
+    }
+    if (isset($this->data['get'][$variable_name])) {
+      return $this->data['get'][$variable_name];
+    }
   }
 }

@@ -2,7 +2,7 @@
 
 interface ServicesContentTypeNegotiatorInterface {
   public function getResponseFormatFromURL($canonical_path);
-  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats);
+  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats, $context);
 }
 
 /**
@@ -41,7 +41,7 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
   /**
    * Determine response format and mime type using headers to negotiate content types.
    */
-  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats) {
+  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats, $context) {
     drupal_add_http_header('Vary', 'Accept');
 
     // Negotiate response format based on accept-headers if we
@@ -60,9 +60,10 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
 
     // Get the best matching format, default to json
     $response_format = 'json';
-    if (isset($_SERVER['HTTP_ACCEPT'])) {
+    $http_accept = $context->getServerVariable('HTTP_ACCEPT');
+    if (!empty($http_accept)) {
       $mime = $this->mimeParse();
-      $mime_type = $mime->best_match($mime_candidates, $_SERVER['HTTP_ACCEPT']);
+      $mime_type = $mime->best_match($mime_candidates, $http_accept);
       $response_format = $mime_map[$mime_type];
     }
 
