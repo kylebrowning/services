@@ -4,7 +4,7 @@
 /**
  * Unit tests for RESTServer class.
  */
-class ServicesRESServerTests extends DrupalUnitTestCase {
+class ServicesRESTServerTests extends DrupalUnitTestCase {
 
   /**
    * Implementation of getInfo().
@@ -17,6 +17,76 @@ class ServicesRESServerTests extends DrupalUnitTestCase {
     );
   }
 
-  public function testMethodX() {
+  public function setUp() {
+    parent::setUp();
+
+    module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
+    module_load_include('inc', 'rest_server', 'includes/RESTServer');
+  }
+
+  /**
+   * Test method getResourceName().
+   */
+  public function testGetResourceName() {
+    $endpoint_path = 'rest';
+    $context_data = array(
+      'get' => array('q' => 'rest/node/1.php'),
+      'server' => array(),
+      'post' => array(),
+      'request_body' => '',
+    );
+
+    $rest_server_factory = new MockServicesRESTServerFactory(array('context_data' => $context_data));
+    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+
+    $resource_name = $rest_server->getResourceName();
+    $this->assertEqual($resource_name, 'node', 'Retrieve call resource name determined properly.');
+
+
+    $context_data['get']['q'] = 'rest/user';
+    $rest_server_factory = new MockServicesRESTServerFactory(array('context_data' => $context_data));
+    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+
+    $resource_name = $rest_server->getResourceName();
+    $this->assertEqual($resource_name, 'user', 'Index call resource name determined properly.');
+  }
+}
+
+/**
+ * Factory to build RESTServer object for testing.
+ */
+class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
+  public function __construct($data = array()) {
+    parent::__construct($data);
+    drupal_static_reset();
+  }
+
+  protected function getContext($endpoint_path) {
+    $context = new MockServicesContext($endpoint_path);
+    $context->setData($this->data['context_data']);
+    return $context;
+  }
+
+  protected function getResources() {
+    if (isset($this->data['resources'])) {
+      return $this->data['resources'];
+    }
+    return array();
+  }
+
+  protected function getEndpoint() {
+    if (isset($this->data['endpoint'])) {
+      return $this->data['endpoint'];
+    }
+    return array();
+  }
+}
+
+/**
+ * Mock ServicesContext object.
+ */
+class MockServicesContext extends ServicesContext {
+  public function setData($data) {
+    $this->data = array_merge($this->data, $data);
   }
 }
