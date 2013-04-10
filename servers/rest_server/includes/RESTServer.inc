@@ -12,22 +12,20 @@ class RESTServer {
   protected $context;
   protected $controller;
   protected $resources;
+  protected $parsers;
+  protected $formatters;
 
   /**
    * Constructor. Initialize properties.
    */
-  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources, $endpoint) {
+  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources, $endpoint, $parsers, $formatters) {
     $this->context = $context;
     $this->negotiator = $negotiator;
     $this->resources = $resources;
 
     $this->endpoint = $endpoint;
-
-    // Get the server settings from the endpoint.
-    $this->settings = !empty($this->endpoint->server_settings) ? $this->endpoint->server_settings : array();
-    // Normalize the settings so that we get the expected structure
-    // and sensible defaults.
-    $this->settings = rest_server_setup_settings($this->settings);
+    $this->parsers = $parsers;
+    $this->formatters = $formatters;
   }
 
   /**
@@ -399,16 +397,7 @@ class RESTServer {
       }
     }
 
-    $parsers = rest_server_request_parsers();
-
-    // Remove parsers that have been disabled for this endpoint.
-    foreach (array_keys($parsers) as $key) {
-      if (!$this->settings['parsers'][$key]) {
-        unset($parsers[$key]);
-      }
-    }
-
-    return $this->matchParser($mime, $parsers);
+    return $this->matchParser($mime, $this->parsers);
   }
 
   /**
@@ -429,20 +418,11 @@ class RESTServer {
   }
 
   protected function responseFormatters($format = NULL) {
-    $formatters = rest_server_response_formatters();
-
-    // Remove formatters that have been disabled for this endpoint.
-    foreach (array_keys($formatters) as $key) {
-      if (!$this->settings['formatters'][$key]) {
-        unset($formatters[$key]);
-      }
-    }
-
     if ($format) {
-      return isset($formatters[$format]) ? $formatters[$format] : FALSE;
+      return isset($this->formatters[$format]) ? $this->formatters[$format] : FALSE;
     }
 
-    return $formatters;
+    return $this->formatters;
   }
 
   protected function resolveController($resource, $resource_name) {
