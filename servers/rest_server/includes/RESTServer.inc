@@ -102,7 +102,7 @@ class RESTServer {
     $mime_type = '';
 
     $canonical_path_not_parsed = $this->context->getCanonicalPath();
-    $response_format = $this->negotiator->getResponseFormatFromURL($canonical_path_not_parsed);
+    $response_format = $this->getResponseFormatFromURL($canonical_path_not_parsed);
 
     if (empty($response_format)) {
       $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path_not_parsed, $controller, $this->formatters);
@@ -139,15 +139,8 @@ class RESTServer {
    *
    * @return string
    */
-  protected function getResponseFormatFromURL(&$canonical_path) {
-    $matches = array();
-    $response_format = '';
-    if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
-      $canonical_path = $matches[1];
-      $response_format = $matches[2];
-    }
-
-    return $response_format;
+  protected function getResponseFormatFromURL($canonical_path) {
+    return $this->negotiator->getResponseFormatFromURL($canonical_path);
   }
 
   /**
