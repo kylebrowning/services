@@ -11,14 +11,20 @@ class ServicesRESTServerFactory {
 
   /**
    * We need data property to pass additional arguments to methods.
+   *
+   * Required property is 'endpoint_path' -- base path of endpoint.
+   * Example: GET rest/node/1.php -- "rest" is endpoint path.
    */
   public function __construct($data = array()) {
+    if (!isset($data['endpoint_path'])) {
+      throw new Exception('ServicesRESTServerFactory constructor requires "endpoint_data" property.');
+    }
     $this->data = $data;
   }
 
-  public function getRESTServer($endpoint_path) {
+  public function getRESTServer() {
     $content_type_negotiator = self::getContentTypeNegotiator();
-    $context = $this->getContext($endpoint_path);
+    $context = $this->getContext();
     $resources = $this->getResources();
     $parsers = $this->getParsers();
     $formatters = $this->getFormatters();
@@ -29,8 +35,8 @@ class ServicesRESTServerFactory {
     return new ServicesContentTypeNegotiator();
   }
 
-  protected function getContext($endpoint_path) {
-    $context = new ServicesContext($endpoint_path);
+  protected function getContext() {
+    $context = new ServicesContext($this->data['endpoint_path']);
     $context->buildFromGlobals();
     return $context;
   }

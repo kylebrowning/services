@@ -24,8 +24,8 @@ function rest_server_server() {
   $endpoint_path = services_get_server_info('endpoint_path', 'services/rest');
 
   $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
-  $rest_server_factory = new $services_rest_server_factory();
-  $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+  $rest_server_factory = new $services_rest_server_factory(array('endpoint_path' => $endpoint_path));
+  $rest_server = $rest_server_factory->getRESTServer();
 
   $canonical_path = $rest_server->getCanonicalPath();
   if (empty($canonical_path)) {

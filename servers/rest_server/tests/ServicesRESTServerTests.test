@@ -33,24 +33,18 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
    * Test method getResourceName().
    */
   public function testGetResourceName() {
-    $endpoint_path = 'rest';
-    $context_data = array(
-      'get' => array('q' => 'rest/node/1.php'),
-      'server' => array(),
-      'post' => array(),
-      'request_body' => '',
-    );
+    $factory_args = $this->getDefaultFactoryArguments();
 
-    $rest_server_factory = new MockServicesRESTServerFactory(array('context_data' => $context_data));
-    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer();
 
     $resource_name = $rest_server->getResourceName();
     $this->assertEqual($resource_name, 'node', 'Retrieve call resource name determined properly.');
 
 
-    $context_data['get']['q'] = 'rest/user';
-    $rest_server_factory = new MockServicesRESTServerFactory(array('context_data' => $context_data));
-    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+    $factory_args['context_data']['get']['q'] = 'rest/user';
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer();
 
     $resource_name = $rest_server->getResourceName();
     $this->assertEqual($resource_name, 'user', 'Index call resource name determined properly.');
@@ -60,13 +54,37 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
    * Test method getResponseFormatter().
    */
   public function testGetResponseFormatter() {
-    $endpoint_path = 'rest';
+    $factory_args = $this->getDefaultFactoryArguments();
+
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer();
+
+    $controller = array();
+    $formatter = $rest_server->getResponseFormatter($controller);
+    $this->assertEqual($formatter, $factory_args['formatters']['xml'], 'XML formatter determined properly from URL');
+
+    // Pass formatter in url that is not recognizable.
+    $factory_args['context_data']['get']['q'] = 'rest/node/1.php';
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer();
+    $formatter_not_found = TRUE;
+    try {
+      $formatter = $rest_server->getResponseFormatter($controller);
+      $formatter_not_found = FALSE;
+    }
+    catch (Exception $e) {
+    }
+    $this->assertTrue($formatter_not_found, 'Unknown formatter not found.');
+  }
+
+  protected function getDefaultFactoryArguments() {
     $context_data = array(
       'get' => array('q' => 'rest/node/1.xml'),
       'server' => array(),
       'post' => array(),
       'request_body' => '',
     );
+
     $formatters = array(
       'xml' => array(
         'mime types' => array('application/xml', 'text/xml'),
@@ -79,28 +97,11 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     );
 
     $factory_args = array(
+      'endpoint_path' => 'rest',
       'context_data' => $context_data,
       'formatters' => $formatters,
     );
 
-    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
-    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
-
-    $controller = array();
-    $formatter = $rest_server->getResponseFormatter($controller);
-    $this->assertEqual($formatter, $formatters['xml'], 'XML formatter determined properly from URL');
-
-    // Pass formatter in url that is not recognizable.
-    $factory_args['context_data']['get']['q'] = 'rest/node/1.php';
-    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
-    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
-    $formatter_not_found = TRUE;
-    try {
-      $formatter = $rest_server->getResponseFormatter($controller);
-      $formatter_not_found = FALSE;
-    }
-    catch (Exception $e) {
-    }
-    $this->assertTrue($formatter_not_found, 'Unknown formatter not found.');
+    return $factory_args;
   }
 }

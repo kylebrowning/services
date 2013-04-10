@@ -9,8 +9,8 @@ class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
     drupal_static_reset();
   }
 
-  protected function getContext($endpoint_path) {
-    $context = new MockServicesContext($endpoint_path);
+  protected function getContext() {
+    $context = new MockServicesContext($this->data['endpoint_path']);
     $context->setData($this->data['context_data']);
     return $context;
   }
