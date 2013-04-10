@@ -20,12 +20,13 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
   public function setUp() {
     parent::setUp();
 
+//    module_load_include('inc', 'rest_server', 'includes/RESTServer');
     $this->loadFile('includes/RESTServer.inc');
     $this->loadFile('includes/ServicesContentTypeNegotiator.inc');
     $this->loadFile('includes/ServicesContext.inc');
     $this->loadFile('includes/ServicesParser.inc');
     $this->loadFile('includes/ServicesRESTServerFactory.inc');
-    $this->loadFile('tests/rest_server.test');
+    $this->loadFile('tests/rest_server_mock_classes.inc');
   }
 
   protected function loadFile($filepath) {

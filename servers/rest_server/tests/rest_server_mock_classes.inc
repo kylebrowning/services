@@ -28,6 +28,20 @@ class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
     }
     return array();
   }
+
+  protected function getFormatters() {
+    if (isset($this->data['formatters'])) {
+      return $this->data['formatters'];
+    }
+    return array();
+  }
+
+  protected function getParsers() {
+    if (isset($this->data['parsers'])) {
+      return $this->data['parsers'];
+    }
+    return array();
+  }
 }
 
 /**
