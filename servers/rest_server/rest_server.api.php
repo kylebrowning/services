@@ -30,8 +30,6 @@ function hook_rest_server_request_parsers_alter(&$parsers) {
  *  formatter info specifies an array of 'mime types' that corresponds to the
  *  output format; a 'view' class that is a subclass of RESTServerView; and
  *  'view arguments' that should be passed to the view when it is created;
- *  a 'model' can also be specified which the controller then must declare
- *  support for to be able to serve data in that format.
  * @return void
  */
 function hook_rest_server_response_formatters_alter(&$formatters) {
@@ -52,7 +50,6 @@ function hook_rest_server_response_formatters_alter(&$formatters) {
 
   // Add a Rss response format.
   $formatters['rss'] = array(
-    'model' => 'ResourceFeedModel',
     'mime types' => array('text/xml'),
     'view' => 'RssFormatView',
   );

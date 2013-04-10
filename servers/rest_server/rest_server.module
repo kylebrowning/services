@@ -77,8 +77,6 @@ function rest_server_request_parsers() {
  *  formatter info specifies an array of 'mime types' that corresponds to the
  *  output format; a 'view' class that is a subclass of RESTServerView; and
  *  'view arguments' that should be passed to the view when it is created;
- *  a 'model' can also be specified which the controller then must declare
- *  support for to be able to serve data in that format.
  */
 function rest_server_response_formatters() {
   static $formatters = NULL;
@@ -108,11 +106,6 @@ function rest_server_response_formatters() {
         'mime types' => array('application/x-bencode'),
         'view' => 'RESTServerViewBuiltIn',
         'view arguments' => array('format' => 'bencode'),
-      ),
-      'rss' => array(
-        'model' => 'ResourceFeedModel',
-        'mime types' => array('text/xml'),
-        'view' => 'RssFormatView',
       ),
     );
 
@@ -181,41 +174,6 @@ function _rest_server_add_default_and_remove_unknown(&$array, $keys, $default) {
   foreach (array_keys($array) as $key) {
     if (!in_array($key, $keys)) {
       unset($array[$key]);
-    }
-  }
-}
-
-/**
- * Implements hook_services_resources_alter().
- */
-function rest_server_services_resources_alter(&$resources, $endpoint) {
-  // Set the default models for the retrieve and index controllers in the node
-  // resource if they are not already set.
-  if (isset($resources['node'])) {
-    if (isset($resources['node']['retrieve'])) {
-      if (!isset($resources['node']['retrieve']['models'])) {
-        $resources['node']['retrieve']['models'] = array();
-      }
-      $resources['node']['retrieve']['models'] += array(
-        'ResourceFeedModel' => array(
-          'class' => 'NodeResourceFeedModel',
-          'arguments' => array('source' => 'single'),
-        ),
-      );
-    }
-
-    if (isset($resources['node']['index'])) {
-      if (!isset($resources['node']['index']['models'])) {
-        $resources['node']['index']['models'] = array();
-      }
-      $resources['node']['index']['models'] += array(
-        'ResourceFeedModel' => array(
-          'class' => 'NodeResourceFeedModel',
-        ),
-        'ResourceTimeFeedModel' => array(
-          'class' => 'NodeResourceFeedModel',
-        ),
-      );
     }
   }
 }

@@ -2,7 +2,7 @@
 
 interface ServicesContentTypeNegotiatorInterface {
   public function getResponseFormatFromURL($canonical_path);
-  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats, $context);
+  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $formats, $context);
 }
 
 /**
@@ -41,20 +41,18 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
   /**
    * Determine response format and mime type using headers to negotiate content types.
    */
-  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats, $context) {
+  public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $formats, $context) {
     drupal_add_http_header('Vary', 'Accept');
 
     // Negotiate response format based on accept-headers if we
     // don't have a response format.
     $mime_candidates = array();
     $mime_map = array();
-    // Add all formatters that accepts raw data, or supports the format model
+
     foreach ($formats as $format => $formatter) {
-      if (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter)) {
-        foreach ($formatter['mime types'] as $m) {
-          $mime_candidates[] = $m;
-          $mime_map[$m] = $format;
-        }
+      foreach ($formatter['mime types'] as $m) {
+        $mime_candidates[] = $m;
+        $mime_map[$m] = $format;
       }
     }
 
@@ -68,18 +66,6 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
     }
 
     return $response_format;
-  }
-
-  public function supportedControllerModel($controller, $format) {
-    if (
-      // The format uses models
-      isset($format['model']) &&
-      // The controller provides models
-      isset($controller['models']) &&
-      // The controller supports the model required by the format
-      isset($controller['models'][$format['model']])) {
-      return $controller['models'][$format['model']];
-    }
   }
 
   /**

@@ -36,9 +36,8 @@ class RESTServer {
     // Parse the request data
     $arguments = $this->getControllerArguments($controller);
 
-    $formatter = $this->getResponseFormatter($controller);
+    $formatter = $this->getResponseFormatter();
 
-    $this->modelAlterArguments($arguments, $formatter, $controller);
     services_set_server_info('resource_uri_formatter', array(&$this, 'uri_formatter'));
 
     try {
@@ -48,7 +47,7 @@ class RESTServer {
       $result = $this->handleException($e);
     }
 
-    return $this->renderFormatterView($controller, $formatter, $result);
+    return $this->renderFormatterView($formatter, $result);
   }
 
   protected function getController() {
@@ -98,14 +97,14 @@ class RESTServer {
     return $resource_name;
   }
 
-  function getResponseFormatter($controller) {
+  function getResponseFormatter() {
     $mime_type = '';
 
     $canonical_path_not_parsed = $this->context->getCanonicalPath();
     $response_format = $this->getResponseFormatFromURL($canonical_path_not_parsed);
 
     if (empty($response_format)) {
-      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path_not_parsed, $controller, $this->formatters);
+      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path_not_parsed, $this->formatters);
     }
 
     $formatter = array();
@@ -115,7 +114,7 @@ class RESTServer {
     }
 
     // Check if we support the response format and determine the mime type
-    if (empty($mime_type) && !empty($formatter) && (!isset($formatter['model']) || $this->supportedControllerModel($controller, $formatter))) {
+    if (empty($mime_type) && !empty($formatter)) {
       $mime_type = $formatter['mime types'][0];
     }
 
@@ -146,9 +145,8 @@ class RESTServer {
   /**
    * Determine response format and mime type using headers to negotiate content types.
    */
-  protected function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $controller, $formats) {
-    $response_format = $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats, $this->context);
-    return $response_format;
+  protected function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $formats) {
+    return $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $formats, $this->context);
   }
 
   /**
@@ -156,39 +154,6 @@ class RESTServer {
    */
   protected function getRequestMethod() {
     return $this->context->getRequestMethod();
-  }
-
-  /**
-   * Give the model (if any) a opportunity to alter the arguments.
-   * This might be needed for the model to ensure that all the required
-   * information is requested.
-   *
-   * @param $arguments
-   */
-  protected function modelAlterArguments(&$arguments, $formatter, $controller) {
-    //
-    if (isset($formatter['model'])) {
-      $cm = &$controller['models'][$formatter['model']];
-      if (!isset($cm['arguments'])) {
-        $cm['arguments'] = array();
-      }
-
-      // Check if any of the model arguments have been overridden
-      if (isset($cm['allow_overrides'])) {
-        foreach ($cm['allow_overrides'] as $arg) {
-          $get_formatter_model = $this->context->getGetVariable($formatter['model'] . ':' . $arg);
-          if (!empty($get_formatter_model)) {
-            $cm['arguments'][$arg] = $get_formatter_model;
-          }
-        }
-      }
-
-      if (isset($cm['class']) && class_exists($cm['class'])) {
-        if (method_exists($cm['class'], 'alterArguments')) {
-          call_user_func_array($cm['class'] . '::alterArguments', array(&$arguments, $cm['arguments']));
-        }
-      }
-    }
   }
 
   /**
@@ -354,18 +319,9 @@ class RESTServer {
     return $ret_val;
   }
 
-  protected function renderFormatterView($controller, $formatter, $result) {
-    // Wrap the results in a model class if required by the formatter
-    if (isset($formatter['model'])) {
-      $cm = $controller['models'][$formatter['model']];
-      $model_arguments = isset($cm['arguments'])?$cm['arguments']:array();
-
-      $model_class = new ReflectionClass($cm['class']);
-      $result = $model_class->newInstanceArgs(array($result, $model_arguments));
-    }
-
+  protected function renderFormatterView($formatter, $result) {
     $view_class = new ReflectionClass($formatter['view']);
-    $view_arguments = isset($formatter['view arguments'])?$formatter['view arguments']:array();
+    $view_arguments = isset($formatter['view arguments']) ? $formatter['view arguments'] : array();
     $view = $view_class->newInstanceArgs(array($result, $view_arguments));
     return $view->render();
   }
