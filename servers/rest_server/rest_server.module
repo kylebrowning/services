@@ -29,7 +29,9 @@ function rest_server_server() {
 
   $canonical_path = $rest_server->getCanonicalPath();
   if (empty($canonical_path)) {
-    return;
+    $endpoint_name = services_get_server_info('endpoint', '');
+    $endpoint = services_endpoint_load($endpoint_name);
+    return t('Services Endpoint "@name" has been setup successfully.', array('@name' => $endpoint->name));
   }
 
   try {

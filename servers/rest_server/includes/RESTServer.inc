@@ -6,24 +6,23 @@
  */
 
 class RESTServer {
-  protected $endpoint;
-  protected $settings;
   protected $negotiator;
   protected $context;
-  protected $controller;
+
   protected $resources;
   protected $parsers;
   protected $formatters;
 
+  protected $controller;
+
   /**
    * Constructor. Initialize properties.
    */
-  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources, $endpoint, $parsers, $formatters) {
+  function __construct(ServicesContextInterface $context, ServicesContentTypeNegotiatorInterface $negotiator, $resources, $parsers, $formatters) {
     $this->context = $context;
     $this->negotiator = $negotiator;
-    $this->resources = $resources;
 
-    $this->endpoint = $endpoint;
+    $this->resources = $resources;
     $this->parsers = $parsers;
     $this->formatters = $formatters;
   }
@@ -63,12 +62,6 @@ class RESTServer {
         $this->controller = $this->resolveController($resource, $resource_name);
       }
       else {
-        // This will stop the 404 from happening when you request just the endpoint.
-        if ($this->endpoint->path == $resource_name) {
-          $response = t('Services Endpoint "@name" has been setup successfully.', array('@name' => $this->endpoint->name));
-          drupal_alter('services_endpoint_response', $response);
-          return $response;
-        }
         return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
       }
 
@@ -81,6 +74,8 @@ class RESTServer {
   }
 
   public function getCanonicalPath() {
+    // Use drupal_static so we can clear this static cache during unit testing.
+    // @see MockServicesRESTServerFactory constructor.
     $canonical_path = &drupal_static('RESTServerGetCanonicalPath');
     if (empty($canonical_path)) {
       $canonical_path = $this->context->getCanonicalPath();

@@ -20,10 +20,9 @@ class ServicesRESTServerFactory {
     $content_type_negotiator = self::getContentTypeNegotiator();
     $context = $this->getContext($endpoint_path);
     $resources = $this->getResources();
-    $endpoint = $this->getEndpoint();
     $parsers = $this->getParsers();
     $formatters = $this->getFormatters();
-    return new RESTServer($context, $content_type_negotiator, $resources, $endpoint, $parsers, $formatters);
+    return new RESTServer($context, $content_type_negotiator, $resources, $parsers, $formatters);
   }
 
   protected function getContentTypeNegotiator() {

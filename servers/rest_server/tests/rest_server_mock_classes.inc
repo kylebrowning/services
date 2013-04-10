@@ -22,13 +22,6 @@ class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
     return array();
   }
 
-  protected function getEndpoint() {
-    if (isset($this->data['endpoint'])) {
-      return $this->data['endpoint'];
-    }
-    return array();
-  }
-
   protected function getFormatters() {
     if (isset($this->data['formatters'])) {
       return $this->data['formatters'];
