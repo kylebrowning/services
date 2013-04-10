@@ -20,6 +20,7 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
   public function setUp() {
     parent::setUp();
 
+    module_load_include('inc', 'services', 'includes/services.runtime');
     module_load_include('inc', 'rest_server', 'includes/RESTServer');
     module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
     module_load_include('inc', 'rest_server', 'includes/ServicesContext');
@@ -53,5 +54,53 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
 
     $resource_name = $rest_server->getResourceName();
     $this->assertEqual($resource_name, 'user', 'Index call resource name determined properly.');
+  }
+
+  /**
+   * Test method getResponseFormatter().
+   */
+  public function testGetResponseFormatter() {
+    $endpoint_path = 'rest';
+    $context_data = array(
+      'get' => array('q' => 'rest/node/1.xml'),
+      'server' => array(),
+      'post' => array(),
+      'request_body' => '',
+    );
+    $formatters = array(
+      'xml' => array(
+        'mime types' => array('application/xml', 'text/xml'),
+        'view arguments' => array('format' => 'xml'),
+      ),
+      'json' => array(
+        'mime types' => array('application/json'),
+        'view arguments' => array('format' => 'json'),
+      ),
+    );
+
+    $factory_args = array(
+      'context_data' => $context_data,
+      'formatters' => $formatters,
+    );
+
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+
+    $controller = array();
+    $formatter = $rest_server->getResponseFormatter($controller);
+    $this->assertEqual($formatter, $formatters['xml'], 'XML formatter determined properly from URL');
+
+    // Pass formatter in url that is not recognizable.
+    $factory_args['context_data']['get']['q'] = 'rest/node/1.php';
+    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+    $rest_server = $rest_server_factory->getRESTServer($endpoint_path);
+    $formatter_not_found = TRUE;
+    try {
+      $formatter = $rest_server->getResponseFormatter($controller);
+      $formatter_not_found = FALSE;
+    }
+    catch (Exception $e) {
+    }
+    $this->assertTrue($formatter_not_found, 'Unknown formatter not found.');
   }
 }

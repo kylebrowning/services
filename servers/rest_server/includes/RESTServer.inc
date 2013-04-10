@@ -101,20 +101,17 @@ class RESTServer {
   function getResponseFormatter($controller) {
     $mime_type = '';
 
-    $canonical_path = $this->context->getCanonicalPath();
-    $response_format = $this->negotiator->getResponseFormatFromURL($canonical_path);
-
-    $formats = $this->responseFormatters();
+    $canonical_path_not_parsed = $this->context->getCanonicalPath();
+    $response_format = $this->negotiator->getResponseFormatFromURL($canonical_path_not_parsed);
 
     if (empty($response_format)) {
-      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $controller, $formats);
+      $response_format = $this->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path_not_parsed, $controller, $this->formatters);
     }
 
     $formatter = array();
 
-
-    if (isset($formats[$response_format])) {
-      $formatter = $formats[$response_format];
+    if (isset($this->formatters[$response_format])) {
+      $formatter = $this->formatters[$response_format];
     }
 
     // Check if we support the response format and determine the mime type
@@ -410,14 +407,6 @@ class RESTServer {
     $mime_type = $mimeparse->best_match(array_keys($parsers), $mime);
 
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
-  }
-
-  protected function responseFormatters($format = NULL) {
-    if ($format) {
-      return isset($this->formatters[$format]) ? $this->formatters[$format] : FALSE;
-    }
-
-    return $this->formatters;
   }
 
   protected function resolveController($resource, $resource_name) {
