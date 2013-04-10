@@ -12,6 +12,7 @@ files[] = includes/ServicesRESTServerFactory.inc
 files[] = includes/ServicesContext.inc
 files[] = includes/ServicesParser.inc
 files[] = includes/node_resource.models.inc
+files[] = tests/ServicesRESTServerTests.test
 files[] = formats/RssFormatView.inc
 files[] = lib/bencode.php
 files[] = lib/mimeparse.php
