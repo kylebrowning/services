@@ -58,7 +58,7 @@ class RESTServer {
         $resource = $this->resources[$resource_name];
 
         // Get the operation and fill with default values
-        $this->controller = $this->resolveController($resource, $resource_name);
+        $this->controller = $this->resolveControllerApplyVersion($resource, $resource_name);
       }
       else {
         return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
@@ -70,6 +70,17 @@ class RESTServer {
     }
 
     return $this->controller;
+  }
+
+  /**
+   * Wrapper around resolveController() to apply version.
+   */
+  protected function resolveControllerApplyVersion($resource, $resource_name) {
+    $apply_version_method = '';
+    $controller = $this->resolveController($resource, $apply_version_method);
+    services_request_apply_version($controller, array('method' => $apply_version_method, 'resource' => $resource_name));
+
+    return $controller;
   }
 
   public function getCanonicalPath() {
@@ -97,7 +108,7 @@ class RESTServer {
     return $resource_name;
   }
 
-  function getResponseFormatter() {
+  public function getResponseFormatter() {
     $mime_type = '';
 
     $canonical_path_not_parsed = $this->context->getCanonicalPath();
@@ -358,7 +369,7 @@ class RESTServer {
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
   }
 
-  public function resolveController($resource, $resource_name) {
+  public function resolveController($resource, &$operation) {
     $request_method = $this->getRequestMethod();
 
     $canonical_path_array = $this->getCanonicalPathArray();
@@ -470,7 +481,7 @@ class RESTServer {
     if (isset($resource['file']) && empty($controller['file'])) {
       $controller['file'] = $resource['file'];
     }
-    services_request_apply_version($controller, array('method' => $operation, 'resource' => $resource_name));
+
 
     return $controller;
   }
