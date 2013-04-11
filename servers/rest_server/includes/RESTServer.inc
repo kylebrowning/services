@@ -364,79 +364,114 @@ class RESTServer {
     $canonical_path_array = $this->getCanonicalPathArray();
     array_shift($canonical_path_array);
 
-    $pc = count($canonical_path_array);
-    $class = NULL;
+    $canon_path_count = count($canonical_path_array);
+    $operation_type = NULL;
     $operation = NULL;
 
     // We do not group "if" conditions on purpose for better readability.
 
     // 'index' method.
-    if ($request_method == 'GET' && isset($resource['operations']['index']) && $this->checkNumberOfArguments($pc, $resource['operations']['index'])) {
-      $class = 'operations';
+    if (  $request_method == 'GET'
+          && isset($resource['operations']['index'])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['index'])
+      ) {
+      $operation_type = 'operations';
       $operation = 'index';
     }
 
     // 'retrieve' method.
     // First path element should be not empty.
-    if ($request_method == 'GET' && isset($resource['operations']['retrieve']) && $this->checkNumberOfArguments($pc, $resource['operations']['retrieve']) && !empty($canonical_path_array[0]) && $pc >= 1) {
-      $class = 'operations';
+    if (  $request_method == 'GET'
+          && $canon_path_count >= 1
+          && isset($resource['operations']['retrieve'])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['retrieve'])
+          && !empty($canonical_path_array[0])
+      ) {
+      $operation_type = 'operations';
       $operation = 'retrieve';
     }
 
     // 'relationships'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if ($request_method == 'GET' && $pc >= 2 && isset($resource['relationships'][$canonical_path_array[1]])
-         && $this->checkNumberOfArguments($pc, $resource['relationships'][$canonical_path_array[1]], 1) && isset($canonical_path_array[0])) {
-      $class = 'relationships';
+    if (  $request_method == 'GET'
+          && $canon_path_count >= 2
+          && isset($resource['relationships'][$canonical_path_array[1]])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['relationships'][$canonical_path_array[1]], 1)
+          && isset($canonical_path_array[0])
+      ) {
+      $operation_type = 'relationships';
       $operation = $canonical_path_array[1];
     }
 
     // 'update'
     // First path element should be not empty.
-    if ($request_method == 'PUT' && isset($resource['operations']['update']) && $this->checkNumberOfArguments($pc, $resource['operations']['update']) && !empty($canonical_path_array[0]) && $pc >= 1) {
-      $class = 'operations';
+    if (  $request_method == 'PUT'
+          && $canon_path_count >= 1
+          && isset($resource['operations']['update'])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['update'])
+          && !empty($canonical_path_array[0])
+      ) {
+      $operation_type = 'operations';
       $operation = 'update';
     }
 
     // 'delete'
     // First path element should be not empty.
-    if ($request_method == 'DELETE' && isset($resource['operations']['delete']) && $this->checkNumberOfArguments($pc, $resource['operations']['delete']) && !empty($canonical_path_array[0]) && $pc >= 1) {
-      $class = 'operations';
+    if (  $request_method == 'DELETE'
+          && $canon_path_count >= 1
+          && isset($resource['operations']['delete'])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['delete'])
+          && !empty($canonical_path_array[0])
+      ) {
+      $operation_type = 'operations';
       $operation = 'delete';
     }
 
     // 'create' method.
     // First path element should be not empty.
-    if ($request_method == 'POST' && isset($resource['operations']['create']) && $this->checkNumberOfArguments($pc, $resource['operations']['create'])) {
-      $class = 'operations';
+    if (  $request_method == 'POST'
+          && isset($resource['operations']['create'])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['create'])
+      ) {
+      $operation_type = 'operations';
       $operation = 'create';
     }
 
     // 'actions'
     // Forst path element should be action name
-    if ($request_method == 'POST' && $pc >= 1 && isset($resource['actions'][$canonical_path_array[0]]) && $this->checkNumberOfArguments($pc, $resource['actions'][$canonical_path_array[0]], 1)) {
-      $class = 'actions';
+    if (  $request_method == 'POST'
+          && $canon_path_count >= 1
+          && isset($resource['actions'][$canonical_path_array[0]])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['actions'][$canonical_path_array[0]], 1)
+      ) {
+      $operation_type = 'actions';
       $operation = $canonical_path_array[0];
     }
 
     // 'targeted_actions'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if ($request_method == 'POST' && $pc >= 2 && isset($resource['targeted_actions'][$canonical_path_array[1]])
-         && $this->checkNumberOfArguments($pc, $resource['targeted_actions'][$canonical_path_array[1]], 1) && !empty($canonical_path_array[0])) {
-      $class = 'targeted_actions';
+    if (  $request_method == 'POST'
+          && $canon_path_count >= 2
+          && isset($resource['targeted_actions'][$canonical_path_array[1]])
+          && $this->checkNumberOfArguments($canon_path_count, $resource['targeted_actions'][$canonical_path_array[1]], 1)
+          && !empty($canonical_path_array[0])
+      ) {
+      $operation_type = 'targeted_actions';
       $operation = $canonical_path_array[1];
     }
 
-    $controller = FALSE;
-    if (!empty($class) && !empty($operation) && !empty($resource[$class][$operation])) {
-      $controller = $resource[$class][$operation];
-      if (isset($resource['file']) && empty($controller['file'])) {
-        $controller['file'] = $resource['file'];
-      }
+    if (empty($operation_type) || empty($operation) || empty($resource[$operation_type][$operation])) {
+      return FALSE;
+    }
+
+    $controller = $resource[$operation_type][$operation];
+    if (isset($resource['file']) && empty($controller['file'])) {
+      $controller['file'] = $resource['file'];
     }
     services_request_apply_version($controller, array('method' => $operation, 'resource' => $resource_name));
+
     return $controller;
   }
 
