@@ -358,7 +358,7 @@ class RESTServer {
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
   }
 
-  protected function resolveController($resource, $resource_name) {
+  public function resolveController($resource, $resource_name) {
     $request_method = $this->getRequestMethod();
 
     $canonical_path_array = $this->getCanonicalPathArray();
