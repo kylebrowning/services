@@ -62,7 +62,7 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
     if (!empty($http_accept)) {
       $mime = $this->mimeParse();
       $mime_type = $mime->best_match($mime_candidates, $http_accept);
-      $response_format = $mime_map[$mime_type];
+      $response_format = isset($mime_map[$mime_type]) ? $mime_map[$mime_type] : '';
     }
 
     return $response_format;

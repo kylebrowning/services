@@ -56,25 +56,50 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
   public function testGetResponseFormatter() {
     $factory_args = $this->getDefaultFactoryArguments();
 
-    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
-    $rest_server = $rest_server_factory->getRESTServer();
-
-    $controller = array();
-    $formatter = $rest_server->getResponseFormatter($controller);
+    $formatter = $this->getResponseFormatter($factory_args);
     $this->assertEqual($formatter, $factory_args['formatters']['xml'], 'XML formatter determined properly from URL');
 
     // Pass formatter in url that is not recognizable.
     $factory_args['context_data']['get']['q'] = 'rest/node/1.php';
-    $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
-    $rest_server = $rest_server_factory->getRESTServer();
-    $formatter_not_found = TRUE;
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, FALSE, 'Unknown formatter "php" path extension.');
+
+    // Default formatter is json.
+    $factory_args['context_data']['get']['q'] = 'rest/node/1';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, $factory_args['formatters']['json'], 'Default is json');
+
+    // Pass Accept headers.
+    $factory_args['context_data']['server']['HTTP_ACCEPT'] = 'application/xml';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, $factory_args['formatters']['xml'], 'XML formatter determined properly from Accept header "application/xml"');
+
+    $factory_args['context_data']['server']['HTTP_ACCEPT'] = 'text/xml';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, $factory_args['formatters']['xml'], 'XML formatter determined properly from Accept header "text/xml"');
+
+    $factory_args['context_data']['server']['HTTP_ACCEPT'] = 'text/html;level=2;q=0.7,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, $factory_args['formatters']['xml'], 'XML formatter determined properly from Accept header "text/html;level=2;q=0.7,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"');
+
+    $factory_args['context_data']['server']['HTTP_ACCEPT'] = 'text/html;level=2;q=0.7,application/json,application/xml;q=0.9,*/*;q=0.8';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, $factory_args['formatters']['json'], 'JSON formatter determined properly from Accept header "text/html;level=2;q=0.7,application/json,application/xml;q=0.9,*/*;q=0.8"');
+
+    $factory_args['context_data']['server']['HTTP_ACCEPT'] = 'text/yaml';
+    $formatter = $this->getResponseFormatter($factory_args);
+    $this->assertEqual($formatter, FALSE, 'Unknown formatter Accept "text/yaml" header.');
+  }
+
+  protected function getResponseFormatter($factory_args) {
     try {
-      $formatter = $rest_server->getResponseFormatter($controller);
-      $formatter_not_found = FALSE;
+      $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
+      $rest_server = $rest_server_factory->getRESTServer();
+      return $rest_server->getResponseFormatter();
     }
     catch (Exception $e) {
+      return FALSE;
     }
-    $this->assertTrue($formatter_not_found, 'Unknown formatter not found.');
   }
 
   protected function getDefaultFactoryArguments() {
