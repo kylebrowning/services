@@ -54,15 +54,12 @@ class RESTServer {
     if (empty($this->controller)) {
       $resource_name = $this->getResourceName();
 
-      if (!empty($resource_name) && isset($this->resources[$resource_name])) {
-        $resource = $this->resources[$resource_name];
-
-        // Get the operation and fill with default values
-        $this->controller = $this->resolveControllerApplyVersion($resource, $resource_name);
-      }
-      else {
+      if (empty($resource_name) || !isset($this->resources[$resource_name])) {
         return services_error(t('Could not find resource @name.', array('@name' => $resource_name)), 404);
       }
+
+      $resource = $this->resources[$resource_name];
+      $this->controller = $this->resolveControllerApplyVersion($resource, $resource_name);
 
       if (empty($this->controller)) {
         return services_error(t('Could not find the controller.'), 404);
