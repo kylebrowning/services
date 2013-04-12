@@ -199,6 +199,9 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $this->assertEqual($controller, FALSE, 'GET request to "rest/node/1/files_fake" not recognized.');
   }
 
+  /**
+   * Test for parseRequestBody() method.
+   */
   public function testParseRequestBody() {
     $factory_args = $this->getDefaultFactoryArguments();
     $factory_args['parsers'] = array(
@@ -211,12 +214,51 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     );
     $factory_args['context_data']['request_method'] = 'POST';
 
-    $factory_args['context_data']['request_body'] = 'username=1&password=2';
+    $test_data = array('username' => 1, 'password' => 2);
+
+    $factory_args['context_data']['request_body'] = drupal_http_build_query($test_data, '', '&');
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
     $rest_server = $this->getRESTSever($factory_args);
+    $decoded_data = $rest_server->parseRequestBody();
+    $this->assertEqual($decoded_data, $test_data, 'URL Enconed parser decoded request data properly.');
 
-    $data = $rest_server->parseRequestBody();
-    $this->assertEqual($data, array('username' => 1, 'password' => 2), '');
+    $factory_args['context_data']['request_body'] = json_encode($test_data);
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/json';
+    $rest_server = $this->getRESTSever($factory_args);
+    $decoded_data = $rest_server->parseRequestBody();
+    $this->assertEqual($decoded_data, $test_data, 'JSON parser decoded request data properly.');
+
+    $factory_args['context_data']['request_body'] = serialize($test_data);
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/vnd.php.serialized';
+    $rest_server = $this->getRESTSever($factory_args);
+    $decoded_data = $rest_server->parseRequestBody();
+    $this->assertEqual($decoded_data, $test_data, 'PHP Serialize parser decoded request data properly.');
+
+    $factory_args['context_data']['post'] = $test_data;
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'multipart/form-data';
+    $rest_server = $this->getRESTSever($factory_args);
+    $decoded_data = $rest_server->parseRequestBody();
+    $this->assertEqual($decoded_data, $test_data, 'Multipart parser decoded request data properly.');
+
+    $factory_args['context_data']['request_body'] =
+      '<xml>
+        <username>1</username>
+        <password>2</password>
+      </xml>';
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/xml';
+    $rest_server = $this->getRESTSever($factory_args);
+    $decoded_data = $rest_server->parseRequestBody();
+    $this->assertEqual($decoded_data, $test_data, 'XML parser decoded request data properly.');
+
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/xml-not-recognized';
+    $rest_server = $this->getRESTSever($factory_args);
+    try {
+      $decoded_data = $rest_server->parseRequestBody();
+      $this->assert(FALSE, 'Unknown Content Type no exception.');
+    }
+    catch (Exception $e) {
+      $this->assert(TRUE, 'Unknown Content Type thown exception');
+    }
   }
 
   protected function getRESTSever($factory_args) {
