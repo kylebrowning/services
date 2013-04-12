@@ -189,7 +189,7 @@ class RESTServer {
     $path_array = $this->getCanonicalPathArray();
     array_shift($path_array);
 
-    $data = $this->parseRequest($controller);
+    $data = $this->parseRequest();
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
     $headers = $this->parseRequestHeaders();
@@ -265,7 +265,7 @@ class RESTServer {
     return $headers;
   }
 
-  protected function parseRequest($controller) {
+  protected function parseRequest() {
     $method = $this->getRequestMethod();
     switch ($method) {
       case 'POST':
@@ -284,7 +284,7 @@ class RESTServer {
         }
 
         // Get the parser for the mime type
-        $parser = $this->requestParser($mime, $controller);
+        $parser = $this->matchParser($mime, $this->parsers);
         if (!$parser) {
           return services_error(t('Unsupported request content type @mime', array('@mime' => $mime)), 406);
         }
@@ -332,21 +332,6 @@ class RESTServer {
     $view_arguments = isset($formatter['view arguments']) ? $formatter['view arguments'] : array();
     $view = $view_class->newInstanceArgs(array($result, $view_arguments));
     return $view->render();
-  }
-
-  /**
-   * Get best match parser for $controller based on $mime type.
-   */
-  protected function requestParser($mime, $controller = NULL) {
-    // Check if the controller has declared support for parsing the mime type.
-    if ($controller && !empty($controller['rest request parsers'])) {
-      $parser = $this->matchParser($mime, $controller['rest request parsers']);
-      if ($parser) {
-        return $parser;
-      }
-    }
-
-    return $this->matchParser($mime, $this->parsers);
   }
 
   /**
