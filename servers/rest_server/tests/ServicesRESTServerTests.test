@@ -199,6 +199,26 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $this->assertEqual($controller, FALSE, 'GET request to "rest/node/1/files_fake" not recognized.');
   }
 
+  public function testParseRequestBody() {
+    $factory_args = $this->getDefaultFactoryArguments();
+    $factory_args['parsers'] = array(
+      'application/x-www-form-urlencoded' => 'ServicesParserURLEncoded',
+      'application/json' => 'ServicesParserJSON',
+      'application/vnd.php.serialized' => 'ServicesParserPHP',
+      'multipart/form-data' => 'ServicesParserMultipart',
+      'application/xml' => 'ServicesParserXML',
+      'text/xml' => 'ServicesParserXML',
+    );
+    $factory_args['context_data']['request_method'] = 'POST';
+
+    $factory_args['context_data']['request_body'] = 'username=1&password=2';
+    $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
+    $rest_server = $this->getRESTSever($factory_args);
+
+    $data = $rest_server->parseRequestBody();
+    $this->assertEqual($data, array('username' => 1, 'password' => 2), '');
+  }
+
   protected function getRESTSever($factory_args) {
     $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
     return $rest_server_factory->getRESTServer();

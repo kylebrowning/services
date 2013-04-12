@@ -189,7 +189,7 @@ class RESTServer {
     $path_array = $this->getCanonicalPathArray();
     array_shift($path_array);
 
-    $data = $this->parseRequest();
+    $data = $this->parseRequestBody();
     drupal_alter('rest_server_request_parsed', $data, $controller);
 
     $headers = $this->parseRequestHeaders();
@@ -265,7 +265,7 @@ class RESTServer {
     return $headers;
   }
 
-  protected function parseRequest() {
+  public function parseRequestBody() {
     $method = $this->getRequestMethod();
     switch ($method) {
       case 'POST':
