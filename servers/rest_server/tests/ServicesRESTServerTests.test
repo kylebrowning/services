@@ -307,6 +307,27 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $sources['get'] = array('node' => $this->randomString());
     $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
     $this->assertEqual($arguments, array($sources['get']['node']), 'Get argument retrieved.');
+
+    // Arguments combination.
+    $sources['data'] = array('comment' => $this->randomString());
+    $create_controller['args'][] = array(
+      'name' => 'comment',
+      'optional' => FALSE,
+      'source' => array('data' => 'comment'),
+      'type' => 'string',
+    );
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+    $this->assertEqual($arguments, array($sources['get']['node'], $sources['data']['comment']), 'Get and Data arguments retrieved.');
+
+    // Required argument.
+    $sources['get'] = array();
+    try {
+      $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+      $this->assert(FALSE, 'Missing required argument no error thrown.');
+    }
+    catch (Exception $e) {
+      $this->assert(TRUE, 'Missing required argument error thrown.');
+    }
   }
 
   protected function getRESTSever($factory_args) {
