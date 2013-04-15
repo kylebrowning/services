@@ -52,6 +52,30 @@ class RESTServer {
     return $this->render($formatter, $result);
   }
 
+  /**
+   * Controller is part of the resource like
+   *
+   * array(
+      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+      'callback' => '_node_resource_create',
+      'args' => array(
+        array(
+          'name' => 'node',
+          'optional' => FALSE,
+          'source' => 'data',
+          'description' => 'The node data to create',
+          'type' => 'array',
+        ),
+      ),
+      'access callback' => '_node_resource_access',
+      'access arguments' => array('create'),
+      'access arguments append' => TRUE,
+    ),
+   *
+   * This method determines what is the controller responsible for processing of the request.
+   *
+   * @return array
+   */
   protected function getController() {
     if (empty($this->controller)) {
       $resource_name = $this->getResourceName();
