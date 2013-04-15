@@ -278,15 +278,35 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
       'headers' => array(),
     );
 
+    // Arguments from path.
     $arguments = $rest_server->protectedGetControllerArgumentsFromSources($retrieve_controller, $sources);
     $this->assertEqual($arguments, array(0 => 1), 'Path argument retrieved.');
 
-    $sources['path'][0] = 'string';
+    $sources['path'][0] = $this->randomName();
     $arguments = $rest_server->protectedGetControllerArgumentsFromSources($retrieve_controller, $sources);
     $this->assertEqual($arguments, array(0 => 0), 'Path argument retrieved and converted to integer.');
 
+    // Arguments from 'data'
+    $create_controller = $test_resources['operations']['create'];
 
+    $sources['data'] = array(1, 2);
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+    $this->assertEqual($arguments, array($sources['data']), 'Data argument that is array retrieved.');
 
+    $sources['data'] = $this->randomName();
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+    $this->assertEqual($arguments, array(array($sources['data'])), 'Data argument that is string retrieved and converted to array.');
+
+    unset($create_controller['args'][0]['type']);
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+    $this->assertEqual($arguments, array($sources['data']), 'Data argument that is string retrieved and converted to array.');
+
+    // Arguments from 'get'
+    $create_controller['args'][0]['source'] = array('get' => 'node');
+    $sources['data'] = array();
+    $sources['get'] = array('node' => $this->randomString());
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($create_controller, $sources);
+    $this->assertEqual($arguments, array($sources['get']['node']), 'Get argument retrieved.');
   }
 
   protected function getRESTSever($factory_args) {
