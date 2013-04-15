@@ -21,7 +21,6 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     parent::setUp();
 
     module_load_include('inc', 'services', 'includes/services.runtime');
-    module_load_include('module', 'services', 'services');
     module_load_include('inc', 'rest_server', 'includes/RESTServer');
     module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
     module_load_include('inc', 'rest_server', 'includes/ServicesContext');
@@ -339,7 +338,20 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $factory_args = $this->getDefaultFactoryArguments();
     $rest_server = $this->getRESTSever($factory_args);
 
-    $formatters = rest_server_response_formatters();
+    $formatters = array(
+      'xml' => array(
+        'mime types' => array('application/xml', 'text/xml'),
+        'formatter class' => 'ServicesXMLFormatter',
+      ),
+      'json' => array(
+        'mime types' => array('application/json'),
+        'formatter class' => 'ServicesJSONFormatter',
+      ),
+      'php' => array(
+        'mime types' => array('application/vnd.php.serialized'),
+        'formatter class' => 'ServicesPHPFormatter',
+      ),
+    );
     $result = array('a' => 'b', 1, FALSE);
 
 
