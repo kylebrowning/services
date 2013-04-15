@@ -221,25 +221,25 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $factory_args['context_data']['request_body'] = drupal_http_build_query($test_data, '', '&');
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
     $rest_server = $this->getRESTSever($factory_args);
-    $decoded_data = $rest_server->parseRequestBody();
+    $decoded_data = $rest_server->protectedParseRequestBody();
     $this->assertEqual($decoded_data, $test_data, 'URL Enconed parser decoded request data properly.');
 
     $factory_args['context_data']['request_body'] = json_encode($test_data);
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/json';
     $rest_server = $this->getRESTSever($factory_args);
-    $decoded_data = $rest_server->parseRequestBody();
+    $decoded_data = $rest_server->protectedParseRequestBody();
     $this->assertEqual($decoded_data, $test_data, 'JSON parser decoded request data properly.');
 
     $factory_args['context_data']['request_body'] = serialize($test_data);
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/vnd.php.serialized';
     $rest_server = $this->getRESTSever($factory_args);
-    $decoded_data = $rest_server->parseRequestBody();
+    $decoded_data = $rest_server->protectedParseRequestBody();
     $this->assertEqual($decoded_data, $test_data, 'PHP Serialize parser decoded request data properly.');
 
     $factory_args['context_data']['post'] = $test_data;
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'multipart/form-data';
     $rest_server = $this->getRESTSever($factory_args);
-    $decoded_data = $rest_server->parseRequestBody();
+    $decoded_data = $rest_server->protectedParseRequestBody();
     $this->assertEqual($decoded_data, $test_data, 'Multipart parser decoded request data properly.');
 
     $factory_args['context_data']['request_body'] =
@@ -249,13 +249,13 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
       </xml>';
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/xml';
     $rest_server = $this->getRESTSever($factory_args);
-    $decoded_data = $rest_server->parseRequestBody();
+    $decoded_data = $rest_server->protectedParseRequestBody();
     $this->assertEqual($decoded_data, $test_data, 'XML parser decoded request data properly.');
 
     $factory_args['context_data']['server']['CONTENT_TYPE'] = 'application/xml-not-recognized';
     $rest_server = $this->getRESTSever($factory_args);
     try {
-      $decoded_data = $rest_server->parseRequestBody();
+      $decoded_data = $rest_server->protectedParseRequestBody();
       $this->assert(FALSE, 'Unknown Content Type no exception.');
     }
     catch (Exception $e) {

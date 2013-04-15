@@ -332,7 +332,12 @@ class RESTServer {
     return $headers;
   }
 
-  public function parseRequestBody() {
+  /**
+   * Parse request body based on $_SERVER['CONTENT_TYPE'].s
+   *
+   * @return array|mixed
+   */
+  protected function parseRequestBody() {
     $method = $this->getRequestMethod();
     switch ($method) {
       case 'POST':
