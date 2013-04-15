@@ -240,9 +240,16 @@ class RESTServer {
             $arguments[$argument_number] = $sources[$argument_info['source']];
           }
         }
-        // Convert to array if argument expected to be array.
-        if (isset($argument_info['type']) && $argument_info['type'] == 'array' && isset($arguments[$argument_number])) {
-          $arguments[$argument_number] = (array)$arguments[$argument_number];
+        // Convert to specific data type.
+        if (isset($argument_info['type']) && isset($arguments[$argument_number])) {
+          switch ($argument_info['type']) {
+            case 'array':
+              $arguments[$argument_number] = (array) $arguments[$argument_number];
+              break;
+            case 'int':
+              $arguments[$argument_number] = (int) $arguments[$argument_number];
+              break;
+          }
         }
       }
       // When argument isn't set, insert default value if provided or
