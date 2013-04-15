@@ -6,7 +6,9 @@
  */
 
 class RESTServer {
+  /* @var $negotiator ServicesContentTypeNegotiatorInterface */
   protected $negotiator;
+  /* @var $context ServicesContextInterface */
   protected $context;
 
   protected $resources;
