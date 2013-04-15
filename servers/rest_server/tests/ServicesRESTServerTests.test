@@ -261,6 +261,34 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     }
   }
 
+  /**
+   * Test for getControllerArgumentsFromSources() method.
+   */
+  public function testGetControllerArgumentsFromSources() {
+    $test_resources = $this->getTestResource();
+    $factory_args = $this->getDefaultFactoryArguments();
+    $rest_server = $this->getRESTSever($factory_args);
+
+    $retrieve_controller = $test_resources['operations']['retrieve'];
+
+    $sources = array(
+      'path' => array('1'),
+      'param' => array(),
+      'data' => array(),
+      'headers' => array(),
+    );
+
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($retrieve_controller, $sources);
+    $this->assertEqual($arguments, array(0 => 1), 'Path argument retrieved.');
+
+    $sources['path'][0] = 'string';
+    $arguments = $rest_server->protectedGetControllerArgumentsFromSources($retrieve_controller, $sources);
+    $this->assertEqual($arguments, array(0 => 0), 'Path argument retrieved and converted to integer.');
+
+
+
+  }
+
   protected function getRESTSever($factory_args) {
     $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
     return $rest_server_factory->getRESTServer();
