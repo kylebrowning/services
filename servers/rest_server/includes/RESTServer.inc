@@ -228,16 +228,18 @@ class RESTServer {
     foreach ($controller['args'] as $argument_number => $argument_info) {
       // Fill in argument from source
       if (isset($argument_info['source'])) {
-        if (is_array($argument_info['source'])) {
-          list($source) = array_keys($argument_info['source']);
-          $key = $argument_info['source'][$source];
-          if (isset($sources[$source][$key])) {
-            $arguments[$argument_number] = $sources[$source][$key];
+        $argument_source = $argument_info['source'];
+        if (is_array($argument_source)) {
+          $argument_source_keys = array_keys($argument_source);
+          $source_name = reset($argument_source_keys);
+          $argument_name = $argument_source[$source_name];
+          if (isset($sources[$source_name][$argument_name])) {
+            $arguments[$argument_number] = $sources[$source_name][$argument_name];
           }
         }
         else {
-          if (isset($sources[$argument_info['source']])) {
-            $arguments[$argument_number] = $sources[$argument_info['source']];
+          if (isset($sources[$argument_source])) {
+            $arguments[$argument_number] = $sources[$argument_source];
           }
         }
         // Convert to specific data type.
