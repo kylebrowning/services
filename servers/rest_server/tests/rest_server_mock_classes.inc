@@ -4,6 +4,8 @@
  * Factory to build RESTServer object for testing.
  */
 class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
+  static $class_name = 'MockRESTServer';
+
   public function __construct($data = array()) {
     parent::__construct($data);
     drupal_static_reset();
@@ -43,5 +45,14 @@ class MockServicesRESTServerFactory extends ServicesRESTServerFactory {
 class MockServicesContext extends ServicesContext {
   public function setData($data) {
     $this->data = array_merge($this->data, $data);
+  }
+}
+
+/**
+ * Extend RESTServer to test protected methods.
+ */
+class MockRESTServer extends RESTServer {
+  public function protectedGetControllerArgumentsFromSources($controller, $sources) {
+    return $this->getControllerArgumentsFromSources($controller, $sources);
   }
 }

@@ -8,6 +8,7 @@
 
 class ServicesRESTServerFactory {
   protected $data = array();
+  static $class_name = 'RESTServer';
 
   /**
    * We need data property to pass additional arguments to methods.
@@ -28,7 +29,9 @@ class ServicesRESTServerFactory {
     $resources = $this->getResources();
     $parsers = $this->getParsers();
     $formatters = $this->getFormatters();
-    return new RESTServer($context, $content_type_negotiator, $resources, $parsers, $formatters);
+
+    $class_name = static::$class_name;
+    return new $class_name($context, $content_type_negotiator, $resources, $parsers, $formatters);
   }
 
   protected function getContentTypeNegotiator() {
