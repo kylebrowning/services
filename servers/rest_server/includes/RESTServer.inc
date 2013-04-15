@@ -106,7 +106,15 @@ class RESTServer {
     return $controller;
   }
 
-  public function getCanonicalPath() {
+  /**
+   * Canonical path is the url of the request without path of endpoint.
+   *
+   * For example endpoint has path 'rest'. Canonical of request to url
+   * 'rest/node/1.php' will be 'node/1.php'.
+   *
+   * @return string
+   */
+  protected function getCanonicalPath() {
     // Use drupal_static so we can clear this static cache during unit testing.
     // @see MockServicesRESTServerFactory constructor.
     $canonical_path = &drupal_static('RESTServerGetCanonicalPath');
