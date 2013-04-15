@@ -55,4 +55,8 @@ class MockRESTServer extends RESTServer {
   public function protectedGetControllerArgumentsFromSources($controller, $sources) {
     return $this->getControllerArgumentsFromSources($controller, $sources);
   }
+
+  public function protectedRender($formatter, $result) {
+    return $this->render($formatter, $result);
+  }
 }

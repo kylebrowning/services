@@ -21,10 +21,12 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     parent::setUp();
 
     module_load_include('inc', 'services', 'includes/services.runtime');
+    module_load_include('module', 'services', 'services');
     module_load_include('inc', 'rest_server', 'includes/RESTServer');
     module_load_include('inc', 'rest_server', 'includes/ServicesContentTypeNegotiator');
     module_load_include('inc', 'rest_server', 'includes/ServicesContext');
     module_load_include('inc', 'rest_server', 'includes/ServicesParser');
+    module_load_include('inc', 'rest_server', 'includes/ServicesFormatter');
     module_load_include('inc', 'rest_server', 'includes/ServicesRESTServerFactory');
     module_load_include('inc', 'rest_server', 'tests/rest_server_mock_classes');
   }
@@ -330,6 +332,33 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     }
   }
 
+  /**
+   * Test for render() method.
+   */
+  public function testRender() {
+    $factory_args = $this->getDefaultFactoryArguments();
+    $rest_server = $this->getRESTSever($factory_args);
+
+    $formatters = rest_server_response_formatters();
+    $result = array('a' => 'b', 1, FALSE);
+
+
+    $xml_formatter = $formatters['xml'];
+    $formatted_output = $rest_server->protectedRender($xml_formatter, $result);
+    $expected_formatted_output =
+      '<?xml version="1.0" encoding="utf-8"?>' . "\n" .
+      '<result><a>b</a><item>1</item><item></item></result>' . "\n";
+    $this->assertEqual($formatted_output, $expected_formatted_output, 'XML formatter encoded correctly.');
+
+    $json_formatter = $formatters['json'];
+    $formatted_output = $rest_server->protectedRender($json_formatter, $result);
+    $this->assertEqual($formatted_output, '{"a":"b","0":1,"1":false}', 'JSON formatter encoded correctly.');
+
+    $php_formatter = $formatters['php'];
+    $formatted_output = $rest_server->protectedRender($php_formatter, $result);
+    $this->assertEqual($formatted_output, 'a:3:{s:1:"a";s:1:"b";i:0;i:1;i:1;b:0;}', 'PHP formatter encoded correctly.');
+  }
+
   protected function getRESTSever($factory_args) {
     $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
     return $rest_server_factory->getRESTServer();
@@ -356,11 +385,9 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $formatters = array(
       'xml' => array(
         'mime types' => array('application/xml', 'text/xml'),
-        'view arguments' => array('format' => 'xml'),
       ),
       'json' => array(
         'mime types' => array('application/json'),
-        'view arguments' => array('format' => 'json'),
       ),
     );
 
