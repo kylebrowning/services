@@ -106,98 +106,98 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['operations']['create'], 'Create operation controller found.');
 
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/1.xml';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'POST request to "node/1.xml" not recognized.');
 
     // Retrieve operation.
     $factory_args['context_data']['request_method'] = 'GET';
     $factory_args['context_data']['get']['q'] = 'rest/node/1.xml';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['operations']['retrieve'], 'Retrieve operation controller found.');
 
     // Update operation.
     $factory_args['context_data']['request_method'] = 'PUT';
     $factory_args['context_data']['get']['q'] = 'rest/node/1.xml';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['operations']['update'], 'Update operation controller found.');
 
     $factory_args['context_data']['request_method'] = 'PUT';
     $factory_args['context_data']['get']['q'] = 'rest/node';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'PUT request to "node" not recognized.');
 
     // Delete operation.
     $factory_args['context_data']['request_method'] = 'DELETE';
     $factory_args['context_data']['get']['q'] = 'rest/node/1.xml';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['operations']['delete'], 'Delete operation controller found.');
 
     $factory_args['context_data']['request_method'] = 'DELETE';
     $factory_args['context_data']['get']['q'] = 'rest/node';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'DELETE request to "node" not recognized.');
 
     // Index operation.
     $factory_args['context_data']['request_method'] = 'GET';
     $factory_args['context_data']['get']['q'] = 'rest/node';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['operations']['index'], 'Index operation controller found.');
 
     // Actions.
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/connect';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['actions']['connect'], 'Action "connect" controller found.');
 
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/connect/1';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'POST request to "node/connect/1" not recognized.');
 
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/not_connect';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'POST request to "node/not_connect" not recognized.');
 
     // Targeted Actions.
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/1/attach_file';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['targeted_actions']['attach_file'], 'Targeted action "attach_file" controller found.');
 
     $factory_args['context_data']['request_method'] = 'POST';
     $factory_args['context_data']['get']['q'] = 'rest/node/1/attach_file_fake';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'POST request to "rest/node/1/attach_file_fake" not recognized.');
 
     // Relationships.
     $factory_args['context_data']['request_method'] = 'GET';
     $factory_args['context_data']['get']['q'] = 'rest/node/1/files';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, $resource['relationships']['files'], 'Relationship "files" controller found.');
 
     $factory_args['context_data']['request_method'] = 'GET';
     $factory_args['context_data']['get']['q'] = 'rest/node/1/files_fake';
     $rest_server = $this->getRESTSever($factory_args);
-    $controller = $rest_server->resolveController($resource, $resource_name);
+    $controller = $rest_server->protectedResolveController($resource, $resource_name);
     $this->assertEqual($controller, FALSE, 'GET request to "rest/node/1/files_fake" not recognized.');
   }
 

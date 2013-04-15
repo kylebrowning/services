@@ -67,4 +67,8 @@ class MockRESTServer extends RESTServer {
   public function protectedGetResponseFormatter() {
     return $this->getResponseFormatter();
   }
+
+  public function protectedResolveController($resource, &$operation) {
+    return $this->resolveController($resource, $operation);
+  }
 }

@@ -420,7 +420,7 @@ class RESTServer {
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
   }
 
-  public function resolveController($resource, &$operation) {
+  protected function resolveController($resource, &$operation) {
     $request_method = $this->getRequestMethod();
 
     $canonical_path_array = $this->getCanonicalPathArray();
@@ -540,7 +540,7 @@ class RESTServer {
   /**
    * Count possible numbers of 'path' arguments of the method.
    */
-  private function checkNumberOfArguments($args_number, $resource_operation, $required_args = 0) {
+  protected function checkNumberOfArguments($args_number, $resource_operation, $required_args = 0) {
     $not_required_args = 0;
 
     if (isset($resource_operation['args'])) {
@@ -559,7 +559,7 @@ class RESTServer {
     return $args_number >= $required_args && $args_number <= $required_args + $not_required_args;
   }
 
-  function handleException($exception){
+  public function handleException($exception){
     $error_code = $exception->getCode();
     $error_message = $exception->getMessage();
     $error_data = method_exists($exception, 'getData') ? $exception->getData() : '';
