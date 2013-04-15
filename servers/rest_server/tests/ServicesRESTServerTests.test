@@ -40,7 +40,7 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
     $rest_server = $rest_server_factory->getRESTServer();
 
-    $resource_name = $rest_server->getResourceName();
+    $resource_name = $rest_server->protectedGetResourceName();
     $this->assertEqual($resource_name, 'node', 'Retrieve call resource name determined properly.');
 
 
@@ -48,7 +48,7 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $rest_server_factory = new MockServicesRESTServerFactory($factory_args);
     $rest_server = $rest_server_factory->getRESTServer();
 
-    $resource_name = $rest_server->getResourceName();
+    $resource_name = $rest_server->protectedGetResourceName();
     $this->assertEqual($resource_name, 'user', 'Index call resource name determined properly.');
   }
 

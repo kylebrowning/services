@@ -59,4 +59,8 @@ class MockRESTServer extends RESTServer {
   public function protectedRender($formatter, $result) {
     return $this->render($formatter, $result);
   }
+
+  public function protectedGetResourceName() {
+    return $this->getResourceName();
+  }
 }

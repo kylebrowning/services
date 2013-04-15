@@ -125,14 +125,26 @@ class RESTServer {
     return $canonical_path;
   }
 
-  public function getCanonicalPathArray() {
+  /**
+   * Explode canonical path to parts by '/'.
+   *
+   * @return array
+   */
+  protected function getCanonicalPathArray() {
     $canonical_path = $this->getCanonicalPath();
     $canonical_path_array = explode('/', $canonical_path);
 
     return $canonical_path_array;
   }
 
-  public function getResourceName() {
+  /**
+   * Example. We have endpoint with path 'rest'.
+   * Request is done to url /rest/node/1.php'.
+   * Name of resource in this case is 'node'.
+   *
+   * @return string
+   */
+  protected function getResourceName() {
     $canonical_path_array = $this->getCanonicalPathArray();
     $resource_name = array_shift($canonical_path_array);
 
