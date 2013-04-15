@@ -367,7 +367,7 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
   protected function getResponseFormatter($factory_args) {
     try {
       $rest_server = $this->getRESTSever($factory_args);
-      return $rest_server->getResponseFormatter();
+      return $rest_server->protectedGetResponseFormatter();
     }
     catch (Exception $e) {
       return FALSE;
@@ -385,9 +385,11 @@ class ServicesRESTServerTests extends DrupalUnitTestCase {
     $formatters = array(
       'xml' => array(
         'mime types' => array('application/xml', 'text/xml'),
+        'formatter class' => 'ServicesXMLFormatter',
       ),
       'json' => array(
         'mime types' => array('application/json'),
+        'formatter class' => 'ServicesJSONFormatter',
       ),
     );
 

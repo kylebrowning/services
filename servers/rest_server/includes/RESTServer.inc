@@ -56,21 +56,21 @@ class RESTServer {
    * Controller is part of the resource like
    *
    * array(
-      'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
-      'callback' => '_node_resource_create',
-      'args' => array(
-        array(
-          'name' => 'node',
-          'optional' => FALSE,
-          'source' => 'data',
-          'description' => 'The node data to create',
-          'type' => 'array',
-        ),
-      ),
-      'access callback' => '_node_resource_access',
-      'access arguments' => array('create'),
-      'access arguments append' => TRUE,
-    ),
+   *  'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
+   *  'callback' => '_node_resource_create',
+   *  'args' => array(
+   *    array(
+   *      'name' => 'node',
+   *      'optional' => FALSE,
+   *      'source' => 'data',
+   *      'description' => 'The node data to create',
+   *      'type' => 'array',
+   *    ),
+   *  ),
+   *  'access callback' => '_node_resource_access',
+   *  'access arguments' => array('create'),
+   *  'access arguments append' => TRUE,
+   * ),
    *
    * This method determines what is the controller responsible for processing of the request.
    *
@@ -114,7 +114,7 @@ class RESTServer {
    *
    * @return string
    */
-  protected function getCanonicalPath() {
+  public function getCanonicalPath() {
     // Use drupal_static so we can clear this static cache during unit testing.
     // @see MockServicesRESTServerFactory constructor.
     $canonical_path = &drupal_static('RESTServerGetCanonicalPath');
@@ -151,7 +151,19 @@ class RESTServer {
     return $resource_name;
   }
 
-  public function getResponseFormatter() {
+  /**
+   * Response formatter is responsible for encoding the response.
+   *
+   * @return array
+   * example:
+   * array(
+   *  'xml' => array(
+   *    'mime types' => array('application/xml', 'text/xml'),
+   *    'formatter class' => 'ServicesXMLFormatter',
+   *  ),
+   * )
+   */
+  protected function getResponseFormatter() {
     $mime_type = '';
 
     $canonical_path_not_parsed = $this->context->getCanonicalPath();
