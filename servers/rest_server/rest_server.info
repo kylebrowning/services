@@ -4,12 +4,12 @@ package = Services - servers
 
 files[] = rest_server.module
 
-files[] = includes/rest_server.views.inc
 files[] = includes/RESTServer.inc
 files[] = includes/ServicesContentTypeNegotiator.inc
 files[] = includes/ServicesRESTServerFactory.inc
 files[] = includes/ServicesContext.inc
 files[] = includes/ServicesParser.inc
+files[] = includes/ServicesFormatter.inc
 files[] = tests/ServicesRESTServerTests.test
 files[] = tests/rest_server_mock_classes.inc
 files[] = formats/RssFormatView.inc

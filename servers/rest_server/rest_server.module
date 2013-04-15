@@ -85,36 +85,30 @@ function rest_server_response_formatters() {
     $formatters = array(
       'xml' => array(
         'mime types' => array('application/xml', 'text/xml'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'xml'),
+        'formatter class' => 'ServicesXMLFormatter',
       ),
       'json' => array(
         'mime types' => array('application/json'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'json'),
+        'formatter class' => 'ServicesJSONFormatter',
       ),
       'jsonp' => array(
         'mime types' => array('text/javascript', 'application/javascript'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'jsonp'),
+        'formatter class' => 'ServicesJSONPFormatter',
       ),
       'php' => array(
         'mime types' => array('application/vnd.php.serialized'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'php'),
+        'formatter class' => 'ServicesPHPFormatter',
       ),
       'bencode' => array(
         'mime types' => array('application/x-bencode'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'bencode'),
+        'formatter class' => 'ServicesBencodeFormatter',
       ),
     );
 
-    if(($library = libraries_load('spyc')) && !empty($library['loaded'])) {
+    if (($library = libraries_load('spyc')) && !empty($library['loaded'])) {
       $formatters['yaml'] = array(
         'mime types' => array('text/plain', 'application/x-yaml', 'text/yaml'),
-        'view' => 'RESTServerViewBuiltIn',
-        'view arguments' => array('format' => 'yaml'),
+        'formatter class' => 'ServicesYAMLFormatter',
       );
     }
 

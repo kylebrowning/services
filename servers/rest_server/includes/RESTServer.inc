@@ -49,7 +49,7 @@ class RESTServer {
       $result = $this->handleException($e);
     }
 
-    return $this->renderFormatterView($formatter, $result);
+    return $this->render($formatter, $result);
   }
 
   protected function getController() {
@@ -338,11 +338,13 @@ class RESTServer {
     return $ret_val;
   }
 
-  protected function renderFormatterView($formatter, $result) {
-    $view_class = new ReflectionClass($formatter['view']);
-    $view_arguments = isset($formatter['view arguments']) ? $formatter['view arguments'] : array();
-    $view = $view_class->newInstanceArgs(array($result, $view_arguments));
-    return $view->render();
+  protected function render($formatter, $result) {
+    if ( !isset($formatter['formatter class'])
+      || array_search('ServicesFormatterInterface', class_implements($formatter['formatter class'])) === FALSE) {
+      return services_error('Formatter is invalid.', 500);
+    }
+    $formatter_object = new $formatter['formatter class'];
+    return $formatter_object->render($result);
   }
 
   /**
