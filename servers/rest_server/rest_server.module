@@ -25,6 +25,7 @@ function rest_server_server() {
 
   $services_rest_server_factory = variable_get('services_rest_server_factory_class', 'ServicesRESTServerFactory');
   $rest_server_factory = new $services_rest_server_factory(array('endpoint_path' => $endpoint_path));
+  /* @var $rest_server RESTServer */
   $rest_server = $rest_server_factory->getRESTServer();
 
   $canonical_path = $rest_server->getCanonicalPath();
