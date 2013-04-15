@@ -12,7 +12,6 @@ files[] = includes/ServicesParser.inc
 files[] = includes/ServicesFormatter.inc
 files[] = tests/ServicesRESTServerTests.test
 files[] = tests/rest_server_mock_classes.inc
-files[] = formats/RssFormatView.inc
 files[] = lib/bencode.php
 files[] = lib/mimeparse.php
 
