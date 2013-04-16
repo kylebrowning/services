@@ -304,9 +304,9 @@ class RESTServer {
             case 'array':
               $arguments[$argument_number] = (array) $arguments[$argument_number];
               break;
-            case 'int':
-              $arguments[$argument_number] = (int) $arguments[$argument_number];
-              break;
+//            case 'int':
+//              $arguments[$argument_number] = (int) $arguments[$argument_number];
+//              break;
           }
         }
       }
