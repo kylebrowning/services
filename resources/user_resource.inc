@@ -5,7 +5,7 @@ function _user_resource_definition() {
     'user' => array(
       'operations' => array(
         'retrieve' => array(
-          'help' => 'Retrieves a user',
+          'help' => 'Retrieve a user',
           'callback' => '_user_resource_retrieve',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'access callback' => '_user_resource_access',
@@ -23,7 +23,7 @@ function _user_resource_definition() {
         ),
 
         'create' => array(
-          'help' => 'Creates a user',
+          'help' => 'Create a user',
           'callback' => '_user_resource_create',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'access callback' => '_user_resource_access',
@@ -41,7 +41,7 @@ function _user_resource_definition() {
         ),
 
         'update' => array(
-          'help' => 'Updates a user',
+          'help' => 'Update a user',
           'callback' => '_user_resource_update',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'access callback' => '_user_resource_access',
@@ -66,7 +66,7 @@ function _user_resource_definition() {
         ),
 
         'delete' => array(
-          'help' => 'Deletes a user',
+          'help' => 'Delete a user',
           'callback' => '_user_resource_delete',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'access callback' => '_user_resource_access',
@@ -83,6 +83,7 @@ function _user_resource_definition() {
           ),
         ),
         'index' => array(
+          'help' => 'List all users',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'callback' => '_user_resource_index',
           'args' => array(
