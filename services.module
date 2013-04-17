@@ -329,6 +329,20 @@ function services_get_resources($endpoint_name = '') {
 }
 
 /**
+ * Load the resources of the endpoint.
+ *
+ * @return array
+ */
+function services_get_resources_apply_settings($endpoint_name) {
+  $resources = services_get_resources($endpoint_name);
+  module_load_include('inc', 'services', 'includes/services.resource_build');
+  $endpoint = services_endpoint_load($endpoint_name);
+  _services_apply_endpoint($resources, $endpoint, TRUE);
+
+  return $resources;
+}
+
+/**
  * Returns information about resource API version information.
  * The resource API is the way modules expose resources to services,
  * not the API that is exposed to the consumers of your services.

@@ -42,9 +42,7 @@ class RESTServer {
     $canonical_path_array = explode('/', $canonical_path);
     $resource_name = array_shift($canonical_path_array);
 
-    $resources = services_get_resources($this->endpoint->name);
-    module_load_include('inc', 'services', 'includes/services.resource_build');
-    _services_apply_endpoint($resources, $this->endpoint, TRUE);
+    $resources = services_get_resources_apply_settings($this->endpoint->name);
 
     $controller = FALSE;
     if (!empty($resource_name) && isset($resources[$resource_name])) {
