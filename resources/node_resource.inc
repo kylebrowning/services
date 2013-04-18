@@ -14,7 +14,7 @@ function _node_resource_definition() {
               'optional' => FALSE,
               'source' => array('path' => 0),
               'type' => 'int',
-              'description' => 'The nid of the node to get',
+              'description' => 'The nid of the node to retrieve',
             ),
           ),
           'access callback' => '_node_resource_access',
@@ -48,7 +48,7 @@ function _node_resource_definition() {
               'optional' => FALSE,
               'source' => array('path' => 0),
               'type' => 'int',
-              'description' => 'The nid of the node to get',
+              'description' => 'The nid of the node to update',
             ),
             array(
               'name' => 'node',
