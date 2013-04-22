@@ -12,9 +12,9 @@ class ServicesSpycLibraryTests extends DrupalUnitTestCase {
    */
   public static function getInfo() {
     return array(
-      'name' => t('Spyc Library'),
-      'description' => t('Test if we can download Spyc library.'),
-      'group' => t('Services'),
+      'name' => 'Spyc Library',
+      'description' => 'Test if we can download Spyc library.',
+      'group' => 'Services',
     );
   }
 

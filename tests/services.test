@@ -462,7 +462,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $endpoint->export_type = FALSE;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
-    $this->assertTrue($endpoint->name == $edit['name'], t('Endpoint successfully created'));
+    $this->assertTrue($endpoint->name == $edit['name'], 'Endpoint successfully created');
     return $endpoint;
   }
 
@@ -691,7 +691,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     $endpoint->export_type = FALSE;
     services_endpoint_save($endpoint);
     $endpoint = services_endpoint_load($endpoint->name);
-    $this->assertTrue($endpoint->name == $edit['name'], t('Endpoint successfully created'));
+    $this->assertTrue($endpoint->name == $edit['name'], 'Endpoint successfully created');
     return $endpoint;
   }
 
@@ -784,8 +784,8 @@ class ServicesWebTestCase extends DrupalWebTestCase {
       '@status' => $status,
       '!length' => format_size(drupal_strlen($this->drupalGetContent()))
     );
-    $message = t('!method @url returned @status (!length).', $message_vars);
-    $this->assertTrue($this->drupalGetContent() !== FALSE, $message, t('Browser'));
+    $message = format_string('!method @url returned @status (!length).', $message_vars);
+    $this->assertTrue($this->drupalGetContent() !== FALSE, $message, 'Browser');
     return $this->drupalGetContent();
   }
     /**
