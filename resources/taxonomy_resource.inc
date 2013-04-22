@@ -307,7 +307,7 @@ function _taxonomy_resource_definition() {
             array(
               'name'         => 'load_entities',
               'type'         => 'int',
-              'description'  => t('Whether the tree of terms should contain full term entity objects. If 1, a full entity load will occur on the term objects. Otherwise they are partial objects to save execution time and memory consumption. Defaults to 0.'),
+              'description'  => t('Whether the tree of terms should contain full term entity objects. If 1 (TRUE), a full entity load will occur on the term objects. Otherwise they are partial objects to save execution time and memory consumption. Defaults to 0 (FALSE).'),
               'source'       => array('data' => 'load_entities'),
               'default value' => 0,
               'optional'     => TRUE,
