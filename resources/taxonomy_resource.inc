@@ -304,6 +304,14 @@ function _taxonomy_resource_definition() {
               'default value' => NULL,
               'optional'     => TRUE,
             ),
+            array(
+              'name'         => 'load_entities',
+              'type'         => 'int',
+              'description'  => t('Whether the tree of terms should contain full term entity objects. If 1, a full entity load will occur on the term objects. Otherwise they are partial objects to save execution time and memory consumption. Defaults to 0.'),
+              'source'       => array('data' => 'load_entities'),
+              'default value' => 0,
+              'optional'     => TRUE,
+            ),
           ),
         ),
       ),
@@ -472,8 +480,8 @@ function _taxonomy_vocabulary_resource_delete($vid) {
  *
  * @see taxonomy_get_tree()
  */
-function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL) {
-  $terms = taxonomy_get_tree($vid, $parent, $max_depth);
+function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL, $load_entities = 0) {
+  $terms = taxonomy_get_tree($vid, $parent, $max_depth, $load_entities);
   if (empty($terms)) {
     return services_error(t('No vocabulary with id @vid found.', array('@vid' => $vid)), 404);
   }

@@ -314,10 +314,15 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
 
     // Compare full tree.
     $vocabulary_tree = taxonomy_get_tree($vid);
-
     $response = $this->servicesPost($path . '/taxonomy_vocabulary/getTree', array('vid' => $vid));
     $vocabulary_tree_response = $response['body'];
     $this->assertEqual($vocabulary_tree, $vocabulary_tree_response, t('Vocabulary full tree received properly.'), 'TaxonomyVocabularyResource: getTree');
+
+    // Compare full tree with loading of full entities.
+    $vocabulary_tree = taxonomy_get_tree($vid, 0, NULL, TRUE);
+    $response = $this->servicesPost($path . '/taxonomy_vocabulary/getTree', array('vid' => $vid, 'load_entities' => 1));
+    $vocabulary_tree_response = $response['body'];
+    $this->assertEqual($vocabulary_tree, $vocabulary_tree_response, 'Vocabulary full tree with loaded entities received properly.', 'TaxonomyVocabularyResource: getTree');
 
     // Compare part tree.
     $vocabulary_tree = taxonomy_get_tree($vid, $part_tree_parent);
@@ -330,6 +335,12 @@ class ServicesResourceTaxonomyTests extends ServicesWebtestCase {
     $response = $this->servicesPost($path . '/taxonomy_vocabulary/getTree', array('vid' => $vid, 'parent' => $part_tree_parent, 'maxdepth' => 1));
     $vocabulary_tree_response = $response['body'];
     $this->assertEqual($vocabulary_tree, $vocabulary_tree_response, t('Vocabulary part tree with depth received properly.'), 'TaxonomyVocabularyResource: getTree');
+
+    // Compare part tree with maxdepth = 1 and loading of full entities.
+    $vocabulary_tree = taxonomy_get_tree($vid, $part_tree_parent, 1, TRUE);
+    $response = $this->servicesPost($path . '/taxonomy_vocabulary/getTree', array('vid' => $vid, 'parent' => $part_tree_parent, 'maxdepth' => 1, 'load_entities' => 1));
+    $vocabulary_tree_response = $response['body'];
+    $this->assertEqual($vocabulary_tree, $vocabulary_tree_response, 'Vocabulary part tree with depth and loaded entities received properly.', 'TaxonomyVocabularyResource: getTree');
   }
 
   /**
