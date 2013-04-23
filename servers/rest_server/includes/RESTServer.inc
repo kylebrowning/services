@@ -561,7 +561,7 @@ class RESTServer {
     return $args_number >= $required_args && $args_number <= $required_args + $not_required_args;
   }
 
-  public function handleException($exception){
+  public function handleException($exception, $controller = array(), $arguments = array()){
     $error_code = $exception->getCode();
     $error_message = $exception->getMessage();
     $error_data = method_exists($exception, 'getData') ? $exception->getData() : '';
@@ -599,7 +599,10 @@ class RESTServer {
     );
     drupal_alter('rest_server_execute_errors', $error_alter_array, $controller, $arguments);
 
-    drupal_add_http_header('Status', $error_header_status_message);
+    drupal_add_http_header('Status', strip_tags($error_header_status_message));
+    if ($this->endpoint->debug) {
+      debug($exception);
+    }
 
     return $error_data;
   }

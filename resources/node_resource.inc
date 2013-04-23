@@ -5,6 +5,7 @@ function _node_resource_definition() {
     'node' => array(
       'operations' => array(
         'retrieve' => array(
+          'help' => 'Retrieve a node',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
           'callback' => '_node_resource_retrieve',
           'args' => array(
@@ -13,7 +14,7 @@ function _node_resource_definition() {
               'optional' => FALSE,
               'source' => array('path' => 0),
               'type' => 'int',
-              'description' => 'The nid of the node to get',
+              'description' => 'The nid of the node to retrieve',
             ),
           ),
           'access callback' => '_node_resource_access',
@@ -21,6 +22,7 @@ function _node_resource_definition() {
           'access arguments append' => TRUE,
         ),
         'create' => array(
+          'help' => 'Create a node',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
           'callback' => '_node_resource_create',
           'args' => array(
@@ -37,6 +39,7 @@ function _node_resource_definition() {
           'access arguments append' => TRUE,
         ),
         'update' => array(
+          'help' => 'Update a node',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
           'callback' => '_node_resource_update',
           'args' => array(
@@ -45,7 +48,7 @@ function _node_resource_definition() {
               'optional' => FALSE,
               'source' => array('path' => 0),
               'type' => 'int',
-              'description' => 'The nid of the node to get',
+              'description' => 'The nid of the node to update',
             ),
             array(
               'name' => 'node',
@@ -60,6 +63,7 @@ function _node_resource_definition() {
           'access arguments append' => TRUE,
         ),
         'delete' => array(
+          'help' => t('Delete a node'),
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
           'callback' => '_node_resource_delete',
           'args' => array(
@@ -75,6 +79,7 @@ function _node_resource_definition() {
           'access arguments append' => TRUE,
         ),
         'index' => array(
+          'help' => 'List all nodes',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
           'callback' => '_node_resource_index',
           'args' => array(
@@ -159,7 +164,7 @@ function _node_resource_definition() {
       'relationships' => array(
         'files' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
-          'help'   => t('This method returns files associated with a node.'),
+          'help'   => 'This method returns files associated with a node.',
           'access callback' => '_node_resource_access',
           'access arguments' => array('view'),
           'access arguments append' => TRUE,
@@ -196,7 +201,7 @@ function _node_resource_definition() {
   if (module_exists('comment')) {
     $comments = array(
       'file'                    => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/node_resource'),
-      'help'                    => t('This method returns the number of new comments on a given node.'),
+      'help'                    => 'This method returns the number of new comments on a given node.',
       'access callback'         => 'user_access',
       'access arguments'        => array('access comments'),
       'access arguments append' => FALSE,
@@ -638,7 +643,7 @@ function _node_resource_attach_file($nid, $field_name, $attach, $field_values) {
   list($files, $file_objs) = _node_resource_file_save_upload($node_type, $field_name, $options);
   // Retrieve the field settings.
   $field = field_info_field($field_name);
-  
+
   foreach ($file_objs as $key => $file_obj) {
     if (isset($field_values[$key])) {
       foreach ($field_values[$key] as $key => $value) {

@@ -360,29 +360,6 @@ function services_error($message, $code = 0, $data = NULL) {
 }
 
 /**
- * Make any changes we might want to make to node.
- */
-function services_node_load($node, $fields = array()) {
-  if (!isset($node->nid)) {
-    return NULL;
-  }
-
-  // Loop through and get only requested fields
-  if (count($fields) > 0) {
-    foreach ($fields as $field) {
-      $val->{$field} = $node->{$field};
-    }
-  }
-  else {
-    $val = $node;
-  }
-
-  return $val;
-}
-
-
-
-/**
  * Extract arguments for a services method callback, preserving backwards compatibility with #1083242.
  *
  * @param array $data
