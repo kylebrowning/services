@@ -1,13 +1,21 @@
 <?php
 
 interface ServicesFormatterInterface {
+  /**
+   * Render data to the string.
+   *
+   * @param $data
+   *   Data to render
+   *
+   * @return string
+   */
   public function render($data);
 }
 
 class ServicesJSONFormatter implements ServicesFormatterInterface {
   public function render($data) {
     // json_encode doesn't give valid json with data that isn't an array/object.
-    if (!is_array($data) && !is_object($data)) {
+    if (is_scalar($data)) {
       $data = array($data);
     }
     return str_replace('\\/', '/', json_encode($data));

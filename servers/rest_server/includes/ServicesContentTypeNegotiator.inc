@@ -25,11 +25,28 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
     return $matches[2];
   }
 
+  /**
+   * Parse canonical path. It may have extension in the end (example node/1.json).
+   * This function returns canonical path without extension.
+   *
+   * @param string $canonical_path
+   *
+   * @return string
+   *   Canonical path without extension.
+   */
   public function getParsedCanonicalPath($canonical_path) {
     $matches = $this->getCanonicalPathMatches($canonical_path);
     return $matches[1];
   }
 
+  /**
+   * Preg match canonical path to split it to clean path and extension.
+   *
+   * @param string $canonical_path
+   *   Canonical path with extension.
+   * @return array
+   *   Array of matches.
+   */
   public function getCanonicalPathMatches($canonical_path) {
     $matches = array();
     if (preg_match('/^(.+)\.([^\.^\/]+)$/', $canonical_path, $matches)) {
@@ -40,6 +57,16 @@ class ServicesContentTypeNegotiator implements ServicesContentTypeNegotiatorInte
 
   /**
    * Determine response format and mime type using headers to negotiate content types.
+   *
+   * @param string $mime_type
+   *   Mime type. This variable to be overriden.
+   * @param string $canonical_path
+   *   Canonical path of the request.
+   * @param array $formats
+   *   Enabled formats by endpoint.
+   *
+   * @return string
+   *   Negotiated response format. For example 'json'.
    */
   public function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $formats, $context) {
     drupal_add_http_header('Vary', 'Accept');

@@ -97,6 +97,14 @@ class RESTServer {
 
   /**
    * Wrapper around resolveController() to apply version.
+   *
+   * @param array $resource
+   *   Resource definition
+   * @param string $resource_name
+   *   Name of the resource. Needed for applying version.
+   *
+   * @return array $controller
+   *   Controller definition
    */
   protected function resolveControllerApplyVersion($resource, $resource_name) {
     $apply_version_method = '';
@@ -210,6 +218,16 @@ class RESTServer {
 
   /**
    * Determine response format and mime type using headers to negotiate content types.
+   *
+   * @param string $mime_type
+   *   Mime type. This variable to be overriden.
+   * @param string $canonical_path
+   *   Canonical path of the request.
+   * @param array $formats
+   *   Enabled formats by endpoint.
+   *
+   * @return string
+   *   Negotiated response format. For example 'json'.
    */
   protected function getResponseFormatContentTypeNegotiations(&$mime_type, $canonical_path, $formats) {
     return $this->negotiator->getResponseFormatContentTypeNegotiations($mime_type, $canonical_path, $formats, $this->context);
@@ -370,6 +388,14 @@ class RESTServer {
     }
   }
 
+  /**
+   * Extract value of the header string.
+   *
+   * @param string $value
+   *
+   * @return array $type
+   *   Value that is used $type['value']
+   */
   protected function parseContentHeader($value) {
     $ret_val = array();
     $value_pattern = '/^([^;]+)(;\s*(.+)\s*)?$/';
@@ -396,6 +422,17 @@ class RESTServer {
     return $ret_val;
   }
 
+  /**
+   * Render results using formatter.
+   *
+   * @param array $formatter
+   *   Formatter definition
+   * @param $result
+   *   Value to be rendered
+   *
+   * @return string
+   *   Rendered result
+   */
   protected function render($formatter, $result) {
     if ( !isset($formatter['formatter class'])
       || array_search('ServicesFormatterInterface', class_implements($formatter['formatter class'])) === FALSE) {
@@ -422,6 +459,18 @@ class RESTServer {
     return ($mime_type) ? $parsers[$mime_type] : FALSE;
   }
 
+  /**
+   * Determine controller.
+   *
+   * @param array $resource
+   *   Full definition of the resource.
+   * @param string $operation
+   *   Type of operation ('index', 'retrieve' etc.). We are going to override this variable.
+   *   Needed for applying version.
+   *
+   * @return array
+   *   Controller definition.
+   */
   protected function resolveController($resource, &$operation) {
     $request_method = $this->getRequestMethod();
 
@@ -435,9 +484,9 @@ class RESTServer {
     // We do not group "if" conditions on purpose for better readability.
 
     // 'index' method.
-    if (  $request_method == 'GET'
-          && isset($resource['operations']['index'])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['index'])
+    if (   $request_method == 'GET'
+        && isset($resource['operations']['index'])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['index'])
       ) {
       $operation_type = 'operations';
       $operation = 'index';
@@ -445,11 +494,11 @@ class RESTServer {
 
     // 'retrieve' method.
     // First path element should be not empty.
-    if (  $request_method == 'GET'
-          && $canon_path_count >= 1
-          && isset($resource['operations']['retrieve'])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['retrieve'])
-          && !empty($canonical_path_array[0])
+    if (   $request_method == 'GET'
+        && $canon_path_count >= 1
+        && isset($resource['operations']['retrieve'])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['retrieve'])
+        && !empty($canonical_path_array[0])
       ) {
       $operation_type = 'operations';
       $operation = 'retrieve';
@@ -458,11 +507,11 @@ class RESTServer {
     // 'relationships'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if (  $request_method == 'GET'
-          && $canon_path_count >= 2
-          && isset($resource['relationships'][$canonical_path_array[1]])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['relationships'][$canonical_path_array[1]], 1)
-          && isset($canonical_path_array[0])
+    if (   $request_method == 'GET'
+        && $canon_path_count >= 2
+        && isset($resource['relationships'][$canonical_path_array[1]])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['relationships'][$canonical_path_array[1]], 1)
+        && isset($canonical_path_array[0])
       ) {
       $operation_type = 'relationships';
       $operation = $canonical_path_array[1];
@@ -470,11 +519,11 @@ class RESTServer {
 
     // 'update'
     // First path element should be not empty.
-    if (  $request_method == 'PUT'
-          && $canon_path_count >= 1
-          && isset($resource['operations']['update'])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['update'])
-          && !empty($canonical_path_array[0])
+    if (   $request_method == 'PUT'
+        && $canon_path_count >= 1
+        && isset($resource['operations']['update'])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['update'])
+        && !empty($canonical_path_array[0])
       ) {
       $operation_type = 'operations';
       $operation = 'update';
@@ -482,11 +531,11 @@ class RESTServer {
 
     // 'delete'
     // First path element should be not empty.
-    if (  $request_method == 'DELETE'
-          && $canon_path_count >= 1
-          && isset($resource['operations']['delete'])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['delete'])
-          && !empty($canonical_path_array[0])
+    if (   $request_method == 'DELETE'
+        && $canon_path_count >= 1
+        && isset($resource['operations']['delete'])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['delete'])
+        && !empty($canonical_path_array[0])
       ) {
       $operation_type = 'operations';
       $operation = 'delete';
@@ -494,9 +543,9 @@ class RESTServer {
 
     // 'create' method.
     // First path element should be not empty.
-    if (  $request_method == 'POST'
-          && isset($resource['operations']['create'])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['create'])
+    if (   $request_method == 'POST'
+        && isset($resource['operations']['create'])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['operations']['create'])
       ) {
       $operation_type = 'operations';
       $operation = 'create';
@@ -504,10 +553,10 @@ class RESTServer {
 
     // 'actions'
     // Forst path element should be action name
-    if (  $request_method == 'POST'
-          && $canon_path_count >= 1
-          && isset($resource['actions'][$canonical_path_array[0]])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['actions'][$canonical_path_array[0]], 1)
+    if (   $request_method == 'POST'
+        && $canon_path_count >= 1
+        && isset($resource['actions'][$canonical_path_array[0]])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['actions'][$canonical_path_array[0]], 1)
       ) {
       $operation_type = 'actions';
       $operation = $canonical_path_array[0];
@@ -516,11 +565,11 @@ class RESTServer {
     // 'targeted_actions'
     // First path element should be not empty,
     // second should be name of targeted action.
-    if (  $request_method == 'POST'
-          && $canon_path_count >= 2
-          && isset($resource['targeted_actions'][$canonical_path_array[1]])
-          && $this->checkNumberOfArguments($canon_path_count, $resource['targeted_actions'][$canonical_path_array[1]], 1)
-          && !empty($canonical_path_array[0])
+    if (   $request_method == 'POST'
+        && $canon_path_count >= 2
+        && isset($resource['targeted_actions'][$canonical_path_array[1]])
+        && $this->checkNumberOfArguments($canon_path_count, $resource['targeted_actions'][$canonical_path_array[1]], 1)
+        && !empty($canonical_path_array[0])
       ) {
       $operation_type = 'targeted_actions';
       $operation = $canonical_path_array[1];
@@ -561,6 +610,19 @@ class RESTServer {
     return $args_number >= $required_args && $args_number <= $required_args + $not_required_args;
   }
 
+  /**
+   * Set proper header and message in case of exception.
+   *
+   * @param object $exception
+   *   Exception object
+   * @param array $controller
+   *   Controller that was executed.
+   * @param array $arguments
+   *   Set of arguments.
+   *
+   * @return string $error_data
+   *   Error message from exception.
+   */
   public function handleException($exception, $controller = array(), $arguments = array()){
     $error_code = $exception->getCode();
     $error_message = $exception->getMessage();
