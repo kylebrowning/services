@@ -20,12 +20,10 @@ use Drupal\Core\Annotation\Translation;
  *   module = "services",
  *   controllers = {
  *     "storage" = "Drupal\services\EndpointStorageController",
- *     "list" = "Drupal\views_ui\EndpointListController",
+ *     "list" = "Drupal\services\EndpointListController",
  *     "form" = {
  *       "edit" = "Drupal\views_ui\ViewEditFormController",
  *       "add" = "Drupal\views_ui\ViewAddFormController",
- *       "preview" = "Drupal\views_ui\ViewPreviewFormController",
- *       "clone" = "Drupal\views_ui\ViewCloneFormController"
  *     }
  *   },
  *   config_prefix = "services.endpoint",
@@ -74,4 +72,39 @@ class Endpoint extends ConfigEntityBase {
    * @var boolean
    */
   public $debug;
+
+  /**
+   * Overrides Drupal\Core\Entity\EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'admin/structure/services/endpoint/' . $this->id(),
+      'options' => array(
+        'entity_type' => $this->entityType,
+        'entity' => $this,
+      ),
+    );
+  }
+
+  /**
+   * Overrides \Drupal\Core\Config\Entity\ConfigEntityBase::getExportProperties();
+   */
+  public function getExportProperties() {
+    $names = array(
+      'label',
+      'path',
+      'authentication',
+      'settings',
+      'debug',
+      'label',
+      'id',
+      'uuid',
+    );
+    $properties = array();
+    foreach ($names as $name) {
+      $properties[$name] = $this->get($name);
+    }
+    return $properties;
+  }
+
 }
