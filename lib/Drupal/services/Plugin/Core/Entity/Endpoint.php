@@ -20,7 +20,7 @@ use Drupal\Core\Annotation\Translation;
  *   module = "services",
  *   controllers = {
  *     "storage" = "Drupal\services\EndpointStorageController",
- *     "list" = "Drupal\views_ui\ViewListController",
+ *     "list" = "Drupal\views_ui\EndpointListController",
  *     "form" = {
  *       "edit" = "Drupal\views_ui\ViewEditFormController",
  *       "add" = "Drupal\views_ui\ViewAddFormController",
