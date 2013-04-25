@@ -19,3 +19,16 @@ function services_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function services_permission() {
+  return array(
+    'administer services' => array(
+      'title' => t('Administer services'),
+      'description' => t('Access the services administration pages.'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
