@@ -23,7 +23,7 @@ use Drupal\Core\Annotation\Translation;
  *     "list" = "Drupal\services\EndpointListController",
  *     "form" = {
  *       "edit" = "Drupal\views_ui\ViewEditFormController",
- *       "add" = "Drupal\views_ui\ViewAddFormController",
+ *       "add" = "Drupal\services\EndpointAddFormController",
  *     }
  *   },
  *   config_prefix = "services.endpoint",
@@ -37,6 +37,13 @@ use Drupal\Core\Annotation\Translation;
  * )
  */
 class Endpoint extends ConfigEntityBase {
+
+  /**
+   * ID.
+   *
+   * @var string
+   */
+  public $id;
 
   /**
    * Label.

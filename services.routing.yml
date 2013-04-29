@@ -4,14 +4,14 @@ services.list:
     _controller: '\Drupal\services\Routing\ServicesUIController::listing'
   requirements:
     _permission: 'administer services'
-#
-#views_ui.add:
-#  pattern: '/admin/structure/views/add'
-#  defaults:
-#    _controller: '\Drupal\views_ui\Routing\ViewsUIController::add'
-#  requirements:
-#    _permission: 'administer views'
-#
+
+services.add:
+  pattern: '/admin/structure/services/add'
+  defaults:
+    _controller: '\Drupal\services\Routing\ServicesUIController::add'
+  requirements:
+    _permission: 'administer services'
+
 #views_ui.settings.basic:
 #  pattern: '/admin/structure/views/settings'
 #  defaults:

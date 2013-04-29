@@ -17,6 +17,17 @@ function services_menu() {
     'route_name' => 'services.list',
   );
 
+  $items['admin/structure/services/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/structure/services/add'] = array(
+    'title' => 'Add new endpoint',
+    'route_name' => 'services.add',
+    'type' => MENU_LOCAL_ACTION,
+  );
+
   return $items;
 }
 
@@ -31,4 +42,17 @@ function services_permission() {
       'restrict access' => TRUE,
     ),
   );
+}
+
+/**
+ * Loads endpoint from configuration.
+ *
+ * @param string $name
+ *   The name of the endpoint
+ *
+ * @return \Drupal\Core\TypedData\TypedDataInterface
+ */
+function services_get_endpoint($name) {
+  $view = entity_load('endpoint', $name);
+  return $view;
 }

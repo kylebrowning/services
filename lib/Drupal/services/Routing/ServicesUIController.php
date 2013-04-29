@@ -53,10 +53,6 @@ class ServicesUIController implements ControllerInterface {
    *
    * @param \Drupal\Core\Entity\EntityManager $entity_manager
    *   The Entity manager.
-   * @param \Drupal\views\ViewsDataCache views_data
-   *   The Views data cache object.
-   * @param \Drupal\user\TempStoreFactory $temp_store_factory
-   *   The factory for the temp store object.
    */
   public function __construct(EntityManager $entity_manager) {
     $this->entityManager = $entity_manager;
@@ -72,10 +68,10 @@ class ServicesUIController implements ControllerInterface {
   }
 
   /**
-   * Lists all of the views.
+   * Lists all of the endpoints.
    *
    * @return array
-   *   The Views listing page.
+   *   The Endpoints listing page.
    */
   public function listing() {
     return $this->entityManager->getListController('endpoint')->render();
@@ -85,69 +81,13 @@ class ServicesUIController implements ControllerInterface {
    * Returns the form to add a new view.
    *
    * @return array
-   *   The Views add form.
+   *   The Endpoint add form.
    */
   public function add() {
-    drupal_set_title(t('Add new view'));
+    drupal_set_title(t('Add new endpoint'));
 
-    $entity = $this->entityManager->getStorageController('view')->create(array());
+    $entity = $this->entityManager->getStorageController('endpoint')->create(array());
     return entity_get_form($entity, 'add');
-  }
-
-  /**
-   * Lists all instances of fields on any views.
-   *
-   * @return array
-   *   The Views fields report page.
-   */
-  public function reportFields() {
-    $views = $this->entityManager->getStorageController('view')->load();
-
-    // Fetch all fieldapi fields which are used in views
-    // Therefore search in all views, displays and handler-types.
-    $fields = array();
-    $handler_types = ViewExecutable::viewsHandlerTypes();
-    foreach ($views as $view) {
-      $executable = $view->get('executable');
-      $executable->initDisplay();
-      foreach ($executable->displayHandlers as $display_id => $display) {
-        if ($executable->setDisplay($display_id)) {
-          foreach ($handler_types as $type => $info) {
-            foreach ($executable->getItems($type, $display_id) as $item) {
-              $table_data = $this->viewsData->get($item['table']);
-              if (isset($table_data[$item['field']]) && isset($table_data[$item['field']][$type])
-                && $field_data = $table_data[$item['field']][$type]) {
-                // The final check that we have a fieldapi field now.
-                if (isset($field_data['field_name'])) {
-                  $fields[$field_data['field_name']][$view->id()] = $view->id();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    $header = array(t('Field name'), t('Used in'));
-    $rows = array();
-    foreach ($fields as $field_name => $views) {
-      $rows[$field_name]['data'][0] = check_plain($field_name);
-      foreach ($views as $view) {
-        $rows[$field_name]['data'][1][] = l($view, "admin/structure/views/view/$view");
-      }
-      $rows[$field_name]['data'][1] = implode(', ', $rows[$field_name]['data'][1]);
-    }
-
-    // Sort rows by field name.
-    ksort($rows);
-    $output = array(
-      '#theme' => 'table',
-      '#header' => $header,
-      '#rows' => $rows,
-      '#empty' => t('No fields have been used in views yet.'),
-    );
-
-    return $output;
   }
 
   /**
