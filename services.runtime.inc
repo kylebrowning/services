@@ -106,8 +106,8 @@ function services_controller_execute($controller, $args = array(), $options = ar
   $original_user = $user;
 
   if (strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE) {
-    $old_state = drupal_save_session();
-    drupal_save_session(FALSE);
+    $old_state = session_save_session();
+    session_save_session(FALSE);
   }
   $user = drupal_anonymous_user();
   $user->timestamp = time();
@@ -172,7 +172,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   drupal_alter('services_request_postprocess', $controller);
 
   if (strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE) {
-    drupal_save_session($old_state);
+    session_save_session($old_state);
   }
   if ($server_info->debug) {
     watchdog('services', 'results: <pre>@results</pre>', array('@results' => print_r($result, TRUE)), WATCHDOG_DEBUG);
