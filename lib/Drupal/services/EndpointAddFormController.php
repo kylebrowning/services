@@ -82,28 +82,25 @@ class EndpointAddFormController extends EntityFormController {
   }
 
   /**
-   * Overrides Drupal\Core\Entity\EntityFormController::validate().
-   */
-  public function validate(array $form, array &$form_state) {
-  }
-
-  /**
    * Overrides Drupal\Core\Entity\EntityFormController::submit().
    */
   public function submit(array $form, array &$form_state) {
-    $fv = $form_state['values'];
-    $endpoint_form_values = array(
-      'label' => $fv['label'],
-      'id' => $fv['id'],
-      'path' => $fv['path'],
-    );
+    $endpoint = parent::submit($form, $form_state);
 
-    $endpoint = $this->entityManager->getStorageController('endpoint')->create($endpoint_form_values);
-    $endpoint->save();
+    $form_state['redirect'] = array('admin/structure/services/endpoint/' . $endpoint->id());
 
-    $form_state['redirect'] = array('admin/structure/services');
-//    $form_state['redirect'] = array('admin/structure/services/endpoint/' . $endpoint->id());
+    return $endpoint;
   }
+
+
+  /**
+   * Overrides Drupal\Core\Entity\EntityFormController::save().
+   */
+  public function save(array $form, array &$form_state) {
+    $endpoint = $this->getEntity($form_state);
+    $endpoint->save();
+  }
+
 
   /**
    * Form submission handler for the 'cancel' action.
