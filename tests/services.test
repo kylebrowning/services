@@ -494,7 +494,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         'application/plist+xml' => TRUE,
         'application/vnd.php.serialized' => TRUE,
         'multipart/form-data' => TRUE,
-        'application/x-www-form-urlencoded' => FALSE,
+        'application/x-www-form-urlencoded' => TRUE,
       ),
     );
     $endpoint->resources = array(
@@ -658,6 +658,11 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         'actions' => array(
           'login' => array(
             'enabled' => '1',
+            'settings' => array(
+              'services' => array(
+                'resource_api_version' => $version,
+              ),
+            ),
           ),
           'logout' => array(
             'enabled' => '1',

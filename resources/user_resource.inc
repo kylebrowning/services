@@ -522,3 +522,29 @@ function _user_resource_access($op = 'view', $args = array()) {
       return user_access('administer users');
   }
 }
+
+/**
+ * Changes the user/login endpoint to accept the same parameters as the user/register endpoint, namely
+ * "name" instead of "username" and "pass" instead of "password"
+ */
+function _user_resource_login_update_1_1() {
+  $new_set = array(
+    'args' => array(
+      array(
+        'name' => 'name',
+        'type' => 'string',
+        'description' => 'A valid username',
+        'source' => array('data' => 'name'),
+        'optional' => FALSE,
+      ),
+      array(
+        'name' => 'pass',
+        'type' => 'string',
+        'description' => 'A valid password',
+        'source' => array('data' => 'pass'),
+        'optional' => FALSE,
+      ),
+    ),
+  );
+  return $new_set;
+}

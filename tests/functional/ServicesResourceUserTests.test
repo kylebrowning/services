@@ -364,7 +364,46 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $this->assertTrue(strpos($response['status'], 'Wrong username or password') !== FALSE,
       'User cannot login with wrong username / password.', 'UserResource: Login');
   }
+  /**
+   * Test login method. API VERsion 1.1
+   *
+   * Create user. Login. Try to login with another user (to get error).
+   * Login with wrong credentials (to get error).
+   */
+  function testUserLoginMethodAPI_1_1() {
+    $this->endpoint = $this->saveNewVersionEndpoint('1.1');
+    $path = $this->endpoint->path;
+    $account = $this->drupalCreateUser();
 
+    // Logout first.
+    $this->drupalLogout();
+
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $account->pass_raw));
+
+    $response_data = $response['body'];
+    $this->assertTrue(strpos($response['status'], 'Missing required argument name') !== FALSE,
+      'User Resource is rejecting old parameter names.', 'UserResource: Login');
+
+    $responseArray = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $account->pass_raw),
+      array('services_user_login_version: 1.0'));
+    $this->assertTrue($responseArray['code'] == '200', 'Arguments should be old arguments and we should be logged in.',
+      'Services Version System');
+    $response_data = $responseArray['body'];
+    $proper_answer = isset($response_data->sessid)
+                  && isset($response_data->user)
+                  && $response_data->user->name == $account->name;
+    $this->assertTrue($proper_answer, 'User successfully logged in.', 'UserResource: Login');
+    $this->drupalLogout();
+    $responseArray = $this->servicesPost($this->endpoint->path . '/user/login', array('name' => $account->name, 'pass' => $account->pass_raw),
+      array('services_user_login_version: 1.1'));
+    $this->assertTrue($responseArray['code'] == '200', 'Arguments should be old arguments and we should be logged in.',
+      'Services Version System');
+    $response_data = $responseArray['body'];
+    $proper_answer = isset($response_data->sessid)
+                  && isset($response_data->user)
+                  && $response_data->user->name == $account->name;
+    $this->assertTrue($proper_answer, 'User successfully logged in.', 'UserResource: Login');
+  }
   /**
    * Test logout method.
    */
