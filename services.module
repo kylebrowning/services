@@ -767,6 +767,11 @@ function services_remove_user_data(&$account) {
     unset($account->init);
   }
   drupal_alter('services_account_object', $account);
+
+  // Add the full URL to the user picture, if one is present.
+  if (variable_get('user_pictures', FALSE) && isset($account->picture->uri)) {
+    $account->picture->url = file_create_url($account->picture->uri);
+  }
 }
 
 /**
