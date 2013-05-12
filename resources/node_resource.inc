@@ -72,6 +72,7 @@ function _node_resource_definition() {
               'optional' => FALSE,
               'source' => array('path' => 0),
               'type' => 'int',
+              'description' => 'The nid of the node to delete',
             ),
           ),
           'access callback' => '_node_resource_access',
@@ -139,7 +140,7 @@ function _node_resource_definition() {
               'name' => 'field_name',
               'optional' => FALSE,
               'source' => array('data' => 'field_name'),
-              'description' => 'The file parameters',
+              'description' => 'The file field name',
               'type' => 'string',
             ),
             array(
