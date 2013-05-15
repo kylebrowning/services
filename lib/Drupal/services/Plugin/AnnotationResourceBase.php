@@ -140,12 +140,9 @@ abstract class AnnotationResourceBase extends ResourceBase {
 
   protected function getResourceMethodAnnotationDefinition($method_name) {
     $reflection_method = new \ReflectionMethod(get_class($this), $method_name);
-    $method_annotations = $this->reader->getMethodAnnotations($reflection_method);
-
-    foreach ($method_annotations as $annotation) {
-      if (strpos(get_class($annotation), 'ResourceMethod') !== FALSE) {
-        return $annotation->get();
-      }
+    $annotation = $this->reader->getMethodAnnotation($reflection_method, 'Drupal\services\Annotation\ResourceMethod');
+    if (!empty($annotation)) {
+      return $annotation->get();
     }
   }
 }
