@@ -48,8 +48,8 @@ abstract class AnnotationResourceBase extends ResourceBase {
       $lower_method = strtolower($method);
       $annotation = $this->getMethodAnnotation($method);
 
-      $route = new Route("/$path_prefix/" . $annotation['uri'], array(
-        '_controller' => 'Drupal\rest\RequestHandler::handle',
+      $route = new Route('/' . $annotation['uri'], array(
+        '_controller' => 'Drupal\services\AnnotationRequestHandler::handle',
         // Pass the resource plugin ID along as default property.
         '_plugin' => $this->pluginId,
       ), array(

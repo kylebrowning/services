@@ -1,0 +1,6 @@
+services:
+  services.route_subscriber:
+    class: Drupal\services\EventSubscriber\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
+    arguments: ['@plugin.manager.rest', '@config.factory']
