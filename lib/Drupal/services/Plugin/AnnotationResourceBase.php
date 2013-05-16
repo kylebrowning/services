@@ -39,49 +39,27 @@ abstract class AnnotationResourceBase extends ResourceBase {
    * Implements ResourceInterface::routes().
    */
   public function routes() {
-    $collection = new RouteCollection();
+    $collection = parent::routes();
     $path_prefix = strtr($this->pluginId, ':', '/');
     $route_name = strtr($this->pluginId, ':', '.');
 
-    $methods = $this->availableMethods();
+    $methods = $this->getAnnotatedMethods();
     foreach ($methods as $method) {
       $lower_method = strtolower($method);
-      $route = new Route("/$path_prefix/{id}", array(
+      $annotation = $this->getMethodAnnotation($method);
+
+      $route = new Route("/$path_prefix/" . $annotation['uri'], array(
         '_controller' => 'Drupal\rest\RequestHandler::handle',
         // Pass the resource plugin ID along as default property.
         '_plugin' => $this->pluginId,
       ), array(
         // The HTTP method is a requirement for this route.
-        '_method' => $method,
+        '_method' => $annotation['httpMethod'],
+        '_operation' => $method,
         '_permission' => "restful $lower_method $this->pluginId",
       ));
 
-      switch ($method) {
-        case 'POST':
-          // POST routes do not require an ID in the URL path.
-          $route->setPattern("/$path_prefix");
-          $route->addDefaults(array('id' => NULL));
-          $collection->add("$route_name.$method", $route);
-          break;
-
-        case 'GET':
-        case 'HEAD':
-          // Restrict GET and HEAD requests to the media type specified in the
-          // HTTP Accept headers.
-          $formats = drupal_container()->getParameter('serializer.formats');
-          foreach ($formats as $format_name) {
-            // Expose one route per available format.
-            //$format_route = new Route($route->getPattern(), $route->getDefaults(), $route->getRequirements());
-            $format_route = clone $route;
-            $format_route->addRequirements(array('_format' => $format_name));
-            $collection->add("$route_name.$method.$format_name", $format_route);
-          }
-          break;
-
-        default:
-          $collection->add("$route_name.$method", $route);
-          break;
-      }
+      $collection->add("$route_name.$lower_method", $route);
     }
 
     return $collection;

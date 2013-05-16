@@ -37,4 +37,23 @@ class AnnotationResourceTest extends UnitTestCase {
     $method_annotation_expected = array('httpMethod' => 'POST', 'uri' => $method_name);
     $this->assertEquals($method_annotation, $method_annotation_expected, 'Annotation for method ' . $method_name . ' retrieved');
   }
+
+  /**
+   * Test case for routes() method.
+   */
+  function testRoutes() {
+    $resource = new TestAnnotationResource(array(), 'plugin_id', array());
+
+    $collection = $resource->routes();
+    $customCall_route = $collection->get('plugin_id.customcall');
+    $path = $customCall_route->getPath();
+    $this->assertEquals('/plugin_id/customCall', $path, 'Route path expected');
+
+    $route_methods = $customCall_route->getMethods();
+    $httpMethod = reset($route_methods);
+    $this->assertEquals('POST', $httpMethod, 'Route method expected');
+
+    $operation = $customCall_route->getRequirement('_operation');
+    $this->assertEquals('customCall', $operation, 'Operation expected');
+  }
 }
