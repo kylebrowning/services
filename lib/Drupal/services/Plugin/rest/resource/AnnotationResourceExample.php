@@ -31,4 +31,16 @@ class AnnotationResourceExample extends AnnotationResourceBase {
   public function exampleGetCall() {
     return new ResourceResponse(array('message' => 'Hello World!'));
   }
+
+  /**
+   * Example GET call.
+   *
+   * @ResourceMethod(
+   *   httpMethod = "POST",
+   *   uri = "examplePostCall"
+   * )
+   */
+  public function examplePostCall() {
+    return new ResourceResponse(array('message' => 'POST call'));
+  }
 }

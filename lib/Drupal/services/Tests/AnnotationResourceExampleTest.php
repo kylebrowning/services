@@ -30,9 +30,9 @@ class AnnotationResourceExampleTest extends RESTTestBase {
   }
 
   /**
-   * Tests GET call exampleGetCall.
+   * Tests rest calls.
    */
-  public function testExampleGetCall() {
+  public function testRESTCalls() {
     // Create a user account that has the required permissions to read
     // the watchdog resource via the REST API.
     $account = $this->drupalCreateUser();
@@ -45,5 +45,11 @@ class AnnotationResourceExampleTest extends RESTTestBase {
     $decoded_expected = array('message' => 'Hello World!');
 
     $this->assertIdentical($decoded_expected, $decoded_response, 'exampleGetCall response expected');
+
+    $response = $this->httpRequest('examplePostCall', 'POST', NULL, $this->defaultMimeType);
+    $decoded_response = drupal_json_decode($response);
+    $decoded_expected = array('message' => 'POST call');
+
+    $this->assertIdentical($decoded_expected, $decoded_response, 'examplePostCall response expected');
   }
 }
