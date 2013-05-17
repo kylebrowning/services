@@ -43,13 +43,16 @@ class AnnotationResourceExampleTest extends RESTTestBase {
     $this->assertHeader('content-type', $this->defaultMimeType);
     $decoded_response = drupal_json_decode($response);
     $decoded_expected = array('message' => 'Hello World!');
-
     $this->assertIdentical($decoded_expected, $decoded_response, 'exampleGetCall response expected');
 
     $response = $this->httpRequest('examplePostCall', 'POST', NULL, $this->defaultMimeType);
     $decoded_response = drupal_json_decode($response);
     $decoded_expected = array('message' => 'POST call');
-
     $this->assertIdentical($decoded_expected, $decoded_response, 'examplePostCall response expected');
+
+    $response = $this->httpRequest('getCallArguments/1/2', 'GET', NULL, $this->defaultMimeType);
+    $decoded_response = drupal_json_decode($response);
+    $decoded_expected = array('arg1' => '1', 'arg2' => '2');
+    $this->assertIdentical($decoded_expected, $decoded_response, 'getCallArguments response expected');
   }
 }

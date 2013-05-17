@@ -19,20 +19,18 @@ use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 /**
  * Acts as intermediate request forwarder for resource plugins.
  */
-class AnnotationRequestHandler extends RequestHandler {
+class AnnotationRequestHandler extends ContainerAware {
 
   /**
    * Handles a web API request.
    *
    * @param Symfony\Component\HttpFoundation\Request $request
    *   The HTTP request object.
-   * @param mixed $id
-   *   The resource ID.
    *
    * @return \Symfony\Component\HttpFoundation\Response
    *   The response object.
    */
-  public function handle(Request $request, $id = NULL) {
+  public function handle(Request $request) {
     $route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT);
     $plugin = $route->getDefault('_plugin');
     $operation = $route->getRequirement('_operation');
@@ -77,7 +75,10 @@ class AnnotationRequestHandler extends RequestHandler {
     // format requirement. If there is no format associated, just pick HAL.
     $format = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT)->getRequirement('_format') ?: 'hal_json';
     try {
-      $response = $resource->{$operation}($id, $unserialized, $request);
+      $operation_annotation = $resource->getMethodAnnotation($operation);
+      $arguments = $this->getArguments($operation_annotation, $request, $unserialized);
+
+      $response = $resource->{$operation}($arguments, $unserialized, $request);
     }
     catch (HttpException $e) {
       $error['error'] = $e->getMessage();
@@ -96,6 +97,27 @@ class AnnotationRequestHandler extends RequestHandler {
       $response->headers->set('Content-Type', $request->getMimeType($format));
     }
     return $response;
+  }
+
+  protected function getArguments($operation_annotation, $request, $unserialized) {
+    if (!isset($operation_annotation['parameters'])) {
+      return;
+    }
+
+    $arguments = array();
+
+    foreach ($operation_annotation['parameters'] as $parameter_name => $parameter_info) {
+      $argument_value = NULL;
+      switch ($parameter_info['location']) {
+        case 'uri':
+          $argument_value = $request->attributes->get($parameter_name);
+          break;
+      }
+
+      $arguments[$parameter_name] = $argument_value;
+    }
+
+    return $arguments;
   }
 
   /**

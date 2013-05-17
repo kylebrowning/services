@@ -47,7 +47,7 @@ class AnnotationResourceTest extends UnitTestCase {
     $collection = $resource->routes();
     $customCall_route = $collection->get('plugin_id.customcall');
     $path = $customCall_route->getPath();
-    $this->assertEquals('/plugin_id/customCall', $path, 'Route path expected');
+    $this->assertEquals('/customCall', $path, 'Route path expected');
 
     $route_methods = $customCall_route->getMethods();
     $httpMethod = reset($route_methods);

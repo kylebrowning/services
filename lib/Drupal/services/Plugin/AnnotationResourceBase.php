@@ -33,6 +33,18 @@ abstract class AnnotationResourceBase extends ResourceBase {
   public function __construct(array $configuration, $plugin_id, array $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->reader = new AnnotationReader();
+
+    $methods = $this->getMethodNames();
+
+    $this->registerAnnotationAutoloaderNamespace();
+
+    foreach ($methods as $method_name) {
+      $annotation_definition = $this->getResourceMethodAnnotationDefinition($method_name);
+
+      if (!empty($annotation_definition )) {
+        $this->annotations[$method_name] = $annotation_definition;
+      }
+    }
   }
 
   /**
@@ -69,22 +81,7 @@ abstract class AnnotationResourceBase extends ResourceBase {
    * We will use annotated methods for building routes.
    */
   public function getAnnotatedMethods() {
-    $methods = $this->getMethodNames();
-
-    $this->registerAnnotationAutoloaderNamespace();
-
-    foreach ($methods as $key => $method_name) {
-      $annotation_definition = $this->getResourceMethodAnnotationDefinition($method_name);
-
-      if (!empty($annotation_definition )) {
-        $this->annotations[$method_name] = $annotation_definition;
-      }
-      else {
-        unset($methods[$key]);
-      }
-    }
-
-    return $methods;
+    return array_keys($this->annotations);
   }
 
   /**

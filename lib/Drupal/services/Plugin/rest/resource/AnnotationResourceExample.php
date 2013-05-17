@@ -33,7 +33,29 @@ class AnnotationResourceExample extends AnnotationResourceBase {
   }
 
   /**
-   * Example GET call.
+   * GET call with several parameters in URL.
+   *
+   * @ResourceMethod(
+   *   httpMethod = "GET",
+   *   uri = "getCallArguments/{arg1}/{arg2}",
+   *   parameters = {
+   *     "arg1" = {
+   *       "location" = "uri",
+   *       "description" = "First argument of the call",
+   *     },
+   *     "arg2" = {
+   *        "location" = "uri",
+   *        "description" = "Second argument of the call",
+   *     }
+   *   }
+   * )
+   */
+  public function getCallArguments($arguments) {
+    return new ResourceResponse($arguments);
+  }
+
+  /**
+   * Example POST call.
    *
    * @ResourceMethod(
    *   httpMethod = "POST",
