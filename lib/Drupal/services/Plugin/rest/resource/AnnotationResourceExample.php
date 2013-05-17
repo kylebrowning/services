@@ -2,6 +2,7 @@
 
 namespace Drupal\services\Plugin\rest\resource;
 
+//*   class = Drupal\services\Plugin\rest\resource\AnnotationResourceExample
 use Drupal\Component\Annotation\Plugin;
 use Drupal\Core\Annotation\Translation;
 use Drupal\rest\Plugin\ResourceBase;
@@ -28,6 +29,6 @@ class AnnotationResourceExample extends AnnotationResourceBase {
    * )
    */
   public function exampleGetCall() {
-    return new ResourceResponse('Hello World!');
+    return new ResourceResponse(array('message' => 'Hello World!'));
   }
 }

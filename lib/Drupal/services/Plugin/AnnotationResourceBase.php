@@ -56,7 +56,7 @@ abstract class AnnotationResourceBase extends ResourceBase {
         // The HTTP method is a requirement for this route.
         '_method' => $annotation['httpMethod'],
         '_operation' => $method,
-        '_permission' => "restful $lower_method $this->pluginId",
+        '_permission' => 'access content',
       ));
 
       $collection->add("$route_name.$lower_method", $route);

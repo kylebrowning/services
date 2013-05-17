@@ -3,3 +3,5 @@ type: module
 description: 'Provide an API for creating web services.'
 package: Services
 core: 8.x
+dependencies:
+  - rest
