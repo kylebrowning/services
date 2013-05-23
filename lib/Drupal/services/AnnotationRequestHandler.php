@@ -51,18 +51,19 @@ class AnnotationRequestHandler extends ContainerAware {
       // format. If the serializer cannot handle it an exception will be thrown
       // that bubbles up to the client.
       $config = $this->container->get('config.factory')->get('rest.settings')->get('resources');
-      $enabled_formats = $config[$plugin][$request->getMethod()];
+      $enabled_formats = isset($config[$plugin][$request->getMethod()]) ? $config[$plugin][$request->getMethod()] : array();
       if (empty($enabled_formats) || isset($enabled_formats[$format])) {
-        $definition = $resource->getDefinition();
-        $class = $definition['serialization_class'];
-        try {
-          $unserialized = $serializer->deserialize($received, $class, $format);
-        }
-        catch (UnexpectedValueException $e) {
-          $error['error'] = $e->getMessage();
-          $content = $serializer->serialize($error, $format);
-          return new Response($content, 400, array('Content-Type' => $request->getMimeType($format)));
-        }
+        $unserialized = json_decode($received);
+//        $definition = $resource->getDefinition();
+//        $class = $definition['serialization_class'];
+//        try {
+//          $unserialized = $serializer->deserialize($received, $class, $format);
+//        }
+//        catch (UnexpectedValueException $e) {
+//          $error['error'] = $e->getMessage();
+//          $content = $serializer->serialize($error, $format);
+//          return new Response($content, 400, array('Content-Type' => $request->getMimeType($format)));
+//        }
       }
       else {
         throw new UnsupportedMediaTypeHttpException();
@@ -111,6 +112,10 @@ class AnnotationRequestHandler extends ContainerAware {
       switch ($parameter_info['location']) {
         case 'uri':
           $argument_value = $request->attributes->get($parameter_name);
+          break;
+        case 'body':
+          $unserialized = (array) $unserialized;
+          $argument_value = isset($unserialized[$parameter_name]) ? $unserialized[$parameter_name] : NULL;
           break;
       }
 

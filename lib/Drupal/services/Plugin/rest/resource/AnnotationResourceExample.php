@@ -55,6 +55,28 @@ class AnnotationResourceExample extends AnnotationResourceBase {
   }
 
   /**
+   * POST call with several parameters in body.
+   *
+   * @ResourceMethod(
+   *   httpMethod = "POST",
+   *   uri = "postCallArguments",
+   *   parameters = {
+   *     "arg1" = {
+   *       "location" = "body",
+   *       "description" = "First argument of the call",
+   *     },
+   *     "arg2" = {
+   *        "location" = "body",
+   *        "description" = "Second argument of the call",
+   *     }
+   *   }
+   * )
+   */
+  public function postCallArguments($arguments) {
+    return new ResourceResponse($arguments);
+  }
+
+  /**
    * Example POST call.
    *
    * @ResourceMethod(
