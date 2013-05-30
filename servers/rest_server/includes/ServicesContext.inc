@@ -127,13 +127,7 @@ class ServicesContext implements ServicesContextInterface {
    *   Content of the request body.
    */
   protected function getRequestBodyData() {
-    $handle = fopen('php://input', 'r');
-    $content = '';
-    while (!feof($handle)) {
-      $content .= fread($handle, 8192);
-    }
-    fclose($handle);
-    return $content;
+    return file_get_contents('php://input');
   }
 
   /**
