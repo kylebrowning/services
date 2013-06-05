@@ -20,6 +20,7 @@ files[] = tests/functional/ServicesAliasTests.test
 files[] = tests/functional/ServicesXMLRPCTests.test
 files[] = tests/functional/ServicesVersionTests.test
 files[] = tests/functional/ServicesArgumentsTests.test
+files[] = tests/functional/ServicesSecurityTests.test
 files[] = tests/unit/ServicesSpycLibraryTests.test
 files[] = tests/ui/ServicesUITests.test
 files[] = tests/services.test

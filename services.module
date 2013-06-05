@@ -99,8 +99,16 @@ function services_menu() {
       }
     }
   }
+
+  $items['services/session/token'] = array(
+    'page callback' => '_services_session_token',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
+
 /**
  * Implements of hook_ctools_plugin_api().
  */
@@ -388,9 +396,17 @@ function services_services_authentication_info() {
  * @return void
  */
 function _services_sessions_authenticate_call() {
-  $arg = func_get_args();
   global $user;
   $original_user = services_get_server_info('original_user');
+
+  if ($original_user->uid != 0) {
+    $non_safe_method_called = !in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD', 'OPTIONS', 'TRACE'));
+    $csrf_token_invalid = !isset($_SERVER['HTTP_X_CSRF_TOKEN']) || !drupal_valid_token($_SERVER['HTTP_X_CSRF_TOKEN'], 'services');
+    if ($non_safe_method_called && $csrf_token_invalid) {
+      return t('CSRF validation failed');
+    }
+  }
+
   $user = $original_user;
 }
 
@@ -804,4 +820,13 @@ if (!function_exists('getallheaders')) {
 
     return $headers;
   }
+}
+
+/**
+ * Page callback to generate token.
+ */
+function _services_session_token() {
+  drupal_add_http_header('Content-Type', 'text/plain');
+  print drupal_get_token('services');
+  drupal_exit();
 }

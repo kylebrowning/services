@@ -46,6 +46,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
    * Post file as multipart/form-data.
    */
   protected function servicesPostFile($url, $filepath, $headers = array(), $additional_arguments = array()) {
+    $this->addCSRFHeader($headers);
     if (!is_array($filepath)) {
       $filepath = array($filepath);
     }
@@ -86,6 +87,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
   }
 
   protected function servicesPost($url, $data = array(), $headers = array(), $call_type = 'php') {
+    $this->addCSRFHeader($headers);
     $options = array();
 
     switch ($call_type) {
@@ -129,6 +131,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
   }
 
   protected function servicesPut($url, $data = NULL, $headers = array(), $call_type = 'php') {
+    $this->addCSRFHeader($headers);
     switch ($call_type) {
       case 'php':
         // Add .php to get serialized response.
@@ -177,6 +180,7 @@ class ServicesWebTestCase extends DrupalWebTestCase {
   }
 
   protected function servicesDelete($url, $data = NULL, $headers = array()) {
+    $this->addCSRFHeader($headers);
     $options = array('query' => $data);
     $url = url($this->getAbsoluteUrl($url) . '.php', $options);
 
@@ -228,6 +232,16 @@ class ServicesWebTestCase extends DrupalWebTestCase {
         break;
     }
     return array($info, $header, $status, $code, $body);
+  }
+
+  /**
+   * Retrieve and set CSFR token header.
+   *
+   * @param array $headers
+   */
+  function addCSRFHeader(&$headers) {
+    $csrf_token = $this->drupalGet('services/session/token');
+    $headers[] = 'X-CSRF-Token: ' . $csrf_token;
   }
 
   /**
