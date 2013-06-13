@@ -154,6 +154,16 @@ function _user_resource_definition() {
           'callback' => '_user_resource_logout',
           'access callback' => 'services_access_menu',
         ),
+        'token' => array(
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'services',
+            'name' => 'user_resource',
+          ),
+          'callback' => '_user_resource_get_token',
+          'access callback' => 'services_access_menu',
+          'help' => t('Returns the CSRF token.'),
+        ),
       ),
     ),
   );
@@ -547,4 +557,8 @@ function _user_resource_login_update_1_1() {
     ),
   );
   return $new_set;
+}
+
+function _user_resource_get_token() {
+  return array('token' => drupal_get_token('services'));
 }
