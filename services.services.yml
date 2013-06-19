@@ -4,3 +4,7 @@ services:
     tags:
       - { name: event_subscriber }
     arguments: ['@plugin.manager.rest', '@config.factory']
+  services.normalizer.stdclass:
+    class: Drupal\services\Normalizer\StdClassNormalizer
+    tags:
+      - { name: normalizer }
