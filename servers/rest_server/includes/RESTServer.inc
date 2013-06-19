@@ -483,6 +483,10 @@ class RESTServer {
 
     // We do not group "if" conditions on purpose for better readability.
 
+    if ($request_method == 'HEAD') {
+      return services_error('OK', 200);
+    }
+
     // 'index' method.
     if (   $request_method == 'GET'
         && isset($resource['operations']['index'])
@@ -643,6 +647,9 @@ class RESTServer {
         break;
       case 406:
         $error_header_status_message = '406 Not Acceptable: ' . $error_message;
+        break;
+      case 200:
+        $error_header_status_message = '200 ' . $error_message;
         break;
       default:
         if ($error_code >= 400 && $error_code < 600) {
