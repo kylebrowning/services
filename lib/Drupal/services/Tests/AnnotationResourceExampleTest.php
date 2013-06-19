@@ -47,7 +47,7 @@ class AnnotationResourceExampleTest extends RESTTestBase {
 
     $response = $this->httpRequest('examplePostCall', 'POST', NULL, $this->defaultMimeType);
     $decoded_response = drupal_json_decode($response);
-    $decoded_expected = array('message' => 'POST call');
+    $decoded_expected = array('message' => array('POST call'));
     $this->assertIdentical($decoded_expected, $decoded_response, 'examplePostCall response expected');
 
     $arg1 = $this->randomName();

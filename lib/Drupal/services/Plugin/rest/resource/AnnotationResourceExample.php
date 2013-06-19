@@ -85,6 +85,6 @@ class AnnotationResourceExample extends AnnotationResourceBase {
    * )
    */
   public function examplePostCall() {
-    return new ResourceResponse(array('message' => 'POST call'));
+    return new ResourceResponse(array('message' => (object) array('POST call')));
   }
 }
