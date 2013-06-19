@@ -209,6 +209,28 @@ class ServicesWebTestCase extends DrupalWebTestCase {
     return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
   }
 
+  /**
+   * Perform HEAD request.
+   */
+  protected function servicesHead($url) {
+    $url = url($this->getAbsoluteUrl($url) . '.php');
+
+    $content = $this->curlExec(array(
+      CURLOPT_URL => $url,
+      CURLOPT_CUSTOMREQUEST => 'HEAD',
+      CURLOPT_HEADER => TRUE,
+      CURLOPT_RETURNTRANSFER => TRUE
+    ));
+
+    // Parse response.
+    list($info, $header, $status, $code, $body) = $this->parseHeader($content);
+
+    $this->verbose('HEAD request to: ' . $url .
+      '<hr />Curl info: ' . highlight_string('<?php ' . var_export($info, TRUE), TRUE) .
+      '<hr />Raw response: ' . $content);
+    return array('header' => $header, 'status' => $status, 'code' => $code, 'body' => $body);
+  }
+
   /*
   ------------------------------------
   HELPER METHODS
