@@ -61,5 +61,13 @@ class AnnotationResourceExampleTest extends RESTTestBase {
     $response = $this->httpRequest("postCallArguments", 'POST', $body, $this->defaultMimeType);
     $decoded_response = drupal_json_decode($response);
     $this->assertIdentical($decoded_response, $decoded_expected, 'postCallArguments response is correct');
+
+    $arg3 = $this->randomName();
+    $arg4 = $this->randomName();
+    $body = json_encode(array('body_arg1' => $arg1, 'body_arg2' => $arg2));
+    $response = $this->httpRequest("postCallMixedArguments/$arg3/$arg4", 'POST', $body, $this->defaultMimeType);
+    $decoded_response = drupal_json_decode($response);
+    $decoded_expected = array('body_arg1' => $arg1, 'body_arg2' => $arg2, 'uri_arg1' => $arg3, 'uri_arg2' => $arg4);
+    $this->assertIdentical($decoded_expected, $decoded_response, 'postCallMixedArguments response expected');
   }
 }
