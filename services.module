@@ -393,7 +393,8 @@ function services_services_authentication_info() {
 /**
  * Authenticates a call using Drupal's built in sessions
  *
- * @return void
+ * @return string
+ *   Error message in case error occured.
  */
 function _services_sessions_authenticate_call($module, $controller) {
   global $user;
