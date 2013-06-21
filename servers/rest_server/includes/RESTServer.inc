@@ -481,11 +481,12 @@ class RESTServer {
     $operation_type = NULL;
     $operation = NULL;
 
-    // We do not group "if" conditions on purpose for better readability.
-
+    // For any HEAD request return response "200 OK".
     if ($request_method == 'HEAD') {
       return services_error('OK', 200);
     }
+
+    // We do not group "if" conditions on purpose for better readability.
 
     // 'index' method.
     if (   $request_method == 'GET'
@@ -587,7 +588,6 @@ class RESTServer {
     if (isset($resource['file']) && empty($controller['file'])) {
       $controller['file'] = $resource['file'];
     }
-
 
     return $controller;
   }
