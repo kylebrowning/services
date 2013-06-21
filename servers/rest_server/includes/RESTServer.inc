@@ -557,7 +557,7 @@ class RESTServer {
     }
 
     // 'actions'
-    // Forst path element should be action name
+    // First path element should be action name
     if (   $request_method == 'POST'
         && $canon_path_count >= 1
         && isset($resource['actions'][$canonical_path_array[0]])
