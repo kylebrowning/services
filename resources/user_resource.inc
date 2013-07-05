@@ -348,6 +348,10 @@ function _user_resource_update($uid, $account) {
  * @see user_delete()
  */
 function _user_resource_delete($uid) {
+  if ($uid == 1) {
+    return services_error(t('The admin user cannot be deleted.'), 403);
+  }
+
   $account = user_load($uid);
   if (empty($account)) {
     return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
