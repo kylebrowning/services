@@ -27,3 +27,10 @@ function rest_server_requirements($phase) {
   }
   return $requirements;
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function rest_server_uninstall() {
+  variable_del('rest_server_default_response_format');
+}
