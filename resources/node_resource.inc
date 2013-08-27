@@ -284,7 +284,9 @@ function _node_resource_create($node) {
   if (!isset($node['name'])) {
     // Assign username to the node from $user created at auth step.
     global $user;
-    $node['name'] = $user->name;
+    if (isset($user->name)) {
+      $node['name'] = $user->name;
+    }
   }
   if(!isset($node['language'])) {
     $node['language'] = LANGUAGE_NONE;
