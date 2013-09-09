@@ -307,6 +307,10 @@ class RESTServer {
           $argument_source_keys = array_keys($argument_source);
           $source_name = reset($argument_source_keys);
           $argument_name = $argument_source[$source_name];
+          // Path arguments can be only integers. i.e.'path' => 0 and not 'path' => '0'.
+          if ($source_name == 'path') {
+            $argument_name = (int) $argument_name;
+          }
           if (isset($sources[$source_name][$argument_name])) {
             $arguments[$argument_number] = $sources[$source_name][$argument_name];
           }
