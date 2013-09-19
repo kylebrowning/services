@@ -35,14 +35,13 @@ class RESTServer {
   public function handle() {
     $controller = $this->getController();
 
-    // Parse the request data
-    $arguments = $this->getControllerArguments($controller);
-
     $formatter = $this->getResponseFormatter();
 
     services_set_server_info('resource_uri_formatter', array(&$this, 'uri_formatter'));
 
     try {
+      // Parse the request data
+      $arguments = $this->getControllerArguments($controller);
       $result = services_controller_execute($controller, $arguments);
     }
     catch (ServicesException $e) {
