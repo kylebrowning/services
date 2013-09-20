@@ -656,7 +656,7 @@ class RESTServer {
         break;
       default:
         if ($error_code >= 400 && $error_code < 600) {
-          $error_header_status_message = $error_code . ':' . $error_message;
+          $error_header_status_message = $error_code . ' :' . $error_message;
         }
         else {
           $error_header_status_message = '500 Internal Server Error: An error occurred (' . $error_code . '): ' . $error_message;
