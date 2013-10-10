@@ -502,6 +502,17 @@ class ServicesWebTestCase extends DrupalWebTestCase {
             'enabled' => 1,
           ),
         ),
+        'targeted_actions' => array(
+          'cancel' => array(
+            'enabled' => 1,
+          ),
+          'password_reset' => array(
+            'enabled' => 1,
+          ),
+          'resend_welcome_email' => array(
+            'enabled' => 1,
+          ),
+        ),
       ),
     );
     $endpoint->debug = 1;
@@ -715,6 +726,17 @@ class ServicesWebTestCase extends DrupalWebTestCase {
           ),
           'register' => array(
             'enabled' => '1',
+          ),
+        ),
+        'targeted_actions' => array(
+          'cancel' => array(
+            'enabled' => 1,
+          ),
+          'password_reset' => array(
+            'enabled' => 1,
+          ),
+          'resend_welcome_email' => array(
+            'enabled' => 1,
           ),
         ),
       ),

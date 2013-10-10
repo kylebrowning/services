@@ -165,6 +165,55 @@ function _user_resource_definition() {
           'help' => t('Returns the CSRF token.'),
         ),
       ),
+      'targeted_actions' => array(
+        'cancel' => array(
+          'help' => 'Cancel a user',
+          'callback' => '_user_resource_cancel',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('cancel'),
+          'access arguments append' => TRUE,
+          'args' => array(
+            array(
+              'name' => 'uid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The id of the user to cancel.',
+            ),
+          ),
+        ),
+        'password_reset' => array(
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('password_reset'),
+          'access arguments append' => TRUE,
+          'callback' => '_user_resource_password_reset',
+          'args' => array(
+            array(
+              'name' => 'uid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The id of the user whose password to reset.',
+            ),
+          ),
+        ),
+        'resend_welcome_email' => array(
+          'access callback' => '_user_resource_access',
+          'access arguments' => array('resend_welcome_email'),
+          'access arguments append' => TRUE,
+          'callback' => '_user_resource_resend_welcome_email',
+          'args' => array(
+            array(
+              'name' => 'uid',
+              'optional' => FALSE,
+              'source' => array('path' => 0),
+              'type' => 'int',
+              'description' => 'The id of the user whose welcome email to resend.',
+            ),
+          ),
+        ),
+      ),
     ),
   );
 
@@ -364,6 +413,54 @@ function _user_resource_delete($uid) {
 }
 
 /**
+ * Cancel a user.
+ *
+ * @param $uid
+ *   UID of the user to be canceled.
+ *
+ * @see user_cancel()
+ */
+function _user_resource_cancel($uid) {
+  if ($uid == 1) {
+    return services_error(t('The admin user cannot be canceled.'), 403);
+  }
+  $account = user_load($uid);
+  if (empty($account)) {
+    return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
+  }
+  $edit = array(
+    'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : variable_get('user_mail_status_canceled_notify', FALSE),
+  );
+  // This defult setting is defined under "admin/config/people/accounts".
+  $default_method = variable_get('user_cancel_method', 'user_cancel_block');
+
+  switch ($default_method) {
+    case 'user_cancel_block_unpublish':
+      // Unpublish nodes (current revisions).
+      module_load_include('inc', 'node', 'node.admin');
+      $nodes = db_select('node', 'n')->fields('n', array('nid'))->condition('uid', $account->uid)->execute()->fetchCol();
+      node_mass_update($nodes, array('status' => 0));
+      break;
+
+    case 'user_cancel_reassign':
+      // Anonymize nodes (current revisions).
+      module_load_include('inc', 'node', 'node.admin');
+      $nodes = db_select('node', 'n')->fields('n', array('nid'))->condition('uid', $account->uid)->execute()->fetchCol();
+      node_mass_update($nodes, array('uid' => 0));
+      // Anonymize old revisions.
+      db_update('node_revision')->fields(array('uid' => 0))->condition('uid', $account->uid)->execute();
+      // Clean history.
+      db_delete('history')->condition('uid', $account->uid)->execute();
+      break;
+  }
+
+  _user_cancel($edit, $account, $default_method);
+
+  // Everything went right.
+  return TRUE;
+}
+
+/**
  * Login a user using the specified credentials.
  *
  * Note this will transfer a plaintext password.
@@ -468,6 +565,64 @@ function _user_resource_logout_1_1() {
 }
 
 /**
+ * Send a password reset email for the specified user.
+ */
+function _user_resource_password_reset($uid) {
+  global $language;
+
+  $account = user_load($uid);
+  if (empty($account)) {
+    return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
+  }
+
+  // Mail one time login URL and instructions using current language.
+  $mail = _user_mail_notify('password_reset', $account, $language);
+  if (!empty($mail)) {
+    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+  }
+  else {
+    watchdog('user', 'There was an error re-sending password reset instructions mailed to %name at %email', array('%name' => $account->name, '%email' => $account->mail));
+  }
+  // Everything went right.
+  return TRUE;
+}
+
+/**
+ * Send a welcome email for the specified user.
+ */
+function _user_resource_resend_welcome_email($uid) {
+  global $language;
+
+  $account = user_load($uid);
+  if (empty($account)) {
+    return services_error(t('There is no user with ID @uid.', array('@uid' => $uid)), 404);
+  }
+
+  $user_register = variable_get('user_register', 2);
+  switch ($user_register) {
+    case USER_REGISTER_ADMINISTRATORS_ONLY:
+      $op = 'register_admin_created';
+      break;
+    case USER_REGISTER_VISITORS:
+      $op = 'register_no_approval_required';
+      break;
+    case USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL:
+      $op = 'register_pending_approval';
+  }
+
+  // Mail the welcome emaiil using current language.
+  $mail = _user_mail_notify($op, $account, $language);
+  if (!empty($mail)) {
+    watchdog('user', 'Welcome message has been re-sent to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+  }
+  else {
+    watchdog('user', 'There was an error re-sending welcome message to %name at %email', array('%name' => $account->name, '%email' => $account->mail));
+  }
+  // Everything went right.
+  return TRUE;
+}
+
+/**
  * Return an array of optionally paged uids baed on a set of criteria.
  *
  * An example request might look like
@@ -533,7 +688,11 @@ function _user_resource_access($op = 'view', $args = array()) {
       else {
         return user_access('administer users');
       }
+    case 'password_reset':
+      return TRUE;
     case 'delete':
+    case 'cancel':
+    case 'resend_welcome_email':
       return user_access('administer users');
   }
 }

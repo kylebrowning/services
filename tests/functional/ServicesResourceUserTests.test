@@ -229,6 +229,69 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
   }
 
   /**
+   * Test cancel method.
+   */
+  function testCancelUser() {
+    // Create our privileged user.
+    $account = $this->drupalCreateUser(array('administer services'));
+
+    // Cancel user.
+    $response = $this->servicesPost($this->endpoint->path . '/user/' . $account->uid . '/cancel');
+    $this->assertTrue($response['body'],
+      'Resource has to cancel user has been called successfully.',
+      'UserResource: Cancel');
+
+    $user_load = user_load($account->uid);
+    $this->assertFalse($user_load->status, 'User has been canceled successfully.', 'UserResource: Cancel');
+  }
+
+  /**
+   * Test cant cancel user 1.
+   */
+  function testCancelAdmin() {
+    // Cancel user.
+    $response = $this->servicesPost($this->endpoint->path . '/user/1/cancel');
+    $this->assertEqual($response['code'], 403,
+      'Services successfully blocked cancel of user 1', 'UserResource: Cancel');
+
+    $user_load = user_load(1);
+    $this->assertTrue(!empty($user_load), 'User 1 still exits and has not deleted, as this is not allowed.', 'UserResource: Cancel');
+  }
+
+  /**
+   * Test password_reset method.
+   */
+  function testPasswordReset() {
+    // Create user.
+    $account = $this->drupalCreateUser(array('administer services'));
+
+    // Password Reset user.
+    $response = $this->servicesPost($this->endpoint->path . '/user/' . $account->uid . '/password_reset');
+    $this->assertTrue($response['body'],
+      'Resource has to reset a users password has been called successfully.',
+      'UserResource: password_reset');
+
+    $user_load = user_load($account->uid);
+    $this->assertFalse(user_check_password($account->pass, $user_load),
+        'Password successfully changed.', 'UserResource: password_reset');
+  }
+
+  /**
+   * Test password_reset method.
+   */
+  function testResendWelcomeEmail() {
+    // Create user.
+    $account = $this->drupalCreateUser(array('administer services'));
+
+    // Password Reset user.
+    $response = $this->servicesPost($this->endpoint->path . '/user/' . $account->uid . '/resend_welcome_email');
+    $this->assertTrue($response['body'],
+      'Resource has to resent a users welcome email has been called successfully.',
+      'UserResource: resend_welcome_email');
+    // Not sure how to test mail actually sent.
+  }
+
+  /**
    * Test delete system user method.
    */
   function testDeleteSystemUser() {
