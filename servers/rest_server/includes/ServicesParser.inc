@@ -65,7 +65,14 @@ class ServicesParserXML implements ServicesParserInterface {
           $new_array = array();
           // recursive through <item>
           foreach($child->children() as $item){
-            $new_array[] = $this->unmarshalXML($item, $array[$item->getName()]);
+            // Make sure that elements with no children gets a value assigned.
+            $item_keys = array_keys((array) $item);
+            if (count($item_keys) == 1 && current($item_keys) === 0) {
+              $new_array[] = (string) $item[0];
+            }
+            else {
+              $new_array[] = self::unmarshalXML($item, $array[$item->getName()]);
+            }
           }
         }
         else {
