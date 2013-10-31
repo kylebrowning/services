@@ -350,8 +350,9 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
           );
           $options = array_merge($options, $update_versions);
           $default_api_value = 0;
-          if (isset($endpoint->resources[$resource_key][$class][$op_name]['endpoint']['services'])) {
-            $default_api_value = $endpoint->resources[$resource_key][$class][$op_name]['endpoint']['services'];
+
+          if (isset($op['endpoint']) && isset($op['endpoint']['services'])) {
+            $default_api_value = $op['endpoint']['services']['resource_api_version'];
           }
           $disabled = (count($options) == 1);
           // Add the version information if it has any
