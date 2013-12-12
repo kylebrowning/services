@@ -410,9 +410,9 @@ function services_edit_form_endpoint_resources_validate($form, $form_state) {
 
   // Validate aliases.
   foreach ($input['resources'] as $resource_name => $resource) {
-    if (!empty($resource['alias']) && !preg_match('/^[a-z-]+$/', $resource['alias'])) {
+    if (!empty($resource['alias']) && !preg_match('/^[a-z-_]+$/', $resource['alias'])) {
       // Still this doesn't highlight needed form element.
-      form_set_error("resources][{$resource_name}][alias", t("The alias for the !name resource may only contain lower case a-z and dashes.", array(
+      form_set_error("resources][{$resource_name}][alias", t("The alias for the !name resource may only contain lower case a-z, underscores and dashes.", array(
         '!name' => $resource_name,
       )));
     }
