@@ -6,11 +6,8 @@ interface ServicesParserInterface {
 
 class ServicesParserURLEncoded implements ServicesParserInterface {
   public function parse(ServicesContextInterface $context) {
-    // Do not use parse_str(), since it does not work correctly
-    // when "magic quotes" are enabled on a website. Instead
-    // use drupal_get_query_array() that always works irrespective
-    // of the get_magic_quotes_gpc() configuration.
-    return drupal_get_query_array($context->getRequestBody());
+    parse_str($context->getRequestBody(), $data);
+    return $data;
   }
 }
 
