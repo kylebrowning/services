@@ -408,7 +408,9 @@ function _services_sessions_authenticate_call($module, $controller) {
     }
   }
 
-  $user = $original_user;
+  if ($original_user->uid != 0 && $user->uid != $original_user->uid) {
+    $user = $original_user;
+  }
 }
 
 /**
