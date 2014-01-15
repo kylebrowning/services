@@ -166,6 +166,26 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
                         && ($account->roles = $this->privileged_user->roles);
     $this->assertTrue($users_are_the_same, 'Retrieved user is the same as created.', 'UserResource: Retrieve');
   }
+  /**
+   * Test updateing a username with administer users permission #1853592.
+   *
+   * Create user, update email.
+   */
+  function testUpdateUserName() {
+    // Create user.
+    $account = $this->drupalCreateUser();
+	$name = $this->randomName();
+    // Update mail of the user.
+    $updated_account = array(
+      'name' => $name,
+    );
+    $response = $this->servicesPut($this->endpoint->path . '/user/' . $account->uid, $updated_account);
+
+    $user_load = user_load($account->uid);
+    $this->assertEqual($name, $user_load->name,
+      'You are allowed to change a username as administer users perm.',
+      'User Resource : Test to check for drupal.org issue #1853592');
+  }
 
   /**
    * Test update method.
