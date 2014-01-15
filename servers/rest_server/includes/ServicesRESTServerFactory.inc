@@ -24,7 +24,7 @@ class ServicesRESTServerFactory {
   }
 
   public function getRESTServer() {
-    $content_type_negotiator = self::getContentTypeNegotiator();
+    $content_type_negotiator = $this->getContentTypeNegotiator();
     $context = $this->getContext();
     $resources = $this->getResources();
     $parsers = $this->getParsers();
