@@ -264,6 +264,10 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
   // Call _services_build_resources() directly instead of
   // services_get_resources to bypass caching.
   $resources = _services_build_resources($endpoint->name);
+  // Sort the resources by the key, which is the string used for grouping each
+  // resource in theme_services_resource_table().
+  ksort($resources);
+
   $form['instructions'] = array(
     '#type' => 'item',
     '#title' => t('Resources'),
