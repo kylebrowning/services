@@ -588,6 +588,12 @@ class RESTServer {
     }
 
     $controller = $resource[$operation_type][$operation];
+
+    if (isset($resource['endpoint']['operations'][$operation]['settings'])) {
+      // Add the endpoint's settings for the specified operation.
+      $controller['endpoint'] = $resource['endpoint']['operations'][$operation]['settings'];
+    }
+
     if (isset($resource['file']) && empty($controller['file'])) {
       $controller['file'] = $resource['file'];
     }
