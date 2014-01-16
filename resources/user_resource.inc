@@ -489,6 +489,11 @@ function _user_resource_login($username, $password) {
 
   $uid = user_authenticate($username, $password);
 
+  // Emulate drupal native flood control
+  if (empty($uid) && variable_get('services_flood_control_enabled', TRUE)) {
+    _user_resource_flood_control($username);
+  }
+
   if ($uid) {
     $user = user_load($uid);
     if ($user->uid) {
@@ -729,4 +734,52 @@ function _user_resource_login_update_1_1() {
 
 function _user_resource_get_token() {
   return array('token' => drupal_get_token('services'));
+}
+
+
+
+/**
+ * Callback that emulate drupal native flood control.
+ * @param $username
+ *  Username we register flood event for
+ * @see user_login_authenticate_validate()
+ * @see user_login_final_validate()
+ */
+function _user_resource_flood_control($username) {
+  $flood_message = '';
+
+  // Always register an IP-based failed login event.
+  flood_register_event('failed_login_attempt_ip', variable_get('user_failed_login_ip_window', 3600));
+
+  if (!flood_is_allowed('failed_login_attempt_ip', variable_get('user_failed_login_ip_limit', 50), variable_get('user_failed_login_ip_window', 3600))) {
+    $flood_message = t('This IP address is temporarily blocked.');
+  }
+
+  $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $username))->fetchObject();
+
+  if ($account) {
+    if (variable_get('user_failed_login_identifier_uid_only', FALSE)) {
+      // Register flood events based on the uid only, so they apply for any
+      // IP address. This is the most secure option.
+      $identifier = $account->uid;
+    }
+    else {
+      // The default identifier is a combination of uid and IP address. This
+      // is less secure but more resistant to denial-of-service attacks that
+      // could lock out all users with public user names.
+      $identifier = $account->uid . '-' . ip_address();
+      flood_register_event('failed_login_attempt_user', variable_get('user_failed_login_user_window', 21600), $identifier);
+    }
+
+    // Don't allow login if the limit for this user has been reached.
+    // Default is to allow 5 failed attempts every 6 hours.
+    if (!flood_is_allowed('failed_login_attempt_user', variable_get('user_failed_login_user_limit', 5), variable_get('user_failed_login_user_window', 21600), $identifier)) {
+      $flood_message = t('Account is temporarily blocked.');
+    }
+  }
+
+  // Throw exception if have blocking
+  if (!empty($flood_message)) {
+    services_error($flood_message, 406);
+  }
 }
