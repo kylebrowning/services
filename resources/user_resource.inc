@@ -498,9 +498,12 @@ function _user_resource_login($username, $password) {
       $return->sessid = session_id();
       $return->session_name = session_name();
       $return->token = drupal_get_token('services');
-      services_remove_user_data($user);
 
-      $return->user = $user;
+      $account = clone $user;
+
+      services_remove_user_data($account);
+
+      $return->user = $account;
 
       return $return;
     }
