@@ -489,6 +489,11 @@ class RESTServer {
       return services_error('OK', 200);
     }
 
+    // For any OPTIONS request return only the headers.
+    if ($request_method == 'OPTIONS') {
+      exit;
+    }
+
     // We do not group "if" conditions on purpose for better readability.
 
     // 'index' method.
