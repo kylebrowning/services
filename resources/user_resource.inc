@@ -371,7 +371,11 @@ function _user_resource_login($username, $password) {
     // user is already logged in
     return services_error(t('Already logged in as !user.', array('!user' => $user->name)), 406);
   }
-
+  
+  if (user_is_blocked($username)) {
+    return services_error(t('!user is blocked.', array('!user' => $username)), 406);
+  }
+  
   user_authenticate(array('name' => $username, 'pass' => $password));
 
   if (isset($user->uid) && $user->uid) {
