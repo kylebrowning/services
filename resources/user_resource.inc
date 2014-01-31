@@ -373,7 +373,7 @@ function _user_resource_login($username, $password) {
   }
   
   if (user_is_blocked($username)) {
-    return services_error(t('!user is blocked.', array('!user' => $username)), 406);
+    return services_error(t('@user is blocked.', array('@user' => $username)), 406);
   }
   
   user_authenticate(array('name' => $username, 'pass' => $password));
