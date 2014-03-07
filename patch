@@ -1,0 +1,13 @@
+diff --git a/plugins/export_ui/services_ctools_export_ui.inc b/plugins/export_ui/services_ctools_export_ui.inc
+index 01c207c..0eefb6f 100644
+--- a/plugins/export_ui/services_ctools_export_ui.inc
++++ b/plugins/export_ui/services_ctools_export_ui.inc
+@@ -114,6 +114,8 @@ function services_ctools_export_ui_form(&$form, &$form_state) {
+     '#maxlength'     => 255,
+     '#default_value' => $endpoint->path,
+     '#title'         => t('Path to endpoint'),
++    '#field_prefix'  => url('', array('absolute' => TRUE)),
++    '#description'   => t('The base URL at which resources exposed by this endpoint will be available.'),
+     '#required'      => TRUE,
+   );
+ 
