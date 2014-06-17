@@ -789,7 +789,7 @@ function services_remove_user_data(&$account) {
 
   // Remove the user mail, if current user don't have "administer users"
   // permission, and the requested account not match the current user.
-  if (!user_access('administer users') && $account->uid !== $user->uid) {
+  if (!user_access('administer users') && isset($account->uid) && isset($user->uid) && $account->uid !== $user->uid) {
     unset($account->mail);
   }
 
