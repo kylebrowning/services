@@ -385,7 +385,9 @@ function _user_resource_update($uid, $account) {
     return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
   else {
+    $account = (object) $account;
     services_remove_user_data($account);
+    $account = (array) $account;
     return $account;
   }
 }
