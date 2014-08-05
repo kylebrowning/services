@@ -279,13 +279,32 @@ function _user_resource_create($account) {
   // with drupal_form_submit().
   module_load_include('inc', 'user', 'user.pages');
 
-  // register a new user
+  // Register a new user.
   $form_state['values'] = $account;
-  // Password may be not available as this callback is used for register as well.
+
+  // Determine the password(s). Passwords may not be available as this callback
+  // is used for registration as well.
+  $pass1 = '';
+  $pass2 = '';
+  if (isset($account['pass'])) {
+    // For legacy usage, passwords come in as a single string. To match the
+    // actual form state value keys used by Drupal, we also can collect two
+    // passwords via an array.
+    if (is_array($account['pass'])) {
+      $pass1 = $account['pass']['pass1'];
+      $pass2 = $account['pass']['pass2'];
+    }
+    else {
+      $pass1 = $account['pass'];
+      $pass2 = $account['pass'];
+    }
+  }
   $form_state['values']['pass'] = array(
-    'pass1' => isset($account['pass']) ?: '',
-    'pass2' => isset($account['pass']) ?: '',
+    'pass1' => $pass1,
+    'pass2' => $pass2
   );
+
+  // Set the form state op.
   $form_state['values']['op'] = variable_get('services_user_create_button_resource_create', t('Create new account'));
 
   // execute the register form

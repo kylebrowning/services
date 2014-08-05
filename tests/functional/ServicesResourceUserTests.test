@@ -111,15 +111,23 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
   /**
    * Test register method.
    *
-   * Register user, load user.
+   * Register user, load user, attempt to login.
    */
   function testRegisterUser() {
     // Verify logged out state can create users
     $this->drupalLogout();
 
+    $username = $this->randomName();
+    $password = user_password();
+
     $user = array();
-    $user['name']   = $this->randomName();
+    $user['name']   = $username;
+    $user['pass']   = $password;
     $user['mail']   = $user['name'] . '@example.com';
+    $user['status'] = 1;
+
+    variable_set('user_email_verification', FALSE);
+    variable_set('user_register', TRUE);
 
     $response = $this->servicesPost($this->endpoint->path . '/user/register', $user);
     $account = $response['body'];
@@ -128,7 +136,18 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     // Load user.
     $user_load = user_load($account['uid']);
+
     $this->assertTrue(!empty($user_load), 'Newly created user has been loaded successfully.', 'UserResource: Create');
+
+    $response = $this->servicesPost($this->endpoint->path . '/user/login',
+      array('username' => $username, 'password' => $password));
+
+    $response = $response['body'];
+
+    $proper_answer = isset($response->sessid)
+                  && isset($response->user)
+                  && $response->user->name == $username;
+    $this->assertTrue($proper_answer, 'User successfully logged in.', 'UserResource: Login');
   }
 
   /**

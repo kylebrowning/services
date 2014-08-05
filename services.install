@@ -235,3 +235,27 @@ function services_update_7400() {
     services_endpoint_save($endpoint);
   }
 }
+
+/**
+ * Update 7401 Changes passwords of all users that were created/registered since (30 July, 2013)
+ * Read more here drupal.org node 2284449.
+ * Skip the user password change by setting the variable services_skip_security_update_7401 to TRUE.
+ * NOTE: This Overwrites password hashes using an invalid prefix which can never match a password hash during login.
+ * All affected users will have to request new one time login links to reset their passwords.
+ */
+function services_update_7401() {
+  // http://drupal.org/node/2284449.
+  // Update users created only after the bug has been introduced (30 July, 2013).
+  $skip_update = variable_get('services_skip_security_update_7401', FALSE);
+  if ($skip_update === FALSE) {
+    $affected_accounts = db_update('users')
+      ->fields(array(
+        'pass' => "ZZZservices_security",
+      ))
+      ->condition('created', 1374278400, '>=')
+      ->execute();
+    return t('@accounts user passwords have been reset.', array('@accounts' => $affected_accounts));
+  } else {
+    return t('Skipped security update 7401 due to variable services_skip_security_update_7401 being set to TRUE');
+  }
+}
