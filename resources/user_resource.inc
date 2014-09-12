@@ -276,21 +276,11 @@ function _user_resource_update($uid, $account) {
   $account = _services_arg_value($account, 'data');
 
   $account['uid'] = $uid;
-  $user = user_load($uid);
+  $account_loaded = user_load($uid);
 
   // Load the required includes for saving profile information
-  // with drupal_execute().
+  // with drupal_form_submit().
   module_load_include('inc', 'user', 'user.pages');
-
-  // Any logged in user is by default authenticated,
-  // and leaving this role set in the user's roles array
-  // causes big problems because of a FAPI hack that controls
-  // this checkbox on the user create and edit form (and thus
-  // causes problems with drupal_execute()). Therefore we just
-  // force it to 0 here.
-  if (isset($account['roles'][2])) {
-    $account['roles'][2] = 0;
-  }
 
   // If a profile category was passed in, use it. Otherwise default
   // to 'account' (for saving core user data.)
@@ -301,35 +291,50 @@ function _user_resource_update($uid, $account) {
   }
 
   // Drop any passed in values into the $account var. Anything
-  // unused by the form just gets ignored.
+  // unused by the form just gets ignored. We handle roles and
+  // password separately.
   foreach ($account as $key => $value) {
-    $form_state['values'][$key] = $value;
+    if ($key != 'pass' && $key != 'roles') {
+      $form_state['values'][$key] = $value;
+    }
   }
+
+  // Prepare values of roles. Check user's permission before allowing changes to roles.
+  if (!isset($account['roles']) || !user_access('administer users')) {
+    $account['roles'] = $account_loaded->roles;
+  }
+  foreach ($account['roles'] as $key => $value) {
+    if (!empty($value)) {
+      $form_state['values']['roles'][$key] = $key;
+    }
+  }
+  unset($form_state['values']['roles'][2]);
+
+  // Prepare values for password.
+  if (isset($account['pass'])) {
+    $form_state['values']['pass']['pass1'] = $account['pass'];
+    $form_state['values']['pass']['pass2'] = $account['pass'];
+  }
+
   // If user is changing name, make sure they have permission.
-  if (isset($account['name']) && $account['name'] != $user->name && !(user_access('change own username') || user_access('administer users'))) {
+  if (isset($account['name']) && $account['name'] != $account_loaded->name && !(user_access('change own username') || user_access('administer users'))) {
     return services_error(t('You are not allowed to change your username.'), 406);
   }
 
   $form_state['values']['op'] = variable_get('services_user_save_button_resource_update', t('Save'));
-  $form_state['values']['_category'] = $category;
-  $form_state['values']['_account'] = (object)$account;
-  if (isset($account['pass'])) {
-    $form_state['values']['pass'] = array(
-      'pass1' => $account['pass'],
-      'pass2' => $account['pass'],
-    );
-  }
+  $form_state['values']['#user_category'] = $category;
+  $form_state['values']['#account'] = $account_loaded;
+  $form_state['programmed_bypass_access_check'] = FALSE;
 
-  $ret = drupal_execute('user_profile_form', $form_state, $user, $category);
-
+  $ret = drupal_execute('user_profile_form', $form_state, $account_loaded, $category);
   // Error if needed.
   if ($errors = form_get_errors()) {
     return services_error(implode(" ", $errors), 406, array('form_errors' => $errors));
   }
-
-  services_remove_user_data($account);
-
-  return $account;
+  else {
+    services_remove_user_data($account);
+    return $account;
+  }
 }
 
 /**
@@ -371,11 +376,11 @@ function _user_resource_login($username, $password) {
     // user is already logged in
     return services_error(t('Already logged in as !user.', array('!user' => $user->name)), 406);
   }
-  
+
   if (user_is_blocked($username)) {
     return services_error(t('@user is blocked.', array('@user' => $username)), 406);
   }
-  
+
   user_authenticate(array('name' => $username, 'pass' => $password));
 
   if (isset($user->uid) && $user->uid) {
