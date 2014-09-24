@@ -147,7 +147,6 @@ function _user_resource_definition() {
           'access callback' => 'services_access_menu',
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         ),
-
         'logout' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
           'help' => 'Logout a user session',
@@ -163,6 +162,21 @@ function _user_resource_definition() {
           'callback' => '_user_resource_get_token',
           'access callback' => 'services_access_menu',
           'help' => t('Returns the CSRF token.'),
+        ),
+        'request_new_password' => array(
+          'help' => 'Request a new password, given a user name or e-mail address',
+          'callback' => '_user_resource_request_new_password',
+          'args' => array(
+            array(
+              'name' => 'name',
+              'type' => 'string',
+              'description' => 'A valid user name or e-mail address',
+              'source' => array('data' => 'name'),
+              'optional' => FALSE,
+            ),
+          ),
+          'access callback' => 'services_access_menu',
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/user_resource'),
         ),
       ),
       'targeted_actions' => array(
@@ -639,6 +653,40 @@ function _user_resource_logout_1_1() {
   $user = drupal_anonymous_user();
 
   return $user;
+}
+
+/**
+ * Request a new password given a user name or e-mail address.
+ *
+ * @param $name
+ *   The username or e-mail address of the requesting account.
+ *
+ * @see https://api.drupal.org/api/drupal/modules!user!user.pages.inc/function/user_pass_validate/7
+ * @see https://api.drupal.org/api/drupal/modules!user!user.pages.inc/function/user_pass_submit/7
+ */
+function _user_resource_request_new_password($name) {
+  $name = trim($name);
+  // Try to load by email.
+  $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
+  $account = reset($users);
+  if (!$account) {
+    // No success, try to load by name.
+    $users = user_load_multiple(array(), array('name' => $name, 'status' => '1'));
+    $account = reset($users);
+  }
+  if (!isset($account->uid)) {
+    return services_error(t('Sorry, %name is not recognized as a user name or an e-mail address.', array('%name' => $name)), 406);
+  }
+  // Mail one time login URL and instructions using current language.
+  global $language;
+  $mail = _user_mail_notify('password_reset', $account, $language);
+  if (!empty($mail)) {
+    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
 }
 
 /**

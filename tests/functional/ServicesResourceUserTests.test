@@ -194,7 +194,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
   function testUpdateUserName() {
     // Create user.
     $account = $this->drupalCreateUser();
-	$name = $this->randomName();
+    $name = $this->randomName();
     // Update mail of the user.
     $updated_account = array(
       'name' => $name,
@@ -635,5 +635,40 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $response = $this->servicesPost($this->endpoint->path . '/user/logout');
     $this->assertTrue(strpos($response['status'], 'User is not logged in'),
       'User cannot logout when is anonymous', 'UserResource: Logout');
+  }
+
+  /**
+   * Test request_new_password method.
+   */
+  function testRequestNewPassword() {
+    // Create user.
+    $account = $this->drupalCreateUser(array('administer services'));
+
+    // Request new password for user by name.
+    $data = array('name' => $account->name);
+    $response = $this->servicesPost($this->endpoint->path . '/user/request_new_password', $data);
+    $this->assertTrue($response['body'],
+      'Resource to request a new password for user name has been called successfully.',
+      'UserResource: request_new_password');
+
+    // Request new password for user by e-mail address.
+    $data = array('name' => $account->mail);
+    $response = $this->servicesPost($this->endpoint->path . '/user/request_new_password', $data);
+    $this->assertTrue($response['body'],
+      'Resource to request a new password for user name has been called successfully.',
+      'UserResource: request_new_password');
+
+    // Assert 406 response for user that does not exist.
+    $data = array('name' => $this->randomName(10) . '@example.com');
+    $response = $this->servicesPost($this->endpoint->path . '/user/request_new_password', $data);
+    $this->assertEqual(406, $response['code'],
+      'Resource to request new password for non-existing user name returned content not acceptable.',
+      'UserResource: request_new_password');
+
+    // Assert that 2 e-mails were sent in this test. The drupalGetMails()
+    // method does not provide immediate feedback about e-mails sent during the
+    // test, and so this assertion can only be done at this point.
+    $mails = $this->drupalGetMails();
+    $this->assertEqual(2, count($mails), 'Only 2 e-mails were sent during this test.');
   }
 }
