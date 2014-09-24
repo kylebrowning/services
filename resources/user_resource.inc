@@ -324,6 +324,7 @@ function _user_resource_create($account) {
     if ($uri = services_resource_uri(array('user', $user['uid']))) {
       $user['uri'] = $uri;
     }
+    _user_resource_update_services_user($user['uid'], time());
     return $user;
   }
 }
@@ -388,6 +389,8 @@ function _user_resource_update($uid, $account) {
     $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
+  debug($account);
+  debug($form_state['values']);
   // If user is changing name, make sure they have permission.
   if (isset($account['name']) && $account['name'] != $account_loaded->name && !(user_access('change own username') || user_access('administer users'))) {
     return services_error(t('You are not allowed to change your username.'), 406);
@@ -407,9 +410,39 @@ function _user_resource_update($uid, $account) {
     $account = (object) $account;
     services_remove_user_data($account);
     $account = (array) $account;
+    _user_resource_update_services_user($uid, time());
     return $account;
   }
 }
+
+function _user_resource_update_services_user($uid, $time) {
+  //Determine if a row exists, if not that means we are creating the user,
+  //If so that means we are updating it.
+  $result = db_select('services_user', 'su')
+    ->fields('su')
+    ->condition('uid', $uid,'=')
+    ->execute()
+    ->fetchAssoc();
+  //check the result
+  if (!$result) {
+    $id = db_insert('services_user')
+      ->fields(array(
+        'uid' => $uid,
+        'created' => $time,
+        'changed' => $time,
+      ))
+    ->execute();
+  } else {
+    db_update('services_user')
+      ->fields(array(
+          'uid' => $uid,
+          'changed' => $time,
+        )
+      )
+      ->execute();
+  }
+}
+
 
 /**
  * Delete a user.

@@ -84,7 +84,29 @@ function services_schema() {
       ),
     ),
   );
-
+  $schema['services_user'] = array(
+    'description' => 'Stores users created/updated by services.',
+    'fields' => array(
+      'uid' => array(
+        'type'        => 'int',
+        'description' => 'User id that has been created by Drupal',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the node was most recently created by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the user was most recently updated by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  );
   return $schema;
 }
 
@@ -123,11 +145,31 @@ function services_requirements($phase) {
         'title' => 'Services Authentication Mechanism',
       );
     }
+
+    $services_security_update = variable_get('services_security_update_1', FALSE);
+    if(!$services_security_update) {
+      $url = url('admin/config/services/services-security');
+      $requirements['services'] = array(
+        'description' => $t('Services has issued a security update with the most recent module release. Administrative steps are required to secure your Drupal installation <a href="!url">here</a>.', array('!url' => $url)),
+        'severity' => REQUIREMENT_ERROR,
+        'value' => 'Steps needed',
+        'title' => 'Services Authentication Mechanism',
+      );
+    }
   }
 
   return $requirements;
 }
 
+/**
+ * Implements hook_install().
+ */
+function services_install() {
+  $ret = array();
+  //Set our security update to true since it wont need to be displayed
+  //on the status report page
+  variable_set('services_security_update_1', TRUE);
+}
 /**
  * Implements hook_uninstall().
  */
@@ -235,27 +277,32 @@ function services_update_7400() {
     services_endpoint_save($endpoint);
   }
 }
-
 /**
- * Update 7401 Changes passwords of all users that were created/registered since (30 July, 2013)
- * Read more here drupal.org node 2284449.
- * Skip the user password change by setting the variable services_skip_security_update_7401 to TRUE.
- * NOTE: This Overwrites password hashes using an invalid prefix which can never match a password hash during login.
- * All affected users will have to request new one time login links to reset their passwords.
+ * Update 7402 adds services_user table so that services can see users created/update by itself.
  */
-function services_update_7401() {
-  // http://drupal.org/node/2284449.
-  // Update users created only after the bug has been introduced (30 July, 2013).
-  $skip_update = variable_get('services_skip_security_update_7401', FALSE);
-  if ($skip_update === FALSE) {
-    $affected_accounts = db_update('users')
-      ->fields(array(
-        'pass' => "ZZZservices_security",
-      ))
-      ->condition('created', 1374278400, '>=')
-      ->execute();
-    return t('@accounts user passwords have been reset.', array('@accounts' => $affected_accounts));
-  } else {
-    return t('Skipped security update 7401 due to variable services_skip_security_update_7401 being set to TRUE');
-  }
+function services_update_7402() {
+  $schema['services_user'] = array(
+    'description' => 'Stores users created/updated by services.',
+    'fields' => array(
+      'uid' => array(
+        'type'        => 'int',
+        'description' => 'User id that has been created by Drupal',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the node was most recently created by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the user was most recently updated by services.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  );
+  db_create_table('services_user', $schema['services_user']);
 }
