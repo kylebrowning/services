@@ -453,7 +453,7 @@ function services_endpoint_save($endpoint) {
       $endpoint->{$endpoint_field} = array();
     }
   }
-
+  ctools_include('export');
   ctools_export_crud_save('services_endpoint', $endpoint);
   ctools_export_load_object_reset('services_endpoint');
   menu_rebuild();
@@ -466,6 +466,7 @@ function services_endpoint_save($endpoint) {
  * @return void
  */
 function services_endpoint_delete($endpoint) {
+  ctools_include('export');
   ctools_export_crud_delete('services_endpoint', $endpoint);
   ctools_export_load_object_reset('services_endpoint');
   menu_rebuild();

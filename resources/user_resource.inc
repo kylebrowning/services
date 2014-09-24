@@ -541,11 +541,25 @@ function _user_resource_login($username, $password) {
     return services_error(t('The username %name has not been activated or is blocked.', array('%name' => $username)), 403);
   }
 
-  $uid = user_authenticate($username, $password);
+  // Emulate drupal native flood control: check for flood condition.
+  $flood_state = array();
+  if (variable_get('services_flood_control_enabled', TRUE)) {
+    $flood_state = _user_resource_flood_control_precheck($username);
+  }
 
-  // Emulate drupal native flood control
-  if (empty($uid) && variable_get('services_flood_control_enabled', TRUE)) {
-    _user_resource_flood_control($username);
+  // Only authenticate if a flood condition was not detected.
+  if (empty($flood_state['flood_control_triggered'])) {
+    $uid = user_authenticate($username, $password);
+  }
+  else {
+    $uid = FALSE;
+  }
+
+  // Emulate drupal native flood control: register flood event, and throw error
+  // if a flood condition was previously detected
+  if (variable_get('services_flood_control_enabled', TRUE)) {
+    $flood_state['uid'] = $uid;
+    _user_resource_flood_control_postcheck($flood_state);
   }
 
   if ($uid) {
@@ -793,47 +807,96 @@ function _user_resource_get_token() {
 
 
 /**
- * Callback that emulate drupal native flood control.
- * @param $username
- *  Username we register flood event for
- * @see user_login_authenticate_validate()
- * @see user_login_final_validate()
+ * Emulate native Drupal flood control, phase 1.
+ *
+ * This function checks for a flood condition, and determines the identifier
+ * for user based flood checks. This is done prior to user authentication.
+ *
+ * @param string $username
+ *   The name of the user who is attempting to log in.
+ * @return array
+ *   An array containing zero or more of the following keys:
+ *   - flood_control_triggered: either 'user' or 'ip' if a flood condition
+ *     was detected.
+ *   - flood_control_user_identifier: the identifier to use to register
+ *     user-based flood events.
+ *
+ * @see _user_resource_flood_control_postcheck().
+ * @see user_login_authenticate_validate().
  */
-function _user_resource_flood_control($username) {
-  $flood_message = '';
+function _user_resource_flood_control_precheck($username) {
+  $flood_state = array();
+  // Do not allow any login from the current user's IP if the limit has been
+  // reached. Default is 50 failed attempts allowed in one hour. This is
+  // independent of the per-user limit to catch attempts from one IP to log
+  // in to many different user accounts.  We have a reasonably high limit
+  // since there may be only one apparent IP for all users at an institution.
+   if (!flood_is_allowed('failed_login_attempt_ip', variable_get('user_failed_login_ip_limit', 50), variable_get('user_failed_login_ip_window', 3600))) {
+    $flood_state['flood_control_triggered'] = 'ip';
+   }
+  else {
+    $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $username))->fetchObject();
+    if ($account) {
+      if (variable_get('user_failed_login_identifier_uid_only', FALSE)) {
+        // Register flood events based on the uid only, so they apply for any
+        // IP address. This is the most secure option.
+        $identifier = $account->uid;
+      }
+      else {
+        // The default identifier is a combination of uid and IP address. This
+        // is less secure but more resistant to denial-of-service attacks that
+        // could lock out all users with public user names.
+        $identifier = $account->uid . '-' . ip_address();
+      }
+      $flood_state['flood_control_user_identifier'] = $identifier;
 
-  // Always register an IP-based failed login event.
-  flood_register_event('failed_login_attempt_ip', variable_get('user_failed_login_ip_window', 3600));
-
-  if (!flood_is_allowed('failed_login_attempt_ip', variable_get('user_failed_login_ip_limit', 50), variable_get('user_failed_login_ip_window', 3600))) {
-    $flood_message = t('This IP address is temporarily blocked.');
+      // Don't allow login if the limit for this user has been reached.
+      // Default is to allow 5 failed attempts every 6 hours.
+      if (!flood_is_allowed('failed_login_attempt_user', variable_get('user_failed_login_user_limit', 5), variable_get('user_failed_login_user_window', 21600), $identifier)) {
+        $flood_state['flood_control_triggered'] = 'user';
+      }
+     }
   }
+  return $flood_state;
+}
 
-  $account = db_query("SELECT * FROM {users} WHERE name = :name AND status = 1", array(':name' => $username))->fetchObject();
-
-  if ($account) {
-    if (variable_get('user_failed_login_identifier_uid_only', FALSE)) {
-      // Register flood events based on the uid only, so they apply for any
-      // IP address. This is the most secure option.
-      $identifier = $account->uid;
+/**
++ * Emulate native Drupal flood control, phase 2.
++ *
++ * This function records a failed login attempt, and triggers an error if a
++ * flood condition was previously detected.
++ *
++ * @param array $flood_state
++ *   An array of flood information as returned by
++ *   _user_resource_flood_control_precheck().
++ *
++ * @throws ServicesException
++ *   If a flood condition was previously detected.
++ *
++ * @see _user_resource_flood_control_precheck().
++ * @see user_login_final_validate().
++ */
+function _user_resource_flood_control_postcheck($flood_state) {
+  if (empty($flood_state['uid'])) {
+    // Always register an IP-based failed login event.
+    flood_register_event('failed_login_attempt_ip', variable_get('user_failed_login_ip_window', 3600));
+    // Register a per-user failed login event.
+    if (isset($flood_state['flood_control_user_identifier'])) {
+      flood_register_event('failed_login_attempt_user', variable_get('user_failed_login_user_window', 21600), $flood_state['flood_control_user_identifier']);
     }
-    else {
-      // The default identifier is a combination of uid and IP address. This
-      // is less secure but more resistant to denial-of-service attacks that
-      // could lock out all users with public user names.
-      $identifier = $account->uid . '-' . ip_address();
-      flood_register_event('failed_login_attempt_user', variable_get('user_failed_login_user_window', 21600), $identifier);
-    }
-
-    // Don't allow login if the limit for this user has been reached.
-    // Default is to allow 5 failed attempts every 6 hours.
-    if (!flood_is_allowed('failed_login_attempt_user', variable_get('user_failed_login_user_limit', 5), variable_get('user_failed_login_user_window', 21600), $identifier)) {
-      $flood_message = t('Account is temporarily blocked.');
+    if (isset($flood_state['flood_control_triggered'])) {
+      if ($flood_state['flood_control_triggered'] == 'user') {
+        services_error(t('Account is temporarily blocked.'), 406);
+      }
+      else {
+        // We did not find a uid, so the limit is IP-based.
+        services_error(t('This IP address is temporarily blocked.'), 406);
+      }
     }
   }
-
-  // Throw exception if have blocking
-  if (!empty($flood_message)) {
-    services_error($flood_message, 406);
+  elseif (isset($flood_state['flood_control_user_identifier'])) {
+    // Clear past failures for this user so as not to block a user who might
+    // log in and out more than once in an hour.
+    flood_clear_event('failed_login_attempt_user', $flood_state['flood_control_user_identifier']);
   }
 }

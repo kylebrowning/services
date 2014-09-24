@@ -584,14 +584,14 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
 
     // Go through set of default error while we're having attempts
     if ($account_blocking_limit > 2) {
-      for ($i = 0; $i < $account_blocking_limit - 2; $i++) {
+      for ($i = 0; $i < $account_blocking_limit - 1; $i++) {
         // Just trigger login operation to write fails to flood table
         $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $this->randomString()));
       }
     }
 
     // Now account will be locked after 5 failed attempts
-    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $this->randomString()));
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account->name, 'password' => $account->pass_raw));
 
     $this->assertTrue(strpos($response['status'], 'Account is temporarily blocked.') !== FALSE,
       'After ' . $account_blocking_limit . '-th failed login account is temporary blocked.', 'UserResource: Login Flood Control');
@@ -612,7 +612,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $account2 = $this->drupalCreateUser();
 
     // Now ip will be locked after 50 failed attempts
-    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account2->name, 'password' => $this->randomString()));
+    $response = $this->servicesPost($this->endpoint->path . '/user/login', array('username' => $account2->name, 'password' => $account2->pass_raw));
 
     $this->assertTrue(strpos($response['status'], 'This IP address is temporarily blocked.') !== FALSE,
       'After ' . $ip_blocking_limit . '-th failed login ip is temporary blocked.', 'UserResource: Login Flood Control');
