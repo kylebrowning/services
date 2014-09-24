@@ -408,6 +408,13 @@ function _node_resource_update($nid, $node) {
   $form_state['values']['op'] = variable_get('services_node_save_button_' . $node_type . '_resource_update', t('Save'));
   $form_state['node'] = $old_node;
   $form_state['programmed_bypass_access_check'] = FALSE;
+
+  // Contributed modules may check the triggering element in the form state.
+  // The triggering element is usually set from the browser's POST request, so
+  // we'll automatically set it as the submit action from here.
+  $stub_form = drupal_get_form($node_type . '_node_form', (object) $old_node);
+  $form_state['triggering_element'] = $stub_form['actions']['submit'];
+
   drupal_form_submit($node_type . '_node_form', $form_state, $old_node);
 
   if ($errors = form_get_errors()) {
