@@ -573,12 +573,42 @@ function _services_version_header_options() {
       }
     }
   }
+  $headers = _services_parse_request_headers();
+
   foreach($available_headers as $key => $version_header_option) {
-    if(array_key_exists($version_header_option, $headers = getallheaders())) {
-      $version = $headers[$version_header_option];
+    $header_key = _services_fix_header_key($version_header_option);
+    $headers = _services_parse_request_headers();
+    if(array_key_exists($header_key, $headers)) {
+      $version = $headers[$header_key];
     }
   }
   return isset($version) ? $version : FALSE;
+}
+
+/**
+ * Returns all request headers.
+ * @return
+ * And array with all request headers
+ */
+function _services_parse_request_headers() {
+  $headers = array();
+  foreach($_SERVER as $key => $value) {
+    $length = 5;
+    if (substr($key, 0, $length) <> 'HTTP_') {
+      continue;
+    }
+    $header = _services_fix_header_key($key, $length);
+    $headers[$header] = $value;
+  }
+  return $headers;
+}
+/**
+ * Fixes request headers to match what PHP gives us.
+ * @return
+ *   a string with the correct syntax for a header value.
+ */
+function _services_fix_header_key($key, $length = 0) {
+  return str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, $length)))));
 }
 
 /**
