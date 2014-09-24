@@ -403,8 +403,6 @@ function _user_resource_update($uid, $account) {
     $form_state['values']['pass']['pass2'] = $account['pass'];
   }
 
-  debug($account);
-  debug($form_state['values']);
   // If user is changing name, make sure they have permission.
   if (isset($account['name']) && $account['name'] != $account_loaded->name && !(user_access('change own username') || user_access('administer users'))) {
     return services_error(t('You are not allowed to change your username.'), 406);
