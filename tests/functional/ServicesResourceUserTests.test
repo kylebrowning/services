@@ -33,6 +33,7 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
     $this->endpoint =  $this->saveNewEndpoint();
     // Set up privileged user and login.
     $this->privileged_user = $this->drupalCreateUser(array('administer users', 'access user profiles'));
+    $this->regular_user = $this->drupalCreateUser(array('access user profiles'));
     $this->drupalLogin($this->privileged_user);
   }
 
@@ -186,6 +187,66 @@ class ServicesResourceUsertests extends ServicesWebtestCase {
                         && ($account->mail = $this->privileged_user->mail)
                         && ($account->roles = $this->privileged_user->roles);
     $this->assertTrue($users_are_the_same, t('Retrieved user is the same as created.'), 'UserResource: Retrieve');
+  }
+  /**
+   * Test update method.
+   *
+   * Check to see if a regular user can change another user's role.
+   */
+  function testUpdateUserRolesWithRegularAccount() {
+    // Create user.
+    $account = $this->drupalCreateUser();
+    $this->drupalLogout();
+    $this->drupalLogin($this->regular_user);
+    // Update the roles of the user.
+    $updated_account = array(
+      'mail' => $this->randomName() . '@example.com',
+      'pass' => $this->randomString(),
+      'roles' => array( 3 => 'adminstrator'),
+    );
+    $response = $this->servicesPut($this->endpoint->path . '/user/' . $account->uid, $updated_account);
+
+    $user_load = user_load($account->uid);
+    //verify they are not allowed.
+    $testtext = 'Access denied for user ' . $this->regular_user->uid . ' "' . $this->regular_user->name - '"';
+    $this->assertEqual($response['body'], $testtext, 'Regular user CANNOT update roles', 'UserResource: Update');
+  }
+
+  /**
+   * Test update own roles method.
+   *
+   * Check to see if a regular user can change their own role.
+   */
+  function testUpdateUserOwnUserRoles() {
+    // Create user with minimal permission
+    $account = $this->drupalCreateUser();
+    $this->drupalLogout();
+    // Login
+    $this->drupalLogin($account);
+
+    // Not strictly necessary but illustrates the problem
+    $role_name = $this->randomName();
+    $role_rid = $this->drupalCreateRole(array('administer users'), $role_name);
+
+    $user_load_before = user_load($account->uid);
+
+    // Update the roles of the user.
+    $updated_account = array(
+      'uid' => $account->uid,
+      'name' => $account->name,
+      'mail' => $account->mail,
+      'roles' => array($role_rid => $role_name),
+    );
+
+    $response = $this->servicesPut($this->endpoint->path . '/user/' . $account->uid, $updated_account);
+
+    $user_load_after = user_load($account->uid, TRUE);
+
+    $this->assertEqual($response['code'], 200, 'Update will should appear to succeed as the roles will be ignored', 'UserResource');
+
+    // The roles must remain unchanged
+    $this->assertEqual($response['body']['roles'], $user_load_before->roles, 'Response shows roles unchanged', 'UserResource');
+    $this->assertEqual($user_load_before->roles, $user_load_after->roles, 'User roles have not been changed', 'UserResource');
   }
 
   /**
