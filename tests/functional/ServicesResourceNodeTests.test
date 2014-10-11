@@ -225,9 +225,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'type' => 'page',
     );
 
-    $response_array = $this->servicesPost($this->endpoint->path . '/node', $node);
+    $responseArray = $this->servicesPost($this->endpoint->path . '/node', $node);
 
-    $this->assertEqual($response_array['body'], t('Title field is required.'), t('Node was not created without title.'), 'NodeResource: Created');
+    $this->assertTrue(strpos($responseArray['status'], 'Title field is required.'), t('Node was not created without title.'), 'NodeResource: Create');
   }
 
   /**
@@ -302,6 +302,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'nid' => $nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'cid' => NULL,
+        'pid' => 0,
+        'format' => FILTER_FORMAT_DEFAULT,
       );
 
       $cid = comment_save($comment);
@@ -319,6 +322,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'nid' => $node2->nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'cid' => NULL,
+        'pid' => 0,
+        'format' => FILTER_FORMAT_DEFAULT,
       );
 
       $cid = comment_save($comment);
