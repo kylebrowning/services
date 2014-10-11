@@ -225,9 +225,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
       'type' => 'page',
     );
 
-    $response_array = $this->servicesPost($this->endpoint->path . '/node', $node);
+    $responseArray = $this->servicesPost($this->endpoint->path . '/node', $node);
 
-    $this->assertEqual($response_array['body'], t('Title field is required.'), t('Node was not created without title.'), 'NodeResource: Created');
+    $this->assertTrue(strpos($responseArray['status'], 'Title field is required.'), t('Node was not created without title.'), 'NodeResource: Create');
   }
 
   /**
