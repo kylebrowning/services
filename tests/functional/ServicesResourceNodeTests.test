@@ -302,6 +302,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'nid' => $nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'cid' => NULL,
+        'pid' => 0,
+        'format' => FILTER_FORMAT_DEFAULT,
       );
 
       $cid = comment_save($comment);
@@ -319,6 +322,9 @@ class ServicesResourceNodetests extends ServicesWebtestCase {
         'nid' => $node2->nid,
         'subject' => $this->randomString(),
         'comment' => $this->randomString(),
+        'cid' => NULL,
+        'pid' => 0,
+        'format' => FILTER_FORMAT_DEFAULT,
       );
 
       $cid = comment_save($comment);
