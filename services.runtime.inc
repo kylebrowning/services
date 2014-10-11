@@ -104,7 +104,7 @@ function services_controller_execute($controller, $args = array(), $options = ar
   }
 
   $original_user = $user;
-
+  
   if (strpos($controller['callback'], 'login') !== FALSE && strpos($controller['callback'], 'logout') !== FALSE) {
     $old_state = session_save_session();
     session_save_session(FALSE);
@@ -341,6 +341,27 @@ function services_server_info_object($reset = FALSE) {
  */
 function services_error($message, $code = 0, $data = NULL) {
   throw new ServicesException($message, $code, $data);
+}
+
+/**
+ * Make any changes we might want to make to node.
+ */
+function services_node_load($node, $fields = array()) {
+  if (!isset($node->nid)) {
+    return NULL;
+  }
+
+  // Loop through and get only requested fields
+  if (count($fields) > 0) {
+    foreach ($fields as $field) {
+      $val->{$field} = $node->{$field};
+    }
+  }
+  else {
+    $val = $node;
+  }
+
+  return $val;
 }
 
 /**
