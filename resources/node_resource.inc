@@ -470,7 +470,6 @@ function _node_resource_delete($nid) {
  *       for index requests more straightforward?
  */
 function _node_resource_index($page, $fields, $parameters, $page_size) {
-  module_load_include('inc', 'services', 'services.module');
   $node_select = db_select('node', 't')
     ->addTag('node_access')
     ->orderBy('sticky', 'DESC')
