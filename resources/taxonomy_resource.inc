@@ -589,7 +589,9 @@ function _taxonomy_resource_delete_access($tid) {
  * @see _node_resource_index() for more notes
  **/
 function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) {
-  $taxonomy_select = db_select('taxonomy_term_data', 't')
+  $taxonomy_select = db_select('taxonomy_term_data', 't');
+  $taxonomy_select->join('taxonomy_term_hierarchy', 'tth', 't.tid = tth.tid');
+  $taxonomy_select->fields('tth')
     ->orderBy('vid', 'DESC')
     ->orderBy('weight', 'DESC')
     ->orderBy('name', 'DESC');
