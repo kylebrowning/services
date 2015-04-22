@@ -611,7 +611,7 @@ function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
   $return_comments = array();
 
   foreach ($comments as $comment) {
-    $return_comments[] = services_field_permissions_comment_clean('view', 'comment', $comment);
+    $return_comments[] = services_field_permissions_clean('view', 'comment', $comment);
   }
 
   return $return_comments;
