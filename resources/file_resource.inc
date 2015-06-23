@@ -253,7 +253,7 @@ function _file_resource_retrieve($fid, $include_file_contents, $get_image_style)
 
     $file->image_styles = array();
     // Add image style information if available.
-    if ($get_image_style) {
+    if ($get_image_style && !empty($file->uri) && strpos($file->filemime, 'image') === 0) {
       foreach (image_styles() as $style) {
         $style_name = $style['name'];
         $file->image_styles[$style_name] = image_style_url($style_name, $file->uri);
