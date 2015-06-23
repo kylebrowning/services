@@ -259,6 +259,8 @@ function _node_resource_retrieve($nid) {
     // cause never ending recursion in rendering.
     unset($node->uri);
   }
+  //Lets check field_permissions
+  $node = services_field_permissions_clean('view', 'node', $node);
   return $node;
 }
 
@@ -604,7 +606,15 @@ function _node_resource_load_node_comments($nid, $count = 0, $start = 0) {
     $cids[] = $record->cid;
   }
 
-  return !empty($cids) ? comment_load_multiple($cids) : array();
+  !empty($cids) ? $comments = comment_load_multiple($cids) : array();
+
+  $return_comments = array();
+
+  foreach ($comments as $comment) {
+    $return_comments[] = services_field_permissions_clean('view', 'comment', $comment);
+  }
+
+  return $return_comments;
 }
 
 /**

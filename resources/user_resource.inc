@@ -253,6 +253,9 @@ function _user_resource_retrieve($uid) {
 
   services_remove_user_data($account);
 
+  //Lets check field_permissions
+  $account = services_field_permissions_clean('view', 'user', $account);
+
   // Everything went right.
   return $account;
 }
