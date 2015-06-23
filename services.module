@@ -799,11 +799,12 @@ function services_get_resource_api_version($endpoint, $resource, $method) {
   if (isset($endpoint->resources[$resource]) ) {
     $class_info = services_operation_class_info();
     foreach ($class_info as $class_name => $class) {
-      if (!empty($resource[$class_name])) {
+      if (!empty($endpoint->resources[$resource][$class_name])) {
         if (isset($endpoint->resources[$resource][$class_name][$method]['settings']['services']['resource_api_version'])) {
           if($version = _services_version_header_options()) {
             $split = explode('.', $version);
-          } else {
+          }
+          else {
             $split = explode('.', $endpoint->resources[$resource][$class_name][$method]['settings']['services']['resource_api_version']);
           }
           return array(

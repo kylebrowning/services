@@ -374,7 +374,7 @@ function services_edit_form_endpoint_resources($form, &$form_state, $endpoint) {
               'resource_api_version' => array(
                 '#type' => 'select',
                 '#options' => $options,
-                '#default_value' => $default_api_value,
+                '#default_value' => $resource_conf[$class][$op_name]['settings']['services']['resource_api_version'],
                 '#title' => 'Resource API Version',
               ),
             );
