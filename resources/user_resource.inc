@@ -317,8 +317,17 @@ function _user_resource_create($account) {
   // Set the form state op.
   $form_state['values']['op'] = variable_get('services_user_create_button_resource_create', t('Create new account'));
 
-  // execute the register form
+  // Execute the register form.
   $form_state['programmed_bypass_access_check'] = FALSE;
+
+  // Ensure this is validated, as drupal_form_submit will not call validation.
+  user_register_validate('user_register_form', $form_state);
+  $errors = form_get_errors();
+  // If there are errors, then short circuit and return early.
+  if ($errors) {
+   return services_error(implode(' ', $errors), 406, array('form_errors' => $errors));
+  }
+
   drupal_form_submit('user_register_form', $form_state);
   // find and store the new user into the form_state
   if(isset($form_state['values']['uid'])) {
