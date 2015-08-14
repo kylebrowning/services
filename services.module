@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Contains services.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function services_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the services module.
+    case 'help.page.services':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('A standardized solution of integrating external applications with Drupal.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function services_theme() {
+  $theme = [];
+
+  return $theme;
+}
