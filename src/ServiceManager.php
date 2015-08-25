@@ -36,6 +36,10 @@ class ServiceManager {
    *   The key provider ID to use.
    */
   public function getServiceByEndpoint($endpoint) {
+
+    // Check if the request endpoint starts or ends with '/', remove them.
+    $endpoint = trim($endpoint, '/');
+
     return array_shift($this->entityManager->getStorage('service_api')->loadByProperties(array('endpoint' => $endpoint)));
   }
 

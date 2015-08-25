@@ -35,7 +35,8 @@ use Symfony\Component\HttpFoundation\Request;
  *   links = {
  *     "canonical" = "/admin/structure/service_api/{service_api}",
  *     "edit-form" = "/admin/structure/service_api/{service_api}/edit",
- *     "delete-form" = "/admin/structure/service_api/{service_api}/delete"
+ *     "delete-form" = "/admin/structure/service_api/{service_api}/delete",
+ *     "collection" = "/admin/structure/service_api"
  *   }
  * )
  */
@@ -72,14 +73,14 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
    * {@inheritdoc}
    */
   public function getEndpoint() {
-    return $this->pluginDefinition['title'];
+    return $this->endpoint;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getServiceProvider() {
-    return $this->pluginDefinition['title'];
+    return $this->service_provider;
   }
 
   /**
@@ -90,7 +91,8 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
       $plugin_service = \Drupal::getContainer()->get('plugin.manager.services.service_definition');
       /** @var $instance \Drupal\services\ServiceAPIInterface */
       $instance = $plugin_service->createInstance($this->getServiceProvider());
-      $instance->processRequest($request);
+      var_dump($instance);
+      return $instance->processRequest($request);
     }
     return NULL;
   }

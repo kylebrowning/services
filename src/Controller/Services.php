@@ -22,7 +22,7 @@ class Services extends ControllerBase {
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match) {
     /** @var $service_api \Drupal\services\ServiceAPIInterface */
-    $service_api = \Drupal::getContainer()->get('service_manager')->getServiceByEndpoint($request->getBasePath());
+    $service_api = \Drupal::getContainer()->get('service_manager')->getServiceByEndpoint($request->getPathInfo());
     return $service_api->processRequest($request);
   }
 }

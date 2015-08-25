@@ -25,7 +25,7 @@ class ServiceAPIForm extends EntityForm {
   protected $manager;
 
   public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.password_policy.password_constraint'));
+    return new static($container->get('plugin.manager.services.service_definition'));
   }
 
   function __construct(PluginManagerInterface $manager) {
@@ -75,6 +75,7 @@ class ServiceAPIForm extends EntityForm {
     $form['service_provider'] = array(
       '#type' => 'select',
       '#options' => $opts,
+      '#title' => $this->t('Service Provider'),
       '#required' => TRUE,
       '#default_value' => $service_api->getServiceProvider(),
     );
