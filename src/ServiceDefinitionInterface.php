@@ -7,6 +7,7 @@ namespace Drupal\services;
 
 use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 
 interface ServiceDefinitionInterface extends PluginInspectionInterface, ConfigurablePluginInterface, PluginFormInterface {
@@ -41,7 +42,7 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface, Configur
    * @param request
    *   A request object.
    *
-   * @return Serialization
+   * @return SerializationInterface
    *   The response.
    */
   public function processRequest($request);

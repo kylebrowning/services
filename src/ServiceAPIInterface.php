@@ -7,7 +7,9 @@
 
 namespace Drupal\services;
 
+use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Provides an interface for defining Service api entities.
@@ -25,4 +27,10 @@ interface ServiceAPIInterface extends ConfigEntityInterface {
    * @return string
    */
   public function getServiceProvider();
+
+  /**
+   * Processes the service API request.
+   * @return SerializationInterface
+   */
+  public function processRequest(Request $request);
 }

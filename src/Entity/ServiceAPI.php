@@ -9,6 +9,7 @@ namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\services\ServiceAPIInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Defines the Service api entity.
@@ -81,4 +82,16 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
     return $this->pluginDefinition['title'];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function processRequest(Request $request) {
+    if ($this->getServiceProvider()) {
+      $plugin_service = \Drupal::getContainer()->get('plugin.manager.services.service_definition');
+      /** @var $instance \Drupal\services\ServiceAPIInterface */
+      $instance = $plugin_service->createInstance($this->getServiceProvider());
+      $instance->processRequest($request);
+    }
+    return NULL;
+  }
 }
