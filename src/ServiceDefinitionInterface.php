@@ -9,8 +9,9 @@ use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Symfony\Component\HttpFoundation\Request;
 
-interface ServiceDefinitionInterface extends PluginInspectionInterface, ConfigurablePluginInterface, PluginFormInterface {
+interface ServiceDefinitionInterface extends PluginInspectionInterface {
 
   /**
    * Returns a translated string for the constraint title.
@@ -45,6 +46,6 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface, Configur
    * @return SerializationInterface
    *   The response.
    */
-  public function processRequest($request);
+  public function processRequest(Request $request);
 
 }
