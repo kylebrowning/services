@@ -21,6 +21,8 @@ class Services extends ControllerBase {
    * Processing the API request
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match) {
-    //TODO - Process request, match to service API via endpoint, process request.
+    /** @var $service_api \Drupal\services\ServiceAPIInterface */
+    $service_api = \Drupal::getContainer()->get('service_manager')->getServiceByEndpoint($request->getBasePath());
+    return $service_api->processRequest($request);
   }
 }

@@ -32,3 +32,5 @@ entity.service_api.delete_form:
   requirements:
     _permission: 'administer site configuration'
 
+route_callbacks:
+  - '\Drupal\services\Routing\ServiceAPI::routes'
