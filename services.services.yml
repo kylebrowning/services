@@ -1,0 +1,5 @@
+services:
+
+  plugin.manager.services.service_definition:
+    class: Drupal\services\ServiceDefinitionPluginManager
+    parent: default_plugin_manager
