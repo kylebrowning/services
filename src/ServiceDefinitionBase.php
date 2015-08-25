@@ -7,7 +7,6 @@
 namespace Drupal\services;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
@@ -39,43 +38,8 @@ abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefini
   /**
    * {@inheritdoc}
    */
-  public function getErrorMessage() {
-    return $this->pluginDefinition['error_message'];
+  public function supportsTranslation() {
+    return $this->pluginDefinition['translatable'];
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public function defaultConfiguration() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getConfiguration() {
-    return array(
-      'id' => $this->getPluginId(),
-    ) + $this->configuration;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setConfiguration(array $configuration) {
-    $this->configuration = $configuration + $this->defaultConfiguration();
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function calculateDependencies() {
-    return array();
-  }
 }

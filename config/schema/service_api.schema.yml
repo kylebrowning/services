@@ -1,0 +1,18 @@
+services.service_api.*:
+  type: config_entity
+  label: 'Service api config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    service_provider:
+      type: services.service_definition.plugin.[id]
+      label: 'Service Provider'
+    endpoint:
+      type: string
+      label: 'Endpoint'

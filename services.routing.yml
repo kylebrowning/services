@@ -1,0 +1,34 @@
+
+# ServiceAPI routing definition
+entity.service_api.collection:
+  path: '/admin/structure/service_api'
+  defaults:
+    _entity_list: 'service_api'
+    _title: 'Service api'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.service_api.add_form:
+  path: '/admin/structure/service_api/add'
+  defaults:
+    _entity_form: 'service_api.add'
+    _title: 'Add Service api'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.service_api.edit_form:
+  path: '/admin/structure/service_api/{service_api}'
+  defaults:
+    _entity_form: 'service_api.edit'
+    _title: 'Edit Service api'
+  requirements:
+    _permission: 'administer site configuration'
+
+entity.service_api.delete_form:
+  path: '/admin/structure/service_api/{service_api}/delete'
+  defaults:
+    _entity_form: 'service_api.delete'
+    _title: 'Delete Service api'
+  requirements:
+    _permission: 'administer site configuration'
+
