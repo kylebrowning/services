@@ -1,0 +1,6 @@
+entity.service_api.add_form:
+  route_name: 'entity.service_api.add_form'
+  title: 'Add Service api'
+  appears_on:
+    - entity.service_api.collection
+
