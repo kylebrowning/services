@@ -91,7 +91,6 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
       $plugin_service = \Drupal::getContainer()->get('plugin.manager.services.service_definition');
       /** @var $instance \Drupal\services\ServiceAPIInterface */
       $instance = $plugin_service->createInstance($this->getServiceProvider());
-      var_dump($instance);
       return $instance->processRequest($request);
     }
     return NULL;
