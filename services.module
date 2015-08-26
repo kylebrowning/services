@@ -915,8 +915,10 @@ function services_resources_as_procedures($resource, $resource_name) {
  *   Integer number of items to be returned.
  * @param $resource
  *   String name of the resource building the index query
+ * @param $options
+ *   Additional query options.
  */
-function services_resource_build_index_query($query, $page, $fields, $parameters, $page_size, $resource) {
+function services_resource_build_index_query($query, $page, $fields, $parameters, $page_size, $resource, $options = array()) {
   $default_limit = variable_get("services_{$resource}_index_page_size", 20);
   if (!user_access('perform unlimited index queries') && $page_size > $default_limit) {
     $page_size = $default_limit;
@@ -930,7 +932,16 @@ function services_resource_build_index_query($query, $page, $fields, $parameters
   }
   if (isset($parameters) && is_array($parameters)) {
     foreach ($parameters as $parameter => $parameter_value) {
-      $query->condition($parameter, services_str_getcsv($parameter_value), 'IN');
+      $op = 'IN';
+      if (isset($options['parameters_op']) && isset($options['parameters_op'][$parameter])) {
+        $op = strtoupper($options['parameters_op'][$parameter]);
+      }
+      $query->condition($parameter, services_str_getcsv($parameter_value), $op);
+    }
+  }
+  if (isset($options['orderby'])) {
+    foreach($options['orderby'] as $column => $sort) {
+      $query->orderBy($column, $sort);
     }
   }
 }

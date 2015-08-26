@@ -118,6 +118,20 @@ function _taxonomy_resource_definition() {
               'default value' => variable_get('services_taxonomy_term_index_page_size', 20),
               'source' => array('param' => 'pagesize'),
             ),
+            array(
+              'name' => 'options',
+              'optional' => TRUE,
+              'type' => 'array',
+              'description' => 'Additional query options.',
+              'default value' => array(
+                'orderby' => array(
+                  'vid' => 'DESC',
+                  'weight' => 'DESC',
+                  'name' => 'DESC'
+                )
+              ),
+              'source' => array('param' => 'options'),
+            ),
           ),
           'access arguments' => array('access content'),
         ),
@@ -618,20 +632,19 @@ function _taxonomy_resource_delete_access($tid) {
  *   indicating items to retrieve.
  * @param $page_size
  *   Integer number of items to be returned.
+ * @param $options
+ *   Additional query options.
  * @return
  *   An array of term objects.
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size) {
+function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size, $options = array()) {
   $taxonomy_select = db_select('taxonomy_term_data', 't');
   $taxonomy_select->join('taxonomy_term_hierarchy', 'tth', 't.tid = tth.tid');
-  $taxonomy_select->fields('tth')
-    ->orderBy('vid', 'DESC')
-    ->orderBy('weight', 'DESC')
-    ->orderBy('name', 'DESC');
-
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_term');
+  $taxonomy_select->fields('tth');
+  
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_term', $options);
 
   $results = services_resource_execute_index_query($taxonomy_select);
 
