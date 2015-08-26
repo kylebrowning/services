@@ -275,6 +275,21 @@ function _taxonomy_resource_definition() {
         ),
       ),
       'actions' => array(
+        'retrieveByMachineName' => array(
+          'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
+          'help'   => t('Returns a vocabulary based on machine name.'),
+          'access arguments' => array('access content'),
+          'callback' => 'taxonomy_service_get_by_machine_name',
+          'args'     => array(
+            array(
+              'name'         => 'machine_name',
+              'type'         => 'string',
+              'description'  => t('The vocabulary id to retrieve.'),
+              'source'       => array('data' => 'machine_name'),
+              'optional'     => FALSE,
+            ),
+          ),
+        ),
         'getTree' => array(
           'file' => array('type' => 'inc', 'module' => 'services', 'name' => 'resources/taxonomy_resource'),
           'help'   => t('Returns a full list of taxonomy terms.'),
@@ -489,6 +504,23 @@ function taxonomy_service_get_tree($vid, $parent = 0, $max_depth = NULL, $load_e
     return services_error(t('No vocabulary with id @vid found.', array('@vid' => $vid)), 404);
   }
   return $terms;
+}
+
+/**
+ * Services interface to taxonomy_vocabulary_machine_name_load().
+ *
+ * @param string $machine_name
+ *   Vocabulary machine name.
+ *
+ * @return object
+ *   Vocabulary.
+ */
+function taxonomy_service_get_by_machine_name($machine_name) {
+  $vocabulary = taxonomy_vocabulary_machine_name_load($machine_name);
+  if (empty($vocabulary)) {
+    return services_error(t('No vocabulary with machine name @name found.', array('@name' => $machine_name)), 404);
+  }
+  return $vocabulary;
 }
 
 /**
