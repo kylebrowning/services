@@ -42,21 +42,21 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterface {
   /**
-   * The service endpoint ID.
+   * The services endpoint ID.
    *
    * @var string
    */
   protected $id;
 
   /**
-   * The service endpoint label.
+   * The services endpoint label.
    *
    * @var string
    */
   protected $label;
 
   /**
-   * The service endpoint endpoint.
+   * The services endpoint.
    *
    * @var string
    */

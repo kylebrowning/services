@@ -18,7 +18,7 @@ class ServiceEndpointListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = $this->t('service endpoint');
+    $header['label'] = $this->t('Services endpoint');
     $header['id'] = $this->t('Machine name');
     return $header + parent::buildHeader();
   }

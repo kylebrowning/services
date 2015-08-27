@@ -4,7 +4,7 @@ entity.service_endpoint.collection:
   path: '/admin/structure/service_endpoint'
   defaults:
     _entity_list: 'service_endpoint'
-    _title: 'service endpoint'
+    _title: 'Services'
   requirements:
     _permission: 'administer site configuration'
 
@@ -12,7 +12,7 @@ entity.service_endpoint.add_form:
   path: '/admin/structure/service_endpoint/add'
   defaults:
     _entity_form: 'service_endpoint.add'
-    _title: 'Add service endpoint'
+    _title: 'Add services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
@@ -20,7 +20,7 @@ entity.service_endpoint.edit_form:
   path: '/admin/structure/service_endpoint/{service_endpoint}'
   defaults:
     _entity_form: 'service_endpoint.edit'
-    _title: 'Edit service endpoint'
+    _title: 'Edit services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
@@ -28,7 +28,7 @@ entity.service_endpoint.delete_form:
   path: '/admin/structure/service_endpoint/{service_endpoint}/delete'
   defaults:
     _entity_form: 'service_endpoint.delete'
-    _title: 'Delete service endpoint'
+    _title: 'Delete services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
