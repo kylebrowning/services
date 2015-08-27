@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\services\Routing\ServiceAPI.
+ * Contains \Drupal\services\Routing\ServiceEndpoint.
  */
 
 namespace Drupal\services\Routing;
@@ -9,17 +9,17 @@ use Symfony\Component\Routing\Route;
 /**
  * Defines dynamic routes.
  */
-class ServiceAPI {
+class ServiceEndpoint {
 
   /**
    * {@inheritdoc}
    */
   public function routes() {
-    $apis = \Drupal::entityManager()->getStorage('service_api')->loadMultiple();
+    $apis = \Drupal::entityManager()->getStorage('service_endpoint')->loadMultiple();
 
     $routes = array();
 
-    /** @var $api \Drupal\services\ServiceAPIInterface */
+    /** @var $api \Drupal\services\ServiceEndpointInterface */
     foreach ($apis as $api) {
       $routes['services.' . $api->id()] = new Route(
         '/' . $api->getEndpoint(),

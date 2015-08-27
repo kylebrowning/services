@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\services\Controller\ServiceAPIListBuilder.
+ * Contains Drupal\services\Controller\ServiceEndpointListBuilder.
  */
 
 namespace Drupal\services\Controller;
@@ -11,14 +11,14 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides a listing of Service api entities.
+ * Provides a listing of service endpoint entities.
  */
-class ServiceAPIListBuilder extends ConfigEntityListBuilder {
+class ServiceEndpointListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = $this->t('Service api');
+    $header['label'] = $this->t('service endpoint');
     $header['id'] = $this->t('Machine name');
     return $header + parent::buildHeader();
   }

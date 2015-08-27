@@ -2,30 +2,30 @@
 
 /**
  * @file
- * Contains Drupal\services\Entity\ServiceAPI.
+ * Contains Drupal\services\Entity\ServiceEndpoint.
  */
 
 namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\services\ServiceAPIInterface;
+use Drupal\services\ServiceEndpointInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Defines the Service api entity.
+ * Defines the service endpoint entity.
  *
  * @ConfigEntityType(
- *   id = "service_api",
- *   label = @Translation("Service api"),
+ *   id = "service_endpoint",
+ *   label = @Translation("service endpoint"),
  *   handlers = {
- *     "list_builder" = "Drupal\services\Controller\ServiceAPIListBuilder",
+ *     "list_builder" = "Drupal\services\Controller\ServiceEndpointListBuilder",
  *     "form" = {
- *       "add" = "Drupal\services\Form\ServiceAPIForm",
- *       "edit" = "Drupal\services\Form\ServiceAPIForm",
- *       "delete" = "Drupal\services\Form\ServiceAPIDeleteForm"
+ *       "add" = "Drupal\services\Form\ServiceEndpointForm",
+ *       "edit" = "Drupal\services\Form\ServiceEndpointForm",
+ *       "delete" = "Drupal\services\Form\ServiceEndpointDeleteForm"
  *     }
  *   },
- *   config_prefix = "service_api",
+ *   config_prefix = "service_endpoint",
  *   admin_permission = "administer site configuration",
  *   entity_keys = {
  *     "id" = "id",
@@ -33,30 +33,30 @@ use Symfony\Component\HttpFoundation\Request;
  *     "uuid" = "uuid"
  *   },
  *   links = {
- *     "canonical" = "/admin/structure/service_api/{service_api}",
- *     "edit-form" = "/admin/structure/service_api/{service_api}/edit",
- *     "delete-form" = "/admin/structure/service_api/{service_api}/delete",
- *     "collection" = "/admin/structure/service_api"
+ *     "canonical" = "/admin/structure/service_endpoint/{service_endpoint}",
+ *     "edit-form" = "/admin/structure/service_endpoint/{service_endpoint}/edit",
+ *     "delete-form" = "/admin/structure/service_endpoint/{service_endpoint}/delete",
+ *     "collection" = "/admin/structure/service_endpoint"
  *   }
  * )
  */
-class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
+class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterface {
   /**
-   * The Service api ID.
+   * The service endpoint ID.
    *
    * @var string
    */
   protected $id;
 
   /**
-   * The Service api label.
+   * The service endpoint label.
    *
    * @var string
    */
   protected $label;
 
   /**
-   * The Service api endpoint.
+   * The service endpoint endpoint.
    *
    * @var string
    */
@@ -89,7 +89,7 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
   public function processRequest(Request $request) {
     if ($this->getServiceProvider()) {
       $plugin_service = \Drupal::getContainer()->get('plugin.manager.services.service_definition');
-      /** @var $instance \Drupal\services\ServiceAPIInterface */
+      /** @var $instance \Drupal\services\ServiceEndpointInterface */
       $instance = $plugin_service->createInstance($this->getServiceProvider());
       return $instance->processRequest($request);
     }

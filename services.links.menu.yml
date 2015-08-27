@@ -1,7 +1,7 @@
-# Service api menu items definition
-entity.service_api.collection:
-  title: 'Service api'
-  route_name: entity.service_api.collection
-  description: 'List Service api'
+# service endpoint menu items definition
+entity.service_endpoint.collection:
+  title: 'service endpoint'
+  route_name: entity.service_endpoint.collection
+  description: 'List service endpoint'
   parent: system.admin_structure
 

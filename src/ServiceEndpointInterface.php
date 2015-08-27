@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\services\ServiceAPIInterface.
+ * Contains Drupal\services\ServiceEndpointInterface.
  */
 
 namespace Drupal\services;
@@ -12,9 +12,9 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Provides an interface for defining Service api entities.
+ * Provides an interface for defining service endpoint entities.
  */
-interface ServiceAPIInterface extends ConfigEntityInterface {
+interface ServiceEndpointInterface extends ConfigEntityInterface {
 
   /**
    * Returns the endpoint path to the API.
@@ -29,7 +29,7 @@ interface ServiceAPIInterface extends ConfigEntityInterface {
   public function getServiceProvider();
 
   /**
-   * Processes the service API request.
+   * Processes the service endpoint request.
    * @return SerializationInterface
    */
   public function processRequest(Request $request);
