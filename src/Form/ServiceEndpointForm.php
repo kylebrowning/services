@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\services\Form\ServiceAPIForm.
+ * Contains Drupal\services\Form\ServiceEndpointForm.
  */
 
 namespace Drupal\services\Form;
@@ -14,11 +14,11 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ServiceAPIForm.
+ * Class ServiceEndpointForm.
  *
  * @package Drupal\services\Form
  */
-class ServiceAPIForm extends EntityForm {
+class ServiceEndpointForm extends EntityForm {
 
   /**
    * @var \Drupal\Component\Plugin\PluginManagerInterface
@@ -38,31 +38,31 @@ class ServiceAPIForm extends EntityForm {
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
 
-    /** @var $service_api \Drupal\services\Entity\ServiceAPI */
-    $service_api = $this->entity;
+    /** @var $service_endpoint \Drupal\services\Entity\ServiceEndpoint */
+    $service_endpoint = $this->entity;
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
       '#maxlength' => 255,
-      '#default_value' => $service_api->label(),
-      '#description' => $this->t("Label for the Service api."),
+      '#default_value' => $service_endpoint->label(),
+      '#description' => $this->t("Label for the service endpoint."),
       '#required' => TRUE,
     );
 
     $form['id'] = array(
       '#type' => 'machine_name',
-      '#default_value' => $service_api->id(),
+      '#default_value' => $service_endpoint->id(),
       '#machine_name' => array(
-        'exists' => '\Drupal\services\Entity\ServiceAPI::load',
+        'exists' => '\Drupal\services\Entity\ServiceEndpoint::load',
       ),
-      '#disabled' => !$service_api->isNew(),
+      '#disabled' => !$service_endpoint->isNew(),
     );
 
     $form['endpoint'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Endpoint'),
       '#maxlength' => 255,
-      '#default_value' => $service_api->getEndpoint(),
+      '#default_value' => $service_endpoint->getEndpoint(),
       '#description' => $this->t("URL endpoint."),
       '#required' => TRUE,
     );
@@ -78,7 +78,7 @@ class ServiceAPIForm extends EntityForm {
       '#options' => $opts,
       '#title' => $this->t('Service Provider'),
       '#required' => TRUE,
-      '#default_value' => $service_api->getServiceProvider(),
+      '#default_value' => $service_endpoint->getServiceProvider(),
     );
 
     return $form;
@@ -88,20 +88,20 @@ class ServiceAPIForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    $service_api = $this->entity;
-    $status = $service_api->save();
+    $service_endpoint = $this->entity;
+    $status = $service_endpoint->save();
 
     if ($status) {
-      drupal_set_message($this->t('Saved the %label Service api.', array(
-        '%label' => $service_api->label(),
+      drupal_set_message($this->t('Saved the %label service endpoint.', array(
+        '%label' => $service_endpoint->label(),
       )));
     }
     else {
-      drupal_set_message($this->t('The %label Service api was not saved.', array(
-        '%label' => $service_api->label(),
+      drupal_set_message($this->t('The %label service endpoint was not saved.', array(
+        '%label' => $service_endpoint->label(),
       )));
     }
-    $form_state->setRedirectUrl($service_api->urlInfo('collection'));
+    $form_state->setRedirectUrl($service_endpoint->urlInfo('collection'));
   }
 
 }

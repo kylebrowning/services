@@ -40,7 +40,7 @@ class ServiceManager {
     // Check if the request endpoint starts or ends with '/', remove them.
     $endpoint = trim($endpoint, '/');
 
-    return array_shift($this->entityManager->getStorage('service_api')->loadByProperties(array('endpoint' => $endpoint)));
+    return array_shift($this->entityManager->getStorage('service_endpoint')->loadByProperties(array('endpoint' => $endpoint)));
   }
 
 }
