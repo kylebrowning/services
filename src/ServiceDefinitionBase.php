@@ -10,11 +10,27 @@ use Drupal\Component\Plugin\PluginBase;
 
 abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
 
+
+
   /**
    * {@inheritdoc}
    */
   public function getTitle() {
     return $this->pluginDefinition['title'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCategory() {
+    return $this->pluginDefinition['category'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPath() {
+    return $this->pluginDefinition['path'];
   }
 
   /**

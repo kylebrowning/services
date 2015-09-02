@@ -33,6 +33,23 @@ class ServiceDefinition extends Plugin {
   public $title;
 
   /**
+   * The human-readable name of the service category.
+   *
+   * @ingroup plugin_translatable
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   */
+  public $category;
+
+  /**
+   * The appended path from the endpoint.
+   *
+   * @var string
+   */
+  public $path;
+
+
+  /**
    * The description shown to users.
    *
    * @ingroup plugin_translatable
@@ -48,5 +65,12 @@ class ServiceDefinition extends Plugin {
    * @var boolean
    */
   public $translatable;
+
+  /**
+   * The service definition arguments.
+   *
+   * @var \Drupal\services\ServiceArgument[]
+   */
+  public $arguments;
 
 }

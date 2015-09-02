@@ -14,10 +14,22 @@ use Symfony\Component\HttpFoundation\Request;
 interface ServiceDefinitionInterface extends PluginInspectionInterface {
 
   /**
-   * Returns a translated string for the constraint title.
+   * Returns a translated string for the service title.
    * @return string
    */
   public function getTitle();
+
+  /**
+   * Returns a translated string for the category.
+   * @return string
+   */
+  public function getCategory();
+
+  /**
+   * Returns the appended path for the service.
+   * @return string
+   */
+  public function getPath();
 
   /**
    * Returns a translated description for the constraint description.
@@ -30,6 +42,13 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
    * @return array
    */
   public function getArguments();
+
+  /**
+   * Returns an array of service request arguments.
+   * @return boolean
+   *   Whether or not the arguments were properly represented in the request.
+   */
+  public function processArguments($request);
 
   /**
    * Returns a boolean if this service definition supports translations.

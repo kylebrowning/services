@@ -24,9 +24,9 @@ interface ServiceAPIInterface extends ConfigEntityInterface {
 
   /**
    * Returns the service provider ID.
-   * @return string
+   * @return array
    */
-  public function getServiceProvider();
+  public function getServiceProviders();
 
   /**
    * Processes the service API request.
