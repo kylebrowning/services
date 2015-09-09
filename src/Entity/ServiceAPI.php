@@ -95,4 +95,11 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
     }
     return NULL;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getServiceProviders() {
+
+  }
 }

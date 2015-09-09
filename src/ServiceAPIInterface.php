@@ -24,7 +24,7 @@ interface ServiceAPIInterface extends ConfigEntityInterface {
 
   /**
    * Returns the service provider ID.
-   * @return array
+   * @return \Drupal\services\ServiceDefinitionInterface[]
    */
   public function getServiceProviders();
 

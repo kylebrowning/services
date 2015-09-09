@@ -69,7 +69,7 @@ class ServiceDefinition extends Plugin {
   /**
    * The service definition arguments.
    *
-   * @var \Drupal\services\ServiceArgument[]
+   * @var \Drupal\services\Annotation\ServiceArgument[]
    */
   public $arguments;
 

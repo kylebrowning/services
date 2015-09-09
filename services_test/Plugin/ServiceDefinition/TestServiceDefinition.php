@@ -21,6 +21,20 @@ use Symfony\Component\HttpFoundation\Request;
  *   title = @Translation("Testing Service Definition"),
  *   description = @Translation("Provided to test basic service provider definition."),
  *   translatable = true,
+ *   arguments = {
+ *     "method" = @ServiceArgument(
+ *       "id" = "test_method",
+ *       "title" = @Translation("Method of test service"),
+ *       "required" = TRUE,
+ *       "error_message" = @Translation("No method was sent to the request"),
+ *     ),
+ *     "uri" = @ServiceArgument(
+ *       "id" = "test_uri",
+ *       "title" = @Translation("URI of test service"),
+ *       "required" = TRUE,
+ *       "error_message" = @Translation("No URI was sent to the request"),
+ *     ),
+ *   }
  * )
  */
 class TestServiceDefinition extends ServiceDefinitionBase {
@@ -30,6 +44,13 @@ class TestServiceDefinition extends ServiceDefinitionBase {
    */
   public function getArguments() {
     return ['method', 'uri'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processArguments(Request $request) {
+
   }
 
   /**

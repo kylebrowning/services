@@ -7,6 +7,7 @@
 namespace Drupal\services;
 
 use Drupal\Component\Plugin\PluginBase;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
 
@@ -45,6 +46,16 @@ abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefini
    */
   public function supportsTranslation() {
     return $this->pluginDefinition['translatable'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processBasicArgument(Request $request, $argument_id) {
+    if ($this->value = $request->get($argument_id)) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
 }

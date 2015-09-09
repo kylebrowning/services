@@ -1,13 +1,22 @@
 <?php
 /**
  * @file
- * Provides Drupal\services\ServiceArgument.
+ * Provides Drupal\services\Annotation\ServiceArgument.
  */
 
 namespace Drupal\services;
-use Symfony\Component\HttpFoundation\Request;
 
-class ServiceArgument implements ServiceArgumentInterface {
+use Drupal\Component\Annotation\Plugin;
+
+/**
+ * Defines a ServiceArgument annotation object.
+ *
+ * Service arguments handle all metadata used to descrive request arguments.
+ *
+ * @Annotation
+ */
+
+class ServiceArgument extends Plugin {
 
   /**
    * The argument ID.
@@ -41,21 +50,4 @@ class ServiceArgument implements ServiceArgumentInterface {
    */
   public $error_message;
 
-  /**
-   * The raw argument value from the request.
-   *
-   * @var mixed
-   */
-  public $value;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processArgument(Request $request) {
-    if ($request->get($this->id)) {
-      $this->value = $request->get($this->id);
-      return TRUE;
-    }
-    return FALSE;
-  }
 }

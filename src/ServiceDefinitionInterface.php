@@ -48,7 +48,7 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
    * @return boolean
    *   Whether or not the arguments were properly represented in the request.
    */
-  public function processArguments($request);
+  public function processArguments(Request $request);
 
   /**
    * Returns a boolean if this service definition supports translations.
