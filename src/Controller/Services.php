@@ -21,9 +21,10 @@ class Services extends ControllerBase {
   /**
    * Processing the API request.
    */
-  public function processRequest(Request $request, RouteMatchInterface $route_match, $service_api_id, $service_definition_id) {
-    /** @var $service_api \Drupal\services\ServiceAPIInterface */
-    $service_api = \Drupal::entityManager()->getStorage('service_api')->load($service_api_id);
+
+  public function processRequest(Request $request, RouteMatchInterface $route_match, $service_endpoint_id, $service_definition_id) {
+    /** @var $service_endpoint \Drupal\services\ServiceEndpointInterface */
+    $service_endpoint = \Drupal::entityManager()->getStorage('service_endpoint')->load($service_endpoint_id);
 
     //TODO - pull in settings from service API and alter response
 

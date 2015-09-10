@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\services\Form\ServiceAPIDeleteForm.
+ * Contains Drupal\services\Form\ServiceEndpointDeleteForm.
  */
 
 namespace Drupal\services\Form;
@@ -12,9 +12,9 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- * Builds the form to delete Service api entities.
+ * Builds the form to delete service endpoint entities.
  */
-class ServiceAPIDeleteForm extends EntityConfirmFormBase {
+class ServiceEndpointDeleteForm extends EntityConfirmFormBase {
   /**
    * {@inheritdoc}
    */
@@ -26,7 +26,7 @@ class ServiceAPIDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('entity.service_api.collection');
+    return new Url('entity.service_endpoint.collection');
   }
 
   /**

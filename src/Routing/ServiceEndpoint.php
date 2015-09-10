@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\services\Routing\ServiceAPI.
+ * Contains \Drupal\services\Routing\ServiceEndpoint.
  */
 
 namespace Drupal\services\Routing;
@@ -9,25 +9,25 @@ use Symfony\Component\Routing\Route;
 /**
  * Defines dynamic routes.
  */
-class ServiceAPI {
+class ServiceEndpoint {
 
   /**
    * {@inheritdoc}
    */
   public function routes() {
-    $apis = \Drupal::entityManager()->getStorage('service_api')->loadMultiple();
+    $endpoints = \Drupal::entityManager()->getStorage('service_endpoint')->loadMultiple();
 
     $routes = array();
 
-    /** @var $api \Drupal\services\ServiceAPIInterface */
-    foreach ($apis as $api) {
+    /** @var $endpoint \Drupal\services\ServiceEndpointInterface */
+    foreach ($endpoints as $endpoint) {
       /** @var $service_provider \Drupal\services\ServiceDefinitionInterface */
-      foreach ($api->getServiceProviders() as $service_def) {
-        $routes['services.api' . $api->id() . '.' . $service_def->getPluginId()] = new Route(
-          '/' . $api->getEndpoint(),
+      foreach ($endpoint->getServiceProviders() as $service_def) {
+        $routes['services.endpoint' . $endpoint->id() . '.' . $service_def->getPluginId()] = new Route(
+          '/' . $endpoint->getEndpoint(),
           array(
             '_controller' => '\Drupal\services\Controller\Services::processRequest',
-            'service_api_id' => $api->id(),
+            'service_endpoint_id' => $endpoint->id(),
             'service_definition_id' => $service_def->getPluginId()
           ),
           array(

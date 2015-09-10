@@ -1,6 +1,6 @@
-services.service_api.*:
+services.service_endpoint.*:
   type: config_entity
-  label: 'Service api config'
+  label: 'Service Endpoint config'
   mapping:
     id:
       type: string
