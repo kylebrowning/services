@@ -78,6 +78,12 @@ class ServiceEndpointForm extends EntityForm {
       ];
     }
 
+    $form['service_definitions'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Service Definitions'),
+      '#options' => $opts,
+    ];
+
     $form['service_providers'] = array(
       '#type' => 'tableselect',
       '#header' => [
@@ -85,7 +91,6 @@ class ServiceEndpointForm extends EntityForm {
         'endpoint'=>t('Endpoint'),
         'arguments'=>t('Arguments')
       ],
-      '#options' => $opts,
       '#title' => $this->t('Service Provider'),
       '#empty' => t('No service definitions exist'),
       '#required' => TRUE,

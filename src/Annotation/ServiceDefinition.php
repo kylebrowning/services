@@ -67,10 +67,10 @@ class ServiceDefinition extends Plugin {
   public $translatable;
 
   /**
-   * The service definition arguments.
+   * The service definition contexts.
    *
-   * @var \Drupal\services\Annotation\ServiceArgument[]
+   * @var \Drupal\Core\Annotation\ContextDefinition[]
    */
-  public $arguments;
+  public $contexts;
 
 }
