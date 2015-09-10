@@ -5,10 +5,9 @@
  */
 namespace Drupal\services;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Component\Serialization\SerializationInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 interface ServiceDefinitionInterface extends PluginInspectionInterface {
@@ -44,13 +43,6 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
   public function getArguments();
 
   /**
-   * Returns an array of service request arguments.
-   * @return boolean
-   *   Whether or not the arguments were properly represented in the request.
-   */
-  public function processArguments(Request $request);
-
-  /**
    * Returns a boolean if this service definition supports translations.
    * @return boolean
    */
@@ -61,10 +53,12 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
    *
    * @param request
    *   A request object.
+   * @param route_match
+   *   A route match object.
    *
    * @return SerializationInterface
    *   The response.
    */
-  public function processRequest(Request $request);
+  public function processRequest(Request $request, RouteMatchInterface $route_match);
 
 }

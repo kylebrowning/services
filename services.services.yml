@@ -1,9 +1,4 @@
 services:
-
-  service_manager:
-    class: Drupal\services\ServiceManager
-    arguments: ['@entity.manager', '@plugin.manager.services.service_definition']
-
   plugin.manager.services.service_definition:
     class: Drupal\services\ServiceDefinitionPluginManager
     parent: default_plugin_manager

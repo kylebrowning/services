@@ -8,6 +8,7 @@
 namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\services\ServiceAPIInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -63,11 +64,11 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
   protected $endpoint;
 
   /**
-   * The Service Provider for the api.
+   * The service providers for the api.
    *
    * @var string
    */
-  protected $service_provider;
+  protected $service_providers;
 
   /**
    * {@inheritdoc}
@@ -79,27 +80,8 @@ class ServiceAPI extends ConfigEntityBase implements ServiceAPIInterface {
   /**
    * {@inheritdoc}
    */
-  public function getServiceProvider() {
-    return $this->service_provider;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processRequest(Request $request) {
-    if ($this->getServiceProvider()) {
-      $plugin_service = \Drupal::getContainer()->get('plugin.manager.services.service_definition');
-      /** @var $instance \Drupal\services\ServiceAPIInterface */
-      $instance = $plugin_service->createInstance($this->getServiceProvider());
-      return $instance->processRequest($request);
-    }
-    return NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getServiceProviders() {
-
+    return $this->service_providers;
   }
+
 }

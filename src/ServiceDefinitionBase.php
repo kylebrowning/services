@@ -11,8 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
 
-
-
   /**
    * {@inheritdoc}
    */
@@ -51,11 +49,7 @@ abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefini
   /**
    * {@inheritdoc}
    */
-  public function processBasicArgument(Request $request, $argument_id) {
-    if ($this->value = $request->get($argument_id)) {
-      return TRUE;
-    }
-    return FALSE;
+  public function getArguments() {
+    return $this->pluginDefinition['arguments'];
   }
-
 }

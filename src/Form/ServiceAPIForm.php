@@ -11,6 +11,7 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\services\ServiceDefinitionPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -70,15 +71,25 @@ class ServiceAPIForm extends EntityForm {
     $opts = [];
 
     foreach ($this->manager->getDefinitions() as $plugin_id => $definition) {
-      $opts[$plugin_id] = (string) $definition['title'];
+      $opts[$plugin_id] = [
+        t((string) $definition['title']),
+        t((string) $definition['endpoint']),
+        t((string) $definition['arguments'])
+      ];
     }
 
-    $form['service_provider'] = array(
-      '#type' => 'select',
+    $form['service_providers'] = array(
+      '#type' => 'tableselect',
+      '#header' => [
+        'title'=>t('Definition'),
+        'endpoint'=>t('Endpoint'),
+        'arguments'=>t('Arguments')
+      ],
       '#options' => $opts,
       '#title' => $this->t('Service Provider'),
+      '#empty' => t('No service definitions exist'),
       '#required' => TRUE,
-      '#default_value' => $service_api->getServiceProvider(),
+      '#default_value' => $service_api->getServiceProviders(),
     );
 
     return $form;

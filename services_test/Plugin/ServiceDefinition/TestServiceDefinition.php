@@ -9,7 +9,7 @@
 namespace Drupal\services\Plugin\ServiceDefinition;
 
 use Drupal\Component\Utility\SafeMarkup;
-use Drupal\services\Annotation\ServiceDefinition;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -38,25 +38,10 @@ use Symfony\Component\HttpFoundation\Request;
  * )
  */
 class TestServiceDefinition extends ServiceDefinitionBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getArguments() {
-    return ['method', 'uri'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processArguments(Request $request) {
-
-  }
-
   /**
    * Testing hello world style request.
    */
-  public function processRequest(Request $request) {
+  public function processRequest(Request $request, RouteMatchInterface $route_match) {
     return SafeMarkup::escape($request->getMethod() . ' - ' . $request->getUri());
   }
 }
