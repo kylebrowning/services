@@ -23,8 +23,8 @@ class ServiceEndpoint {
     foreach ($endpoints as $endpoint) {
       /** @var $service_provider \Drupal\services\ServiceDefinitionInterface */
       foreach ($endpoint->getServiceProviders() as $service_def) {
-        $routes['services.endpoint' . $endpoint->id() . '.' . $service_def->getPluginId()] = new Route(
-          '/' . $endpoint->getEndpoint(),
+        $routes['services.endpoint.' . $endpoint->id() . '.' . $service_def->getPluginId()] = new Route(
+          '/' . $endpoint->getEndpoint() . '/' . $service_def->getPath(),
           array(
             '_controller' => '\Drupal\services\Controller\Services::processRequest',
             'service_endpoint_id' => $endpoint->id(),

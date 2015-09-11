@@ -6,10 +6,10 @@
 
 namespace Drupal\services;
 
-use Drupal\Component\Plugin\PluginBase;
-use Symfony\Component\HttpFoundation\Request;
 
-abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
+use Drupal\Core\Plugin\ContextAwarePluginBase;
+
+abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements ServiceDefinitionInterface {
 
   /**
    * {@inheritdoc}

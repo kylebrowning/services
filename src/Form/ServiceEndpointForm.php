@@ -71,11 +71,7 @@ class ServiceEndpointForm extends EntityForm {
     $opts = [];
 
     foreach ($this->manager->getDefinitions() as $plugin_id => $definition) {
-      $opts[$plugin_id] = [
-        t((string) $definition['title']),
-        t((string) $definition['endpoint']),
-        t((string) $definition['arguments'])
-      ];
+      $opts[$plugin_id] = $definition['title'];
     }
 
     $form['service_definitions'] = [
