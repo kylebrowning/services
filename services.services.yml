@@ -3,5 +3,5 @@ services:
     class: Drupal\services\ServiceDefinitionPluginManager
     parent: default_plugin_manager
   plugin.manager.services.service_response:
-      class: Drupal\services\ServiceResponseManager
-      parent: default_plugin_manager
+    class: Drupal\services\ServiceResponseManager
+    parent: default_plugin_manager
