@@ -71,25 +71,24 @@ class ServiceEndpointForm extends EntityForm {
     $opts = [];
 
     foreach ($this->manager->getDefinitions() as $plugin_id => $definition) {
-      $opts[$plugin_id] = $definition['title'];
+      $opts[$plugin_id] = [
+        'title' => (string) $definition['title'],
+        'endpoint' => $definition['path'],
+        'category' => $definition['category']
+      ];
     }
-
-    $form['service_definitions'] = [
-      '#type' => 'select',
-      '#title' => $this->t('Service Definitions'),
-      '#options' => $opts,
-    ];
 
     $form['service_providers'] = array(
       '#type' => 'tableselect',
       '#header' => [
-        'title'=>t('Definition'),
-        'endpoint'=>t('Endpoint'),
-        'arguments'=>t('Arguments')
+        'title'=> $this->t('Definition'),
+        'endpoint'=> $this->t('Endpoint'),
+        'category'=> $this->t('Category')
       ],
       '#title' => $this->t('Service Provider'),
       '#empty' => t('No service definitions exist'),
       '#required' => TRUE,
+      '#options' => $opts,
       '#default_value' => $service_endpoint->getServiceProviders(),
     );
 
