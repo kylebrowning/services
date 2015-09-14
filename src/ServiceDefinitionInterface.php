@@ -56,7 +56,7 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
    * @param route_match
    *   A route match object.
    *
-   * @return SerializationInterface
+   * @return array
    *   The response.
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match);

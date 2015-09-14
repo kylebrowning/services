@@ -7,7 +7,6 @@
 namespace Drupal\services\Plugin\ServiceDefinition;
 
 
-use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionBase;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,8 +31,9 @@ class NodeGet extends ServiceDefinitionBase {
    * {@inheritdoc}
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match) {
-    $node = $this->getContext('node');
-
+    /** @var $node \Drupal\node\Entity\Node */
+    $node = $this->getContextValue('node');
+    return $node->toArray();
   }
 
 }
