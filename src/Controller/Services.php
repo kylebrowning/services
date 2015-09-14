@@ -9,7 +9,9 @@ namespace Drupal\services\Controller;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,6 +59,13 @@ class Services extends ControllerBase {
 
     /** @var $service_def \Drupal\services\ServiceDefinitionInterface */
     $service_def = $this->serviceDefinitionManager->createInstance($service_definition_id, []);
+    foreach ($service_def->getContextDefinitions() as $context_id => $context_definition) {
+      if ($request->attributes->has($context_id)) {
+        $context = new Context($context_definition);
+        $context->setContextValue($request->attributes->get($context_id));
+        $service_def->setContext($context_id, $context);
+      }
+    }
     $content = $service_def->processRequest($request, $route_match);
     /** @var $responder \Drupal\services\ServiceResponseInterface */
     $responder = $this->serviceResponseManager->getInstance(['request' => $request]);
