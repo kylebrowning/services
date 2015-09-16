@@ -5,11 +5,12 @@
  */
 namespace Drupal\services;
 
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-interface ServiceDefinitionInterface extends ContextAwarePluginInterface {
+interface ServiceDefinitionInterface extends ContextAwarePluginInterface, CacheableDependencyInterface {
 
   /**
    * Returns a translated string for the service title.
@@ -50,10 +51,8 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface {
   /**
    * Returns a true/false status as to if the password meets the requirements of the constraint.
    *
-   * @param request
-   *   A request object.
-   * @param route_match
-   *   A route match object.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *
    * @return array
    *   The response.

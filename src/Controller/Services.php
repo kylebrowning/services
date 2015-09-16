@@ -8,6 +8,7 @@
 namespace Drupal\services\Controller;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
+use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -68,8 +69,9 @@ class Services extends ControllerBase {
     $accept = $request->headers->get('Accept');
     $format = $request->getFormat($accept);
     $data = $this->serializer->serialize($content, $format);
-    $response = new Response($data);
+    $response = new CacheableResponse($data);
     $response->headers->add(['Content-Type' => $accept]);
+    $response->addCacheableDependency($service_def);
     return $response;
   }
 }
