@@ -5,12 +5,11 @@
  */
 namespace Drupal\services;
 
-use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Component\Serialization\SerializationInterface;
+use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-interface ServiceDefinitionInterface extends PluginInspectionInterface {
+interface ServiceDefinitionInterface extends ContextAwarePluginInterface {
 
   /**
    * Returns a translated string for the service title.

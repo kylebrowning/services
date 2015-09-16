@@ -11,7 +11,6 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\Context\Context;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,20 +29,19 @@ class Services extends ControllerBase {
   protected $serviceDefinitionManager;
 
   /**
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
+   * @var \Symfony\Component\Serializer\SerializerInterface
    */
-  protected $serviceResponseManager;
+  protected $serializer;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.services.service_definition'), $container->get('plugin.manager.services.service_response'), $container->get('serializer'));
+    return new static($container->get('plugin.manager.services.service_definition'), $container->get('serializer'));
   }
 
-  function __construct(PluginManagerInterface $service_definition_manager, PluginManagerInterface $service_response_manager, SerializerInterface $serializer) {
+  function __construct(PluginManagerInterface $service_definition_manager, SerializerInterface $serializer) {
     $this->serviceDefinitionManager = $service_definition_manager;
-    $this->serviceResponseManager = $service_response_manager;
     $this->serializer = $serializer;
   }
 
@@ -67,8 +65,11 @@ class Services extends ControllerBase {
       }
     }
     $content = $service_def->processRequest($request, $route_match);
-    /** @var $responder \Drupal\services\ServiceResponseInterface */
-    $responder = $this->serviceResponseManager->getInstance(['request' => $request]);
-    return $responder->respond($content, $request, $this->serializer);
+    $accept = $request->headers->get('Accept');
+    $format = $request->getFormat($accept);
+    $data = $this->serializer->serialize($content, $format);
+    $response = new Response($data);
+    $response->headers->add(['Content-Type' => $accept]);
+    return $response;
   }
 }

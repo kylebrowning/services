@@ -13,12 +13,12 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @ServiceDefinition(
- *   id = "node_get",
- *   title = @Translation("Node: Retrieve"),
- *   description = @Translation("Retrieves a node object and serializes it as a response to the current request."),
+ *   id = "node_delete",
+ *   title = @Translation("Node: Delete"),
+ *   description = @Translation("Deletes a node object."),
  *   path = "node/{node}",
  *   methods = {
- *     "GET"
+ *     "DELETE"
  *   },
  *   translatable = true,
  *   category = @Translation("Node"),
@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Request;
  * )
  *
  */
-class NodeGet extends ServiceDefinitionBase {
+class NodeDelete extends ServiceDefinitionBase {
 
   /**
    * {@inheritdoc}
@@ -36,7 +36,7 @@ class NodeGet extends ServiceDefinitionBase {
   public function processRequest(Request $request, RouteMatchInterface $route_match) {
     /** @var $node \Drupal\node\Entity\Node */
     $node = $this->getContextValue('node');
-    return $node->toArray();
+    $node->delete();
   }
 
 }

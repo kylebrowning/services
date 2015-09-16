@@ -48,9 +48,12 @@ class ServiceEndpoint {
             '_access' => 'TRUE',
           ),
           [
-            'compiler_class' => "\Drupal\Core\Routing\RouteCompiler",
+            'compiler_class' => '\Drupal\Core\Routing\RouteCompiler',
             'parameters' => $contexts
-          ]
+          ],
+          '',
+          [],
+          $plugin_definition['methods']
         );
       }
     }
