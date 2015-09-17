@@ -10,9 +10,9 @@ services.service_endpoint.*:
       label: 'Label'
     uuid:
       type: string
-    service_provider:
-      type: services.service_definition.plugin.[id]
-      label: 'Service Provider'
+    service_providers:
+      type: sequence
+      label: 'Service Providers'
     endpoint:
       type: string
       label: 'Endpoint'

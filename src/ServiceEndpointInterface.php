@@ -9,6 +9,7 @@ namespace Drupal\services;
 
 use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Routing\RouteMatch;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -23,14 +24,8 @@ interface ServiceEndpointInterface extends ConfigEntityInterface {
   public function getEndpoint();
 
   /**
-   * Returns the service provider ID.
-   * @return string
+   * Returns the service provider IDs.
+   * @return string[]
    */
-  public function getServiceProvider();
-
-  /**
-   * Processes the service endpoint request.
-   * @return SerializationInterface
-   */
-  public function processRequest(Request $request);
+  public function getServiceProviders();
 }

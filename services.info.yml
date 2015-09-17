@@ -3,4 +3,7 @@ type: module
 description: A standardized solution of integrating external applications with Drupal.
 core: 8.x
 package: Services
+dependencies:
+  - ctools
+  - serialization
 
