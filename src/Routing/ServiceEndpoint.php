@@ -13,26 +13,48 @@ class ServiceEndpoint {
 
   /**
    * {@inheritdoc}
+   *
+   * @todo does this implement some interface that we're not documenting?
    */
   public function routes() {
     $endpoints = \Drupal::entityManager()->getStorage('service_endpoint')->loadMultiple();
+    /** @var $manager \Drupal\services\ServiceDefinitionPluginManager */
+    $manager = \Drupal::service('plugin.manager.services.service_definition');
 
     $routes = array();
 
     /** @var $endpoint \Drupal\services\ServiceEndpointInterface */
     foreach ($endpoints as $endpoint) {
-      /** @var $service_provider \Drupal\services\ServiceDefinitionInterface */
       foreach ($endpoint->getServiceProviders() as $service_def) {
-        $routes['services.endpoint' . $endpoint->id() . '.' . $service_def->getPluginId()] = new Route(
-          '/' . $endpoint->getEndpoint(),
+        /** @var $plugin_definition \Drupal\services\ServiceDefinitionInterface */
+        $plugin_definition = $manager->getDefinition($service_def);
+        /**
+         * @var $context_id string
+         * @var $context_definition \Drupal\Core\Plugin\Context\ContextDefinition
+         */
+        foreach ($plugin_definition['context'] as $context_id => $context_definition) {
+          // Build an array of parameter to pass to the Route definitions.
+          $parameters[$context_id] = [
+            'type' => $context_definition->getDataType(),
+          ];
+        }
+        // Dynamically building custom routes per enabled plugin on an endpoint entity.
+        $routes['services.endpoint.' . $endpoint->id() . '.' . $service_def] = new Route(
+          '/' . $endpoint->getEndpoint() . '/' . $plugin_definition['path'],
           array(
             '_controller' => '\Drupal\services\Controller\Services::processRequest',
             'service_endpoint_id' => $endpoint->id(),
-            'service_definition_id' => $service_def->getPluginId()
+            'service_definition_id' => $service_def
           ),
           array(
             '_access' => 'TRUE',
-          )
+          ),
+          [
+            'parameters' => $parameters
+          ],
+          '',
+          [],
+          $plugin_definition['methods']
         );
       }
     }

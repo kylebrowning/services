@@ -26,13 +26,21 @@ class ServiceEndpointForm extends EntityForm {
    */
   protected $manager;
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static($container->get('plugin.manager.services.service_definition'));
   }
 
+  /**
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
+   *   The service definition plugin manager.
+   */
   function __construct(PluginManagerInterface $manager) {
     $this->manager = $manager;
   }
+
   /**
    * {@inheritdoc}
    */
@@ -72,23 +80,23 @@ class ServiceEndpointForm extends EntityForm {
 
     foreach ($this->manager->getDefinitions() as $plugin_id => $definition) {
       $opts[$plugin_id] = [
-        t((string) $definition['title']),
-        t((string) $definition['endpoint']),
-        t((string) $definition['arguments'])
+        'title' => (string) $definition['title'],
+        'endpoint' => $definition['path'],
+        'category' => $definition['category']
       ];
     }
 
     $form['service_providers'] = array(
       '#type' => 'tableselect',
       '#header' => [
-        'title'=>t('Definition'),
-        'endpoint'=>t('Endpoint'),
-        'arguments'=>t('Arguments')
+        'title'=> $this->t('Definition'),
+        'endpoint'=> $this->t('Endpoint'),
+        'category'=> $this->t('Category')
       ],
-      '#options' => $opts,
       '#title' => $this->t('Service Provider'),
       '#empty' => t('No service definitions exist'),
       '#required' => TRUE,
+      '#options' => $opts,
       '#default_value' => $service_endpoint->getServiceProviders(),
     );
 

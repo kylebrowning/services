@@ -5,12 +5,12 @@
  */
 namespace Drupal\services;
 
-use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Component\Serialization\SerializationInterface;
+use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-interface ServiceDefinitionInterface extends PluginInspectionInterface {
+interface ServiceDefinitionInterface extends ContextAwarePluginInterface, CacheableDependencyInterface {
 
   /**
    * Returns a translated string for the service title.
@@ -51,12 +51,12 @@ interface ServiceDefinitionInterface extends PluginInspectionInterface {
   /**
    * Returns a true/false status as to if the password meets the requirements of the constraint.
    *
-   * @param request
-   *   A request object.
-   * @param route_match
-   *   A route match object.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match object.
    *
-   * @return SerializationInterface
+   * @return array
    *   The response.
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match);

@@ -48,6 +48,12 @@ class ServiceDefinition extends Plugin {
    */
   public $path;
 
+  /**
+   * The method this Service Definition utilizes
+   *
+   * @var array
+   */
+  public $methods;
 
   /**
    * The description shown to users.
@@ -67,10 +73,10 @@ class ServiceDefinition extends Plugin {
   public $translatable;
 
   /**
-   * The service definition arguments.
+   * The service definition contexts.
    *
-   * @var \Drupal\services\Annotation\ServiceArgument[]
+   * @var \Drupal\Core\Annotation\ContextDefinition[]
    */
-  public $arguments;
+  public $contexts;
 
 }
