@@ -26,13 +26,21 @@ class ServiceEndpointForm extends EntityForm {
    */
   protected $manager;
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static($container->get('plugin.manager.services.service_definition'));
   }
 
+  /**
+   * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
+   *   The service definition plugin manager.
+   */
   function __construct(PluginManagerInterface $manager) {
     $this->manager = $manager;
   }
+
   /**
    * {@inheritdoc}
    */

@@ -58,6 +58,12 @@ class Services extends ControllerBase {
 
     /** @var $service_def \Drupal\services\ServiceDefinitionInterface */
     $service_def = $this->serviceDefinitionManager->createInstance($service_definition_id, []);
+    /**
+     * Iterate over any contexts defined for this plugin and extract them from
+     * the request defaults if the naming is identical. This means that a
+     * context named 'node' would match to a url parameter {node} or a route
+     * default named 'node'.
+     */
     foreach ($service_def->getContextDefinitions() as $context_id => $context_definition) {
       if ($request->attributes->has($context_id)) {
         $context = new Context($context_definition);
@@ -65,13 +71,24 @@ class Services extends ControllerBase {
         $service_def->setContext($context_id, $context);
       }
     }
+    // Get the data from the plugin.
     $content = $service_def->processRequest($request, $route_match);
-    $accept = $request->headers->get('Accept');
-    $format = $request->getFormat($accept);
+    // Find the request format to determin how we're going to serialize this data
+    $format = $request->getRequestFormat();
     $data = $this->serializer->serialize($content, $format);
+    /**
+     * Create a new Cacheable Response object with our serialized data, set its
+     * Content-Type to match the format of our Request and add the service
+     * definition plugin as a cacheable dependency.
+     *
+     * This last step will extract the cache context, tags and max-ages from
+     * any context the plugin required to operate.
+     */
     $response = new CacheableResponse($data);
-    $response->headers->add(['Content-Type' => $accept]);
+    $response->headers->add(['Content-Type' => $request->getMimeType($format)]);
     $response->addCacheableDependency($service_def);
+    // Be explicit about the caching needs of this response.
+    $response->setVary('Accept-Encoding');
     return $response;
   }
 }

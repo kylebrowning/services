@@ -25,6 +25,14 @@ interface ServiceEndpointInterface extends ConfigEntityInterface {
 
   /**
    * Returns the service provider IDs.
+   *
+   * This is an array of plugin ids for ServiceDefinition plugins.
+   *
+   * @todo This should be expanded to include a PluginCollection on this entity
+   * so that individual plugins can be instantiated and returned. As part of
+   * this change, configurable plugins should be introduced and the
+   * corresponding entity updates will need to be made.
+   *
    * @return string[]
    */
   public function getServiceProviders();

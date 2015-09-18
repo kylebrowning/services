@@ -52,7 +52,9 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    * Returns a true/false status as to if the password meets the requirements of the constraint.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match object.
    *
    * @return array
    *   The response.
