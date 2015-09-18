@@ -9,7 +9,9 @@ namespace Drupal\services\Plugin\ServiceDefinition;
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionBase;
+use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @ServiceDefinition(
@@ -21,20 +23,25 @@ use Symfony\Component\HttpFoundation\Request;
  *     "POST"
  *   },
  *   translatable = true,
- *   category = @Translation("Node"),
- *   context = {
- *     "node" = @ContextDefinition("entity:node", label = @Translation("Node"))
- *   }
+ *   category = @Translation("Node")
  * )
  *
  */
-class NodeCreate extends ServiceDefinitionBase {
+class NodeCreate extends ServiceDefinitionEntityRequestContentBase {
 
   /**
    * {@inheritdoc}
    */
-  public function processRequest(Request $request, RouteMatchInterface $route_match) {
-    /** @var $node \Drupal\node\Entity\Node */
+  public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
+    $entity = parent::processRequest($request, $route_match, $serializer);
+    if ($entity) {
+      $entity->save();
+      return [$entity->getEntityType()->id() => $entity->id()];
+    }
+    /**
+     * @todo let's return some sort of failure. Probably need to dig into
+     * response handling for errors in D8
+     */
     return ['hey'];
   }
 
