@@ -11,6 +11,7 @@ use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\services\ServiceDefinitionPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -27,18 +28,24 @@ class ServiceEndpointForm extends EntityForm {
   protected $manager;
 
   /**
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected $routeBuilder;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.services.service_definition'));
+    return new static($container->get('plugin.manager.services.service_definition'), $container->get('router.builder'));
   }
 
   /**
    * @param \Drupal\Component\Plugin\PluginManagerInterface $manager
    *   The service definition plugin manager.
    */
-  function __construct(PluginManagerInterface $manager) {
+  function __construct(PluginManagerInterface $manager, RouteBuilderInterface $route_builder) {
     $this->manager = $manager;
+    $this->routeBuilder = $route_builder;
   }
 
   /**
@@ -121,6 +128,7 @@ class ServiceEndpointForm extends EntityForm {
       )));
     }
     $form_state->setRedirectUrl($service_endpoint->urlInfo('collection'));
+    $this->routeBuilder->setRebuildNeeded();
   }
 
 }
