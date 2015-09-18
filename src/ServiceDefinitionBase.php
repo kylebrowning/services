@@ -6,15 +6,30 @@
 
 namespace Drupal\services;
 
-use Drupal\Component\Plugin\PluginBase;
 
-abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefinitionInterface {
+use Drupal\Core\Plugin\ContextAwarePluginBase;
+
+abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements ServiceDefinitionInterface {
 
   /**
    * {@inheritdoc}
    */
   public function getTitle() {
     return $this->pluginDefinition['title'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getCategory() {
+    return $this->pluginDefinition['category'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPath() {
+    return $this->pluginDefinition['path'];
   }
 
   /**
@@ -31,4 +46,10 @@ abstract class ServiceDefinitionBase extends PluginBase implements ServiceDefini
     return $this->pluginDefinition['translatable'];
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getArguments() {
+    return $this->pluginDefinition['arguments'];
+  }
 }

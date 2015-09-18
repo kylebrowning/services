@@ -1,36 +1,36 @@
 
-# ServiceAPI routing definition
-entity.service_api.collection:
-  path: '/admin/structure/service_api'
+# ServiceEndpoint routing definition
+entity.service_endpoint.collection:
+  path: '/admin/structure/service_endpoint'
   defaults:
-    _entity_list: 'service_api'
-    _title: 'Service api'
+    _entity_list: 'service_endpoint'
+    _title: 'Services'
   requirements:
     _permission: 'administer site configuration'
 
-entity.service_api.add_form:
-  path: '/admin/structure/service_api/add'
+entity.service_endpoint.add_form:
+  path: '/admin/structure/service_endpoint/add'
   defaults:
-    _entity_form: 'service_api.add'
-    _title: 'Add Service api'
+    _entity_form: 'service_endpoint.add'
+    _title: 'Add services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
-entity.service_api.edit_form:
-  path: '/admin/structure/service_api/{service_api}'
+entity.service_endpoint.edit_form:
+  path: '/admin/structure/service_endpoint/{service_endpoint}'
   defaults:
-    _entity_form: 'service_api.edit'
-    _title: 'Edit Service api'
+    _entity_form: 'service_endpoint.edit'
+    _title: 'Edit services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
-entity.service_api.delete_form:
-  path: '/admin/structure/service_api/{service_api}/delete'
+entity.service_endpoint.delete_form:
+  path: '/admin/structure/service_endpoint/{service_endpoint}/delete'
   defaults:
-    _entity_form: 'service_api.delete'
-    _title: 'Delete Service api'
+    _entity_form: 'service_endpoint.delete'
+    _title: 'Delete services endpoint'
   requirements:
     _permission: 'administer site configuration'
 
 route_callbacks:
-  - '\Drupal\services\Routing\ServiceAPI::routes'
+  - '\Drupal\services\Routing\ServiceEndpoint::routes'
