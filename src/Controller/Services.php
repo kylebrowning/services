@@ -72,10 +72,10 @@ class Services extends ControllerBase {
       }
     }
     // Get the data from the plugin.
-    $content = $service_def->processRequest($request, $route_match);
+    $data = $service_def->processRequest($request, $route_match, $this->serializer);
     // Find the request format to determin how we're going to serialize this data
     $format = $request->getRequestFormat();
-    $data = $this->serializer->serialize($content, $format);
+    $data = $this->serializer->serialize($data, $format);
     /**
      * Create a new Cacheable Response object with our serialized data, set its
      * Content-Type to match the format of our Request and add the service
