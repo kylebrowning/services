@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\NodeGet.php
+ * Contains \Drupal\services\Plugin\ServiceDefinition\EntityGet.php
  */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
@@ -14,18 +14,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @ServiceDefinition(
- *   id = "node_delete",
- *   title = @Translation("Node: Delete"),
- *   description = @Translation("Deletes a node object."),
- *   path = "node/{node}",
+ *   id = "entity_delete",
  *   methods = {
  *     "DELETE"
  *   },
  *   translatable = true,
- *   category = @Translation("Node"),
- *   context = {
- *     "node" = @ContextDefinition("entity:node", label = @Translation("Node"))
- *   }
+ *   deriver = "\Drupal\services\Plugin\Deriver\EntityDelete"
  * )
  *
  */
@@ -35,9 +29,9 @@ class NodeDelete extends ServiceDefinitionBase {
    * {@inheritdoc}
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
-    /** @var $node \Drupal\node\Entity\Node */
-    $node = $this->getContextValue('node');
-    $node->delete();
+    /** @var $entity \Drupal\Core\Entity\EntityInterface */
+    $entity = $this->getContextValue('entity');
+    $entity->delete();
   }
 
 }

@@ -113,6 +113,13 @@ class ServiceEndpointForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $form_state->setValue('service_providers', array_filter($form_state->getValue('service_providers')));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function save(array $form, FormStateInterface $form_state) {
     $service_endpoint = $this->entity;
     $status = $service_endpoint->save();

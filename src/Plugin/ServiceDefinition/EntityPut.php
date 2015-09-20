@@ -5,6 +5,7 @@
  */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,29 +14,28 @@ use Symfony\Component\Serializer\SerializerInterface;
 /**
  * @ServiceDefinition(
  *   id = "node_put",
- *   title = @Translation("Node: Update"),
- *   description = @Translation("Updates a node object."),
- *   path = "node/{node}",
  *   methods = {
  *     "PUT"
  *   },
  *   translatable = true,
- *   category = @Translation("Node"),
- *   context = {
- *     "node" = @ContextDefinition("entity:node", label = @Translation("Node"))
- *   }
+ *   deriver = "\Drupal\services\Plugin\Deriver\EntityPut"
  * )
  *
  */
-class NodePut extends ServiceDefinitionEntityRequestContentBase {
+class EntityPut extends ServiceDefinitionEntityRequestContentBase {
   /**
    * {@inheritdoc}
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     $updated_entity = parent::processRequest($request, $route_match, $serializer);
-    $entity = $this->getContextValue('node');
+    $entity = $this->getContextValue('entity');
     foreach ($updated_entity as $field_name => $field) {
-      $entity->set($field_name, $field->getValue());
+      if ($entity instanceof ContentEntityInterface) {
+        $entity->set($field_name, $field->getValue());
+      }
+      else {
+        $entity->set($field_name, $field);
+      }
     }
     $entity->save();
     return $entity->toArray();

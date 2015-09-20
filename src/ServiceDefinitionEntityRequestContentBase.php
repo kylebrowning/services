@@ -7,11 +7,39 @@
 namespace Drupal\services;
 
 
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 
-class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase {
+class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  protected $manager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static ($configuration, $plugin_id, $plugin_definition, $container->get('entity.manager'));
+  }
+
+  /**
+   * @param array $configuration
+   * @param string $plugin_id
+   * @param mixed $plugin_definition
+   * @param EntityManagerInterface $manager
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $manager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->manager = $manager;
+  }
+
+
   /**
    * {@inheritdoc}
    *
@@ -21,7 +49,10 @@ class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase {
     // Unserialize the content of the request if there is any.
     $content = $request->getContent();
     if (!empty($content)) {
-      return $serializer->deserialize($content, '\Drupal\node\Entity\Node', $request->getContentType(), ['entity_type' => 'node']);
+      $entity_type_id = $this->getDerivativeId();
+      /** @var $entity_type \Drupal\Core\Entity\EntityTypeInterface */
+      $entity_type = $this->manager->getDefinition($entity_type_id);
+      return $serializer->deserialize($content, $entity_type->getClass(), $request->getContentType(), ['entity_type' => $entity_type_id]);
     }
     return [];
   }

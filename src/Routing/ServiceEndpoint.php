@@ -32,11 +32,13 @@ class ServiceEndpoint {
          * @var $context_id string
          * @var $context_definition \Drupal\Core\Plugin\Context\ContextDefinition
          */
-        foreach ($plugin_definition['context'] as $context_id => $context_definition) {
-          // Build an array of parameter to pass to the Route definitions.
-          $parameters[$context_id] = [
-            'type' => $context_definition->getDataType(),
-          ];
+        if (!empty($plugin_definition['context'])) {
+          foreach ($plugin_definition['context'] as $context_id => $context_definition) {
+            // Build an array of parameter to pass to the Route definitions.
+            $parameters[$context_id] = [
+              'type' => $context_definition->getDataType(),
+            ];
+          }
         }
         // Dynamically building custom routes per enabled plugin on an endpoint entity.
         $routes['services.endpoint.' . $endpoint->id() . '.' . $service_def] = new Route(
