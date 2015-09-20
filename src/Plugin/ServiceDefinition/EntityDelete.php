@@ -23,7 +23,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  * )
  *
  */
-class NodeDelete extends ServiceDefinitionBase {
+class EntityDelete extends ServiceDefinitionBase {
 
   /**
    * {@inheritdoc}
