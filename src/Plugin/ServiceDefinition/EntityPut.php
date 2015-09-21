@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @ServiceDefinition(
- *   id = "node_put",
+ *   id = "entity_put",
  *   methods = {
  *     "PUT"
  *   },
@@ -28,17 +28,26 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     $updated_entity = parent::processRequest($request, $route_match, $serializer);
-    $entity = $this->getContextValue('entity');
-    foreach ($updated_entity as $field_name => $field) {
+    if ($updated_entity) {
+      /** @var $entity \Drupal\Core\Entity\EntityInterface */
+      $entity = $this->getContextValue('entity');
       if ($entity instanceof ContentEntityInterface) {
-        $entity->set($field_name, $field->getValue());
+        foreach ($updated_entity as $field_name => $field) {
+          $entity->set($field_name, $field->getValue());
+        }
       }
       else {
-        $entity->set($field_name, $field);
+        /** @var $updated_entity \Drupal\Core\Config\Entity\ConfigEntityInterface */
+        foreach ($updated_entity->toArray() as $field_name => $field) {
+          $entity->set($field_name, $field);
+        }
       }
+      $entity->save();
+      return $entity->toArray();
     }
-    $entity->save();
-    return $entity->toArray();
+    // @todo throw a proper exception.
+    return [];
   }
+
 
 }
