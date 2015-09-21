@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\NodeGet.php
+ * Contains \Drupal\services\Plugin\ServiceDefinition\EntityPost.php
  */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
@@ -15,19 +15,16 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @ServiceDefinition(
- *   id = "node_create",
- *   title = @Translation("Node: Create"),
- *   description = @Translation("Creates a node object."),
- *   path = "node",
+ *   id = "entity_post",
  *   methods = {
  *     "POST"
  *   },
  *   translatable = true,
- *   category = @Translation("Node")
+ *   deriver = "\Drupal\services\Plugin\Deriver\EntityPost"
  * )
  *
  */
-class NodeCreate extends ServiceDefinitionEntityRequestContentBase {
+class EntityPost extends ServiceDefinitionEntityRequestContentBase {
 
   /**
    * {@inheritdoc}
