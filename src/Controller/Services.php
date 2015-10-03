@@ -73,6 +73,14 @@ class Services extends ControllerBase {
     }
     // Get the data from the plugin.
     $data = $service_def->processRequest($request, $route_match, $this->serializer);
+    $code = $service_def->getPluginDefinition()['response_code'];
+    $headers = [];
+    $messages = drupal_get_messages();
+    if ($messages) {
+      foreach ($messages as $type => $type_message) {
+        $headers["X-Drupal-Services-Messages-$type"] = implode("; ", $type_message);
+      }
+    }
     // Find the request format to determin how we're going to serialize this data
     $format = $request->getRequestFormat();
     $data = $this->serializer->serialize($data, $format);
@@ -84,11 +92,11 @@ class Services extends ControllerBase {
      * This last step will extract the cache context, tags and max-ages from
      * any context the plugin required to operate.
      */
-    $response = new CacheableResponse($data);
+    $response = new CacheableResponse($data, $code, $headers);
     $response->headers->add(['Content-Type' => $request->getMimeType($format)]);
     $response->addCacheableDependency($service_def);
     // Be explicit about the caching needs of this response.
-    $response->setVary('Accept-Encoding');
+    $response->setVary('Accept');
     return $response;
   }
 }
