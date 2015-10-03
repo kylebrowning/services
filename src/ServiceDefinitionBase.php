@@ -8,6 +8,7 @@ namespace Drupal\services;
 
 
 use Drupal\Core\Plugin\ContextAwarePluginBase;
+use Symfony\Component\HttpFoundation\Response;
 
 abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements ServiceDefinitionInterface {
 
@@ -52,4 +53,11 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
   public function getArguments() {
     return $this->pluginDefinition['arguments'];
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processResponse(Response $response) {}
+
+
 }

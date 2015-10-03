@@ -9,6 +9,7 @@ use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 
 interface ServiceDefinitionInterface extends ContextAwarePluginInterface, CacheableDependencyInterface {
@@ -50,7 +51,7 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
   public function supportsTranslation();
 
   /**
-   * Returns a true/false status as to if the password meets the requirements of the constraint.
+   * Processes the request and returns an array of data as appropriate.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object.
@@ -62,7 +63,19 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    *
    * @return array
    *   The response.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\HttpException
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer);
+
+  /**
+   * Allow plugins to alter the response object before it is returned.
+   *
+   * @param Response $response
+   *   The response object that is about to be returned.
+   *
+   * @return void
+   */
+  public function processResponse(Response $response);
 
 }

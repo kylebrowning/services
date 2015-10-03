@@ -97,6 +97,7 @@ class Services extends ControllerBase {
     $response->addCacheableDependency($service_def);
     // Be explicit about the caching needs of this response.
     $response->setVary('Accept');
+    $service_def->processResponse($response);
     return $response;
   }
 }
