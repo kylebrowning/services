@@ -5,6 +5,7 @@
  */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
+
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionEntityRequestContentBase;
