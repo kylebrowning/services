@@ -51,9 +51,7 @@ class ServiceEndpoint {
             'service_endpoint_id' => $endpoint->id(),
             'service_definition_id' => $service_def
           ),
-          array(
-            '_access' => 'TRUE',
-          ),
+          [],
           [
             'parameters' => $parameters
           ],
