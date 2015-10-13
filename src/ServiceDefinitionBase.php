@@ -62,7 +62,9 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
   /**
    * {@inheritdoc}
    */
-  public function processRoute(Route $route) {}
+  public function processRoute(Route $route) {
+    $route->addRequirements(array('_access' => 'TRUE'));
+  }
 
   /**
    * {@inheritdoc}
