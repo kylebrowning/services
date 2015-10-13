@@ -29,6 +29,8 @@ class ServiceEndpoint {
         $parameters = [];
         /** @var $plugin_definition \Drupal\services\ServiceDefinitionInterface */
         $plugin_definition = $manager->getDefinition($service_def);
+        $instance_of_services_def = $manager->createInstance($service_def, []);
+
         /**
          * @var $context_id string
          * @var $context_definition \Drupal\Core\Plugin\Context\ContextDefinition
@@ -42,7 +44,7 @@ class ServiceEndpoint {
           }
         }
         // Dynamically building custom routes per enabled plugin on an endpoint entity.
-        $routes['services.endpoint.' . $endpoint->id() . '.' . $service_def] = new Route(
+        $route = new Route(
           '/' . $endpoint->getEndpoint() . '/' . $plugin_definition['path'],
           array(
             '_controller' => '\Drupal\services\Controller\Services::processRequest',
@@ -59,6 +61,8 @@ class ServiceEndpoint {
           [],
           $plugin_definition['methods']
         );
+        $instance_of_services_def->processRoute($route);
+        $routes['services.endpoint.' . $endpoint->id() . '.' . $service_def] = $route;
       }
     }
     return $routes;

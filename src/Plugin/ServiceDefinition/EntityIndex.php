@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Routing\Route;
 
 /**
  * @ServiceDefinition(
@@ -48,6 +50,13 @@ class EntityIndex extends ServiceDefinitionBase implements ContainerFactoryPlugi
   public function __construct(array $configuration, $plugin_id, $plugin_definition, QueryFactory $query_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->queryFactory = $query_factory;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processRoute(Route $route) {
+    $route->addRequirements(array('_permission' => 'perm string'));
   }
 
   /**
