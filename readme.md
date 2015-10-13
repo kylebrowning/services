@@ -10,3 +10,4 @@ Module port of Drupal Services module for Drupal 8
 - Accept header-based negotiation, also accepts ?format=json
 - Provide abstraction from some of cores annoyances. Like hal_json POST only instead of just JSON acceptance.
 - Version your API's
+- Rate Limiting
