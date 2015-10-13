@@ -9,6 +9,7 @@ namespace Drupal\services;
 
 use Drupal\Core\Plugin\ContextAwarePluginBase;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Route;
 
 abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements ServiceDefinitionInterface {
 
@@ -52,6 +53,13 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
    */
   public function getArguments() {
     return $this->pluginDefinition['arguments'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processRoute(Route $route) {
+    $route->addRequirements(array('_access' => 'TRUE'));
   }
 
   /**

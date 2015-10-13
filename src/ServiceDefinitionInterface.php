@@ -11,6 +11,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Route;
 
 interface ServiceDefinitionInterface extends ContextAwarePluginInterface, CacheableDependencyInterface {
 
@@ -49,6 +50,16 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    * @return boolean
    */
   public function supportsTranslation();
+
+  /**
+   * Checks access for the ServiceDefintion.
+   *
+   * @param \Symfony\Component\Routing\Route; $route
+   *   The route match object.
+   *
+   *
+   */
+  public function processRoute(Route $route);
 
   /**
    * Processes the request and returns an array of data as appropriate.
