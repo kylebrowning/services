@@ -55,13 +55,6 @@ class EntityIndex extends ServiceDefinitionBase implements ContainerFactoryPlugi
   /**
    * {@inheritdoc}
    */
-  public function processRoute(Route $route) {
-    $route->addRequirements(array('_permission' => 'perm string'));
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     $entity_type_id = $this->getDerivativeId();
     $start = 0;
