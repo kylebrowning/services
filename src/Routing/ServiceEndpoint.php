@@ -26,6 +26,7 @@ class ServiceEndpoint {
     /** @var $endpoint \Drupal\services\ServiceEndpointInterface */
     foreach ($endpoints as $endpoint) {
       foreach ($endpoint->getServiceProviders() as $service_def) {
+        $parameters = [];
         /** @var $plugin_definition \Drupal\services\ServiceDefinitionInterface */
         $plugin_definition = $manager->getDefinition($service_def);
         /**

@@ -14,7 +14,7 @@ use Drupal\Core\Language\LanguageManager;
 
 class ServiceDefinitionPluginManager extends \Drupal\Core\Plugin\DefaultPluginManager {
   /**
-   * Constructs a new PasswordConstraintPluginManager.
+   * Constructs a new ServiceDefinitionPluginManager.
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths

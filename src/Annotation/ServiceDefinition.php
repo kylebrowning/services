@@ -79,4 +79,11 @@ class ServiceDefinition extends Plugin {
    */
   public $contexts;
 
+  /**
+   * The successful response code for this definition.
+   *
+   * @var int
+   */
+  public $response_code = 200;
+
 }

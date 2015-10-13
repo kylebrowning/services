@@ -5,10 +5,12 @@
  */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
+
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -27,8 +29,8 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
    * {@inheritdoc}
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
-    $updated_entity = parent::processRequest($request, $route_match, $serializer);
-    if ($updated_entity) {
+    try {
+      $updated_entity = parent::processRequest($request, $route_match, $serializer);
       /** @var $entity \Drupal\Core\Entity\EntityInterface */
       $entity = $this->getContextValue('entity');
       if ($entity instanceof ContentEntityInterface) {
@@ -45,8 +47,9 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
       $entity->save();
       return $entity->toArray();
     }
-    // @todo throw a proper exception.
-    return [];
+    catch (\Exception $e) {
+      throw new HttpException(422, "The supplied content body could not be serialized into an entity of the requested type.", $e);
+    }
   }
 
 

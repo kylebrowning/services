@@ -8,6 +8,7 @@
 namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\services\ServiceEndpointInterface;
 
 /**
@@ -81,4 +82,15 @@ class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterfa
   public function getServiceProviders() {
     return $this->service_providers;
   }
+
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    \Drupal::service('router.builder')->setRebuildNeeded();
+  }
+
+  public static function postDelete(EntityStorageInterface $storage, array $entities) {
+    parent::postDelete($storage, $entities);
+    \Drupal::service('router.builder')->setRebuildNeeded();
+  }
+
 }
