@@ -71,7 +71,6 @@ class Services extends ControllerBase {
         $service_def->setContext($context_id, $context);
       }
     }
-
     // Get the data from the plugin.
     $data = $service_def->processRequest($request, $route_match, $this->serializer);
     $code = $service_def->getPluginDefinition()['response_code'];

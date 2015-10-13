@@ -13,8 +13,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Routing\Route;
 
 /**
  * @ServiceDefinition(
