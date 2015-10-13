@@ -67,11 +67,6 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
   /**
    * {@inheritdoc}
    */
-  public function checkAccess(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {}
-
-  /**
-   * {@inheritdoc}
-   */
   public function processResponse(Response $response) {}
 
 
