@@ -72,9 +72,6 @@ class Services extends ControllerBase {
       }
     }
 
-    //Check access on the service definition.
-    $service_def->checkAccess($request, $route_match, $this->serializer);
-
     // Get the data from the plugin.
     $data = $service_def->processRequest($request, $route_match, $this->serializer);
     $code = $service_def->getPluginDefinition()['response_code'];
