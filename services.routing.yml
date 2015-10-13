@@ -6,7 +6,7 @@ entity.service_endpoint.collection:
     _entity_list: 'service_endpoint'
     _title: 'Services'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'manage services'
 
 entity.service_endpoint.add_form:
   path: '/admin/structure/service_endpoint/add'
@@ -14,7 +14,7 @@ entity.service_endpoint.add_form:
     _entity_form: 'service_endpoint.add'
     _title: 'Add services endpoint'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'manage services'
 
 entity.service_endpoint.edit_form:
   path: '/admin/structure/service_endpoint/{service_endpoint}'
@@ -22,7 +22,7 @@ entity.service_endpoint.edit_form:
     _entity_form: 'service_endpoint.edit'
     _title: 'Edit services endpoint'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'manage services'
 
 entity.service_endpoint.delete_form:
   path: '/admin/structure/service_endpoint/{service_endpoint}/delete'
@@ -30,7 +30,7 @@ entity.service_endpoint.delete_form:
     _entity_form: 'service_endpoint.delete'
     _title: 'Delete services endpoint'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'manage services'
 
 route_callbacks:
   - '\Drupal\services\Routing\ServiceEndpoint::routes'
