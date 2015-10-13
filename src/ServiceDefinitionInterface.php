@@ -50,6 +50,22 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    */
   public function supportsTranslation();
 
+/**
+   * Checks access for the ServiceDefintion.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request object.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The route match object.
+   * @param \Symfony\Component\Serializer\SerializerInterface $serializer
+   *   The serializer. Some methods might require the plugin to leverage the
+   *   serializer after extracting the request contents.
+   *
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+   */
+  public function checkAccess(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer);
+
   /**
    * Processes the request and returns an array of data as appropriate.
    *
