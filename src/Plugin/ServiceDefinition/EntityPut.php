@@ -12,6 +12,7 @@ use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Route;
 
 /**
  * @ServiceDefinition(
@@ -25,6 +26,13 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  */
 class EntityPut extends ServiceDefinitionEntityRequestContentBase {
+  /**
+   * {@inheritdoc}
+   */
+  public function processRoute(Route $route) {
+    $route->setRequirement('_entity_access', $this->getDerivativeId() . '.update');
+  }
+
   /**
    * {@inheritdoc}
    */
