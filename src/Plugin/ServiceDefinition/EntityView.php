@@ -122,9 +122,8 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     list($js_assets_header, $js_assets_footer) = $this->assetResolver->getJsAssets($assets, FALSE);
     $variables['scripts'] = $this->jsCollectionRenderer->render($js_assets_header);
     $variables['scripts_bottom'] = $this->jsCollectionRenderer->render($js_assets_footer);
-    // Handle all non-asset attachments.
-    drupal_process_attached($render_array);
-    $variables['head'] = drupal_get_html_head(FALSE);
+    // @todo Handle all non-asset attachments.
+    //$variables['head'] = drupal_get_html_head(FALSE);
     return $variables;
   }
 
