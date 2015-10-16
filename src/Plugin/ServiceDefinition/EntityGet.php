@@ -30,7 +30,6 @@ class EntityGet extends ServiceDefinitionBase {
    * {@inheritdoc}
    */
   public function processRoute(Route $route) {
-    //print 'setting: ' . $this->getDerivativeId() . '.view' . "\n\r";
     $route->setRequirement('_entity_access', $this->getDerivativeId() . '.view');
   }
 

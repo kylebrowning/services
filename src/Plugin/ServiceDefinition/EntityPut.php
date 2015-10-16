@@ -40,7 +40,7 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
     try {
       $updated_entity = parent::processRequest($request, $route_match, $serializer);
       /** @var $entity \Drupal\Core\Entity\EntityInterface */
-      $entity = $this->getContextValue('entity');
+      $entity = $this->getContextValue($this->getDerivativeId());
       if ($entity instanceof ContentEntityInterface) {
         foreach ($updated_entity as $field_name => $field) {
           $entity->set($field_name, $field->getValue());
