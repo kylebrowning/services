@@ -12,6 +12,7 @@ use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Route;
 
 /**
  * @ServiceDefinition(
@@ -28,11 +29,18 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
   /**
    * {@inheritdoc}
    */
+  public function processRoute(Route $route) {
+    $route->setRequirement('_entity_access', $this->getDerivativeId() . '.update');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     try {
       $updated_entity = parent::processRequest($request, $route_match, $serializer);
       /** @var $entity \Drupal\Core\Entity\EntityInterface */
-      $entity = $this->getContextValue('entity');
+      $entity = $this->getContextValue($this->getDerivativeId());
       if ($entity instanceof ContentEntityInterface) {
         foreach ($updated_entity as $field_name => $field) {
           $entity->set($field_name, $field->getValue());

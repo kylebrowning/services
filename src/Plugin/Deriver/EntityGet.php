@@ -17,9 +17,9 @@ class EntityGet extends EntityDeriverBase {
       $this->derivatives[$entity_type_id]['title'] = $this->t('@label: Retrieve', ['@label' => $entity_type->getLabel()]);
       $this->derivatives[$entity_type_id]['description'] = $this->t('Retrieves a @entity_type_id object and serializes it as a response to the current request.', ['@entity_type_id' => $entity_type_id]);
       $this->derivatives[$entity_type_id]['category'] = $this->t('@label', ['@label' => $entity_type->getLabel()]);
-      $this->derivatives[$entity_type_id]['path'] = "$entity_type_id/{entity}";
+      $this->derivatives[$entity_type_id]['path'] = "$entity_type_id/{{$entity_type_id}}";
       $this->derivatives[$entity_type_id]['context'] = [
-        'entity' => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
+        "$entity_type_id" => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
       ];
     }
     return $this->derivatives;

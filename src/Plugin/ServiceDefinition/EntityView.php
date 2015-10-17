@@ -14,6 +14,7 @@ use Drupal\services\ServiceDefinitionBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -55,6 +56,12 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     $this->jsCollectionRenderer = $js_collection_renderer;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function processRoute(Route $route) {
+    $route->setRequirement('_entity_access', $this->getDerivativeId() . '.view');
+  }
 
   /**
    * {@inheritdoc}
@@ -65,7 +72,7 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
       $view_mode = $request->query->get('view_mode');
     }
     /** @var $entity \Drupal\Core\Entity\EntityInterface */
-    $entity = $this->getContextValue('entity');
+    $entity = $this->getContextValue($this->getDerivativeId());
     $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
     $render_array = $view_builder->view($entity, $view_mode);
 
@@ -115,9 +122,8 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     list($js_assets_header, $js_assets_footer) = $this->assetResolver->getJsAssets($assets, FALSE);
     $variables['scripts'] = $this->jsCollectionRenderer->render($js_assets_header);
     $variables['scripts_bottom'] = $this->jsCollectionRenderer->render($js_assets_footer);
-    // Handle all non-asset attachments.
-    drupal_process_attached($render_array);
-    $variables['head'] = drupal_get_html_head(FALSE);
+    // @todo Handle all non-asset attachments.
+    //$variables['head'] = drupal_get_html_head(FALSE);
     return $variables;
   }
 

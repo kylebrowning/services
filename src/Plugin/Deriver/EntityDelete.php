@@ -17,9 +17,9 @@ class EntityDelete extends EntityDeriverBase {
       $this->derivatives[$entity_type_id]['title'] = $this->t('@label: Delete', ['@label' => $entity_type->getLabel()]);
       $this->derivatives[$entity_type_id]['description'] = $this->t('Deletes a @entity_type_id object.', ['@entity_type_id' => $entity_type_id]);
       $this->derivatives[$entity_type_id]['category'] = $this->t('@label', ['@label' => $entity_type->getLabel()]);
-      $this->derivatives[$entity_type_id]['path'] = "$entity_type_id/{entity}";
+      $this->derivatives[$entity_type_id]['path'] = "$entity_type_id/{{$entity_type_id}}";
       $this->derivatives[$entity_type_id]['context'] = [
-        'entity' => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
+        "$entity_type_id" => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
       ];
     }
     return $this->derivatives;

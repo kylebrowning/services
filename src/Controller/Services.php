@@ -66,11 +66,11 @@ class Services extends ControllerBase {
      */
     foreach ($service_def->getContextDefinitions() as $context_id => $context_definition) {
       if ($request->attributes->has($context_id)) {
-        $context = new Context($context_definition);
-        $context = Context::createFromContext($context, $request->attributes->get($context_id));
+        $context = new Context($context_definition, $request->attributes->get($context_id));
         $service_def->setContext($context_id, $context);
       }
     }
+
     // Get the data from the plugin.
     $data = $service_def->processRequest($request, $route_match, $this->serializer);
     $code = $service_def->getPluginDefinition()['response_code'];
