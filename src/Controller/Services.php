@@ -67,7 +67,6 @@ class Services extends ControllerBase {
     foreach ($service_def->getContextDefinitions() as $context_id => $context_definition) {
       if ($request->attributes->has($context_id)) {
         $context = new Context($context_definition, $request->attributes->get($context_id));
-        // $context = Context::createFromContext($context, $request->attributes->get($context_id));
         $service_def->setContext($context_id, $context);
       }
     }
