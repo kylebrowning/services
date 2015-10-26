@@ -284,6 +284,19 @@ function _taxonomy_resource_definition() {
               'default value' => variable_get('services_taxonomy_vocabulary_index_page_size', 20),
               'source' => array('param' => 'pagesize'),
             ),
+            array(
+              'name' => 'options',
+              'optional' => TRUE,
+              'type' => 'array',
+              'description' => 'Additional query options.',
+              'default value' => array(
+                'orderby' => array(
+                  'weight' => 'DESC',
+                  'name' => 'DESC'
+                )
+              ),
+              'source' => array('param' => 'options'),
+            ),
           ),
           'access arguments' => array('access content'),
         ),
@@ -670,6 +683,8 @@ function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size, 
  *   indicating items to retrieve.
  * @param $page_size
  *   Integer number of items to be returned.
+ * @param $options
+ *   Additional query options.
  * @return
  *   An array of vocabulary objects.
  *
@@ -678,12 +693,10 @@ function _taxonomy_term_resource_index($page, $fields, $parameters, $page_size, 
  *
  * @see _node_resource_index() for more notes
  **/
-function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_size) {
-  $taxonomy_select = db_select('taxonomy_vocabulary', 't')
-    ->orderBy('weight', 'DESC')
-    ->orderBy('name', 'DESC');
+function _taxonomy_vocabulary_resource_index($page, $fields, $parameters, $page_size, $options = array()) {
+  $taxonomy_select = db_select('taxonomy_vocabulary', 't');
 
-  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_vocabulary');
+  services_resource_build_index_query($taxonomy_select, $page, $fields, $parameters, $page_size, 'taxonomy_vocabulary', $options);
 
   $results = $taxonomy_select->execute();
 
