@@ -112,11 +112,15 @@ class ServicesParserXML implements ServicesParserInterface {
 
 class ServicesParserJSON implements ServicesParserInterface {
   public function parse(ServicesContextInterface $context) {
-    $data = json_decode($context->getRequestBody(), TRUE);
-    if ($data === NULL) {
-      return services_error(t('Invalid JSON.'), 400);
+    $requestBody = $context->getRequestBody();
+    if ($requestBody) {
+      $data = json_decode($requestBody, TRUE);
+      if ($data === NULL) {
+        return services_error(t('Invalid JSON.'), 400);
+      }
+      return $data;
     }
-    return $data;
+    return $requestBody;
   }
 }
 
