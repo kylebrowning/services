@@ -1,0 +1,7 @@
+services.service_definition.plugin:
+  type: mapping
+  label: 'Service Definition'
+  mapping:
+    id:
+      type: string
+      label: 'ID'

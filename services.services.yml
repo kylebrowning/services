@@ -1,0 +1,8 @@
+services:
+  plugin.manager.services.service_definition:
+    class: Drupal\services\ServiceDefinitionPluginManager
+    parent: default_plugin_manager
+  http_middleware.format_setter:
+    class: Drupal\services\StackMiddleware\FormatSetter
+    tags:
+      - { name: http_middleware, priority: 201, responder: true }

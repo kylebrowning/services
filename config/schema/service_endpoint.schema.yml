@@ -1,0 +1,18 @@
+services.service_endpoint.*:
+  type: config_entity
+  label: 'Service Endpoint config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string
+    service_providers:
+      type: sequence
+      label: 'Service Providers'
+    endpoint:
+      type: string
+      label: 'Endpoint'
