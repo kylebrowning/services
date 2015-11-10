@@ -119,6 +119,18 @@ function _user_resource_definition() {
               'default value' => variable_get('services_user_index_page_size', 20),
               'source' => array('param' => 'pagesize'),
             ),
+            array(
+              'name' => 'options',
+              'optional' => TRUE,
+              'type' => 'array',
+              'description' => 'Additional query options.',
+              'default value' => array(
+                'orderby' => array(
+                  'created' => 'DESC'
+                )
+              ),
+              'source' => array('param' => 'options'),
+            ),
           ),
           'access arguments' => array('access user profiles'),
           'access arguments append' => FALSE,
@@ -763,11 +775,10 @@ function _user_resource_resend_welcome_email($uid) {
  *
  * @see _node_resource_index() for more notes
  */
-function _user_resource_index($page, $fields, $parameters, $page_size) {
-  $user_select = db_select('users', 't')
-    ->orderBy('created', 'DESC');
+function _user_resource_index($page, $fields, $parameters, $page_size, $options = array()) {
+  $user_select = db_select('users', 't');
 
-  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size, 'user');
+  services_resource_build_index_query($user_select, $page, $fields, $parameters, $page_size, 'user', $options);
 
   $results = services_resource_execute_index_query($user_select);
 
