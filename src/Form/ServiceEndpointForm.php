@@ -80,8 +80,14 @@ class ServiceEndpointForm extends EntityForm {
       $opts[$plugin_id] = [
         'title' => (string) $definition['title'],
         'endpoint' => $definition['path'],
-        'category' => $definition['category']
+        'category' => $definition['category'],
       ];
+      if (isset($definition['warning'])) {
+        $opts[$plugin_id]['description'] = $definition['warning'] . ' ' . $definition['description'];
+        $opts[$plugin_id]['#attributes'] = array('class' => array('services-experimental'));
+      } else {
+        $opts[$plugin_id]['description'] = $definition['description'];
+      }
     }
 
     $form['service_providers'] = array(
@@ -89,13 +95,15 @@ class ServiceEndpointForm extends EntityForm {
       '#header' => [
         'title'=> $this->t('Definition'),
         'endpoint'=> $this->t('Endpoint'),
-        'category'=> $this->t('Category')
+        'category'=> $this->t('Category'),
+        'description'=> $this->t('Description')
       ],
       '#title' => $this->t('Service Provider'),
       '#empty' => t('No service definitions exist'),
       '#required' => TRUE,
       '#options' => $opts,
       '#default_value' => $service_endpoint->getServiceProviders(),
+      '#attached' => array('library' => array('services/services.admin'))
     );
 
     return $form;

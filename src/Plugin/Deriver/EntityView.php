@@ -22,6 +22,8 @@ class EntityView extends EntityDeriverBase {
         $this->derivatives[$entity_type_id]['context'] = [
           "$entity_type_id" => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
         ];
+        //Added as a warning that this EntityView is expirimental.
+        $this->derivatives[$entity_type_id]['warning'] = $this->t('EXPERIMENTAL: ');
       }
     }
     return $this->derivatives;
