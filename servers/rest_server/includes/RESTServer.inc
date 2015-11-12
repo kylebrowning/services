@@ -45,7 +45,7 @@ class RESTServer {
       $result = services_controller_execute($controller, $arguments);
     }
     catch (ServicesException $e) {
-      $result = $this->handleException($e);
+      $result = $this->handleException($e, $controller, $arguments);
     }
 
     return $this->render($formatter, $result);
