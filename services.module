@@ -125,8 +125,8 @@ function services_security_update_reset_users_with_password_one_op($progress, $l
     $context['sandbox']['current_user'] = 0;
     $context['sandbox']['max'] = $limit;
   }
-  //required for user_check_password
-  require_once('./includes/password.inc');
+  // Required for user_check_password.
+  require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
   //Set the password we are looking for.
   $password = "1";
   //Fetch all users in our current range.
