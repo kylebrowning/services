@@ -12,6 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionEntityRequestContentBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Routing\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -27,6 +28,12 @@ use Symfony\Component\Serializer\SerializerInterface;
  *
  */
 class EntityPost extends ServiceDefinitionEntityRequestContentBase {
+  /**
+   * {@inheritdoc}
+   */
+  public function processRoute(Route $route) {
+    $route->setRequirement('_entity_access', $this->getDerivativeId() . '.create');
+  }
 
   /**
    * {@inheritdoc}
