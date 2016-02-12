@@ -397,6 +397,26 @@ function _user_resource_update($uid, $account) {
     unset($account['category']);
   }
 
+  // Prepare values for the user profile image.
+  if (array_key_exists('picture_upload', $account)) {
+    if (is_array($account['picture_upload'])) {
+      // Check if it's an array and convert to object.
+      $account['picture_upload'] = (object) $account['picture_upload'];
+    }
+    elseif (is_int($account['picture_upload'])) {
+      // Check if it's an integer and get the file object.
+      if (empty(file_validate_is_image($file = file_load($account['picture_upload'])))) {
+        $account['picture_upload'] = $file;
+      }
+    }
+    elseif (is_string($account['picture_upload'])) {
+      // Check if it's an string and get the file object.
+      if (empty(file_validate_is_image($file = file_load((int) $account['picture_upload'])))) {
+        $account['picture_upload'] = $file;
+      }
+    }
+  }
+
   // Drop any passed in values into the $account var. Anything
   // unused by the form just gets ignored. We handle roles and
   // password separately.
