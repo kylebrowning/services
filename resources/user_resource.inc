@@ -397,13 +397,15 @@ function _user_resource_update($uid, $account) {
     }
     elseif (is_int($account['picture_upload'])) {
       // Check if it's an integer and get the file object.
-      if (empty(file_validate_is_image($file = file_load($account['picture_upload'])))) {
+      $file_validate = file_validate_is_image($file = file_load($account['picture_upload']));
+      if (empty($file_validate)) {
         $account['picture_upload'] = $file;
       }
     }
     elseif (is_string($account['picture_upload'])) {
       // Check if it's an string and get the file object.
-      if (empty(file_validate_is_image($file = file_load((int) $account['picture_upload'])))) {
+      $file_validate = file_validate_is_image($file = file_load((int) $account['picture_upload']));
+      if (empty($file_validate)) {
         $account['picture_upload'] = $file;
       }
     }
