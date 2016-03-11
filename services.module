@@ -1111,6 +1111,7 @@ if (!function_exists('getallheaders')) {
  * Page callback to generate token.
  */
 function _services_session_token() {
+  drupal_page_is_cacheable(FALSE);
   drupal_add_http_header('Content-Type', 'text/plain');
   print drupal_get_token('services');
   drupal_exit();
