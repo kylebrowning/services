@@ -119,7 +119,10 @@ function services_requirements($phase) {
   // Warn users of the possible threat.
   if ($phase == 'runtime') {
     //Pull endpoints that do not have services authentication enabled
-    $result = db_query('SELECT * FROM {services_endpoint} AS se WHERE se.authentication NOT LIKE :services', array(':services' => '%services%'));
+    $result = db_select('services_endpoint', 'se')
+      ->condition('se.authentication', '%services%', 'NOT LIKE')
+      ->fields('se')
+      ->execute();
     $items = array();
     // Build our items array
     foreach ($result as $endpoint) {
