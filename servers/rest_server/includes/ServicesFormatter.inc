@@ -49,7 +49,7 @@ class ServicesXMLFormatter implements ServicesFormatterInterface {
 
     $this->xml_recursive($doc, $root, $data);
 
-    return $doc->saveXML();
+    return html_entity_decode($doc->saveXML());
   }
 
   private function xml_recursive(&$doc, &$parent, $data) {
