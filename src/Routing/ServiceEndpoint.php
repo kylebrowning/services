@@ -17,7 +17,7 @@ class ServiceEndpoint {
    * @todo does this implement some interface that we're not documenting?
    */
   public function routes() {
-    $endpoints = \Drupal::entityManager()->getStorage('service_endpoint')->loadMultiple();
+    $endpoints = \Drupal::entityTypeManager()->getStorage('service_endpoint')->loadMultiple();
     /** @var $manager \Drupal\services\ServiceDefinitionPluginManager */
     $manager = \Drupal::service('plugin.manager.services.service_definition');
 

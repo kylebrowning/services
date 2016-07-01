@@ -7,7 +7,7 @@
 namespace Drupal\services;
 
 
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
 
   /**
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $manager;
 
@@ -32,9 +32,9 @@ class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase im
    * @param array $configuration
    * @param string $plugin_id
    * @param mixed $plugin_definition
-   * @param EntityManagerInterface $manager
+   * @param EntityTypeManagerInterface $manager
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->manager = $manager;
   }

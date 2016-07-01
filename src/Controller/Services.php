@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
-
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 /**
  * Class Services.
  *
@@ -52,7 +52,7 @@ class Services extends ControllerBase {
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, $service_endpoint_id, $service_definition_id) {
     /** @var $service_endpoint \Drupal\services\ServiceEndpointInterface */
-    $service_endpoint = $this->entityManager()->getStorage('service_endpoint')->load($service_endpoint_id);
+    $service_endpoint = $this->entityTypeManager()->getStorage('service_endpoint')->load($service_endpoint_id);
 
     //TODO - pull in settings from service API and alter response
 
