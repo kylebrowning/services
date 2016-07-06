@@ -9,6 +9,7 @@
  * Minimum CTools version needed.
  */
 define('SERVICES_REQUIRED_CTOOLS_API', '1.7');
+define('SERVICES_ALLOWED_EXTENSIONS', 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp');
 
 /*
  * Function to return list of batch options
