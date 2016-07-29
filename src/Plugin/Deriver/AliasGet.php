@@ -7,12 +7,10 @@
 namespace Drupal\services\Plugin\Deriver;
 
 use Drupal\ctools\Plugin\Deriver\EntityDeriverBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-
 
 class AliasGet extends EntityDeriverBase {
   public function getDerivativeDefinitions($base_plugin_definition) {
-    foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
+    foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
       if ($entity_type_id === "node") {
         $this->derivatives[$entity_type_id] = $base_plugin_definition;
         $this->derivatives[$entity_type_id]['title'] = $this->t('@label: Alias Retrieve', ['@label' => $entity_type->getLabel()]);

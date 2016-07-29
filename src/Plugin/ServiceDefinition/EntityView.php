@@ -73,7 +73,7 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     }
     /** @var $entity \Drupal\Core\Entity\EntityInterface */
     $entity = $this->getContextValue($this->getDerivativeId());
-    $view_builder = \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId());
+    $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
     $render_array = $view_builder->view($entity, $view_mode);
 
     $result = [];

@@ -8,7 +8,7 @@ namespace Drupal\services\Plugin\ServiceDefinition;
 
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Flood\FloodInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -46,16 +46,16 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
    *   The user authentication service.
    * @param \Drupal\Core\Flood\FloodInterface $flood
    *   The flood service.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    * @param Session $session
    */
-  public function __construct($configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config_factory, UserAuthInterface $user_auth, FloodInterface $flood, EntityTypeManagerInterface $entity_type_manager, Session $session) {
+  public function __construct($configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config_factory, UserAuthInterface $user_auth, FloodInterface $flood, EntityManagerInterface $entity_manager, Session $session) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->configFactory = $config_factory;
     $this->userAuth = $user_auth;
     $this->flood = $flood;
-    $this->entityTypeManager = $entity_type_manager;
+    $this->entityManager = $entity_manager;
     $this->session = $session;
   }
 
@@ -106,7 +106,7 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
     // in to many different user accounts.  We have a reasonably high limit
     // since there may be only one apparent IP for all users at an institution.
     if ($this->flood->isAllowed('services.failed_login_ip', $flood_config->get('ip_limit'), $flood_config->get('ip_window'))) {
-      $accounts = $this->entityTypeManager->getStorage('user')->loadByProperties(array('name' => $username, 'status' => 1));
+      $accounts = $this->entityManager->getStorage('user')->loadByProperties(array('name' => $username, 'status' => 1));
       $account = reset($accounts);
       if ($account) {
         if ($flood_config->get('uid_only')) {
