@@ -1008,6 +1008,7 @@ function services_remove_user_data(&$account) {
 
   // Remove the user password from the account object.
   unset($account->pass);
+  if (isset($account->current_pass)) { unset($account->current_pass); }
 
   // Remove the user mail, if current user don't have "administer users"
   // permission, and the requested account not match the current user.
