@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Entity\ServiceEndpoint.
- */
-
 namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;

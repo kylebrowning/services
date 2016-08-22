@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Provides Drupal\services\ServiceDefinitionBase.
- */
 
 namespace Drupal\services;
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Controller\Services.
- */
-
 namespace Drupal\services\Controller;
 
 use Drupal\Component\Plugin\PluginManagerInterface;

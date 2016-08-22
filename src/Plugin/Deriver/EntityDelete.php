@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\Deriver\EntityDelete.php
- */
 
 namespace Drupal\services\Plugin\Deriver;
 

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\Deriver\EntityPost.php
- */
 
 namespace Drupal\services\Plugin\Deriver;
 

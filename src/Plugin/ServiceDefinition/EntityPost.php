@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityPost.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 

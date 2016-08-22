@@ -1,8 +1,5 @@
 <?php
-/**
- * @file
- * Provides Drupal\services\ServiceDefinitionInterface.
- */
+
 namespace Drupal\services;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;

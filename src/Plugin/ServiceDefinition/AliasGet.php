@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\AliasGet.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\service\Plugin\ServiceDefinition\EntityIndex.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 

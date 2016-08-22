@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Routing\ServiceEndpoint.
- */
 
 namespace Drupal\services\Routing;
 use Symfony\Component\Routing\Route;

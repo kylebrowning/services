@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityGet.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 

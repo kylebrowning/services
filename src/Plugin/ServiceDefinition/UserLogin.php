@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\UserLogin.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 

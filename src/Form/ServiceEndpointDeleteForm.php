@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Form\ServiceEndpointDeleteForm.
- */
-
 namespace Drupal\services\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;

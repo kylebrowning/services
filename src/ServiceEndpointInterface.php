@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\ServiceEndpointInterface.
- */
-
 namespace Drupal\services;
 
 use Drupal\Component\Serialization\SerializationInterface;

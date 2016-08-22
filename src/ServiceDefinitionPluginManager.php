@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\services\ServiceDefinitionPluginManager.
- */
 
 namespace Drupal\services;
 

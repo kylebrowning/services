@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\Deriver\EntityIndex.php
- */
 
 namespace Drupal\services\Plugin\Deriver;
 

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityView.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 use Drupal\Core\Asset\AssetCollectionRendererInterface;

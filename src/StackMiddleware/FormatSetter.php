@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\StackMiddleware\FormatSetter.php
- */
 
 namespace Drupal\services\StackMiddleware;
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Form\ServiceEndpointForm.
- */
-
 namespace Drupal\services\Form;
 
 use Drupal\Component\Plugin\PluginManagerInterface;

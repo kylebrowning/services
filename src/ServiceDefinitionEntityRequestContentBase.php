@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains
- */
 
 namespace Drupal\services;
 

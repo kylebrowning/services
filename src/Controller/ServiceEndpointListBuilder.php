@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Controller\ServiceEndpointListBuilder.
- */
-
 namespace Drupal\services\Controller;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;

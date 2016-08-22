@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\ServiceDefinition\TestServiceDefinition.
- */
-
-
 namespace Drupal\services\Plugin\ServiceDefinition;
 
 use Drupal\Component\Utility\SafeMarkup;
