@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\StackMiddleware\FormatSetter.php
- */
 
 namespace Drupal\services\StackMiddleware;
 
@@ -44,6 +40,7 @@ class FormatSetter implements HttpKernelInterface {
     if ($request->headers->has('Accept')) {
       $request->setRequestFormat($request->getFormat($request->headers->get('Accept')));
     }
+
     return $this->httpKernel->handle($request, $type, $catch);
   }
 

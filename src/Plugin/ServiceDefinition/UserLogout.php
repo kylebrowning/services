@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\UserLogout.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 
@@ -11,7 +7,6 @@ use Drupal\services\ServiceDefinitionBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-
 
 /**
  * @ServiceDefinition(
@@ -24,7 +19,6 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   category = @Translation("User"),
  *   path = "user/logout"
  * )
- *
  */
 class UserLogout extends ServiceDefinitionBase  {
 
@@ -40,7 +34,8 @@ class UserLogout extends ServiceDefinitionBase  {
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     user_logout();
-    drupal_set_message(t('User succesffully logged out'), 'status', FALSE);
+    drupal_set_message(t('User successfully logged out'), 'status', FALSE);
+
     return [];
   }
 

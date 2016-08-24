@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\VocabularyTreeGet.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 
@@ -22,15 +18,13 @@ use Symfony\Component\Serializer\SerializerInterface;
  *     "GET"
  *   },
  *   translatable = true,
-*    title = @Translation("Taxonomy Vocabulary Get Tree"),
+ *    title = @Translation("Taxonomy Vocabulary Get Tree"),
  *   description = @Translation("Returns term hierarchy."),
  *   category = @Translation("Taxonomy"),
  *   path = "taxonomy/{vocabulary}/get-tree"
  * )
- *
  */
 class VocabularyTreeGet extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
-
 
     /**
      * {@inheritdoc}
@@ -68,6 +62,7 @@ class VocabularyTreeGet extends ServiceDefinitionBase implements ContainerFactor
         foreach ($terms as $term) {
           $terms_array[] = (array) $term;
         }
+
         return $terms_array;
     }
 }

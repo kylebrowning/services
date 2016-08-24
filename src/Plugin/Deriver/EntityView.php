@@ -1,16 +1,18 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\Deriver\EntityGet.php
- */
 
 namespace Drupal\services\Plugin\Deriver;
-
 
 use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\ctools\Plugin\Deriver\EntityDeriverBase;
 
+/**
+ * Class \Drupal\services\Plugin\Deriver\EntityView.
+ */
 class EntityView extends EntityDeriverBase {
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDerivativeDefinitions($base_plugin_definition) {
     foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
       if ($entity_type->hasViewBuilderClass()) {
@@ -20,12 +22,13 @@ class EntityView extends EntityDeriverBase {
         $this->derivatives[$entity_type_id]['category'] = $this->t('@label', ['@label' => $entity_type->getLabel()]);
         $this->derivatives[$entity_type_id]['path'] = "$entity_type_id/{{$entity_type_id}}/view";
         $this->derivatives[$entity_type_id]['context'] = [
-          "$entity_type_id" => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()]))
+          "$entity_type_id" => new ContextDefinition("entity:$entity_type_id", $this->t('@label', ['@label' => $entity_type->getLabel()])),
         ];
         //Added as a warning that this EntityView is expirimental.
         $this->derivatives[$entity_type_id]['warning'] = $this->t('EXPERIMENTAL: ');
       }
     }
+
     return $this->derivatives;
   }
 }

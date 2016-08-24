@@ -1,11 +1,6 @@
 <?php
-/**
- * @file
- * Contains
- */
 
 namespace Drupal\services;
-
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -14,6 +9,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * Class \Drupal\services\ServiceDefinitionEntityRequestContentBase.
+ */
 class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -39,7 +37,6 @@ class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase im
     $this->manager = $manager;
   }
 
-
   /**
    * {@inheritdoc}
    *
@@ -52,8 +49,10 @@ class ServiceDefinitionEntityRequestContentBase extends ServiceDefinitionBase im
       $entity_type_id = $this->getDerivativeId();
       /** @var $entity_type \Drupal\Core\Entity\EntityTypeInterface */
       $entity_type = $this->manager->getDefinition($entity_type_id);
+
       return $serializer->deserialize($content, $entity_type->getClass(), $request->getContentType(), ['entity_type' => $entity_type_id]);
     }
+
     return [];
   }
 

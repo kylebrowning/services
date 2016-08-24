@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\service\Plugin\ServiceDefinition\EntityIndex.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 
@@ -24,7 +20,6 @@ use Drupal\Core\Routing\RouteMatchInterface;
  *   translatable = true,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityIndex"
  * )
- *
  */
 class EntityIndex extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
 
@@ -90,6 +85,7 @@ class EntityIndex extends ServiceDefinitionBase implements ContainerFactoryPlugi
         ->load($id)
         ->label();
     };
+
     return array_map($map_function, $result);
   }
 

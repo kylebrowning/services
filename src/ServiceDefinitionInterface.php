@@ -1,8 +1,5 @@
 <?php
-/**
- * @file
- * Provides Drupal\services\ServiceDefinitionInterface.
- */
+
 namespace Drupal\services;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;
@@ -13,6 +10,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Routing\Route;
 
+/**
+ * Interface \Drupal\services\ServiceDefinitionInterface.
+ */
 interface ServiceDefinitionInterface extends ContextAwarePluginInterface, CacheableDependencyInterface {
 
   /**

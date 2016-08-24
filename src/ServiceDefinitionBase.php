@@ -1,14 +1,14 @@
 <?php
-/**
- * @file
- * Provides Drupal\services\ServiceDefinitionBase.
- */
+
 namespace Drupal\services;
 
 use Drupal\Core\Plugin\ContextAwarePluginBase;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Route;
 
+/**
+ * Class \Drupal\services\ServiceDefinitionBase.
+ */
 abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements ServiceDefinitionInterface {
 
   /**

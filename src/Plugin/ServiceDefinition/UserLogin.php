@@ -1,11 +1,6 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\UserLogin.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
-
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
@@ -33,7 +28,6 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   category = @Translation("User"),
  *   path = "user/login"
  * )
- *
  */
 class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
 
@@ -90,10 +84,10 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
       $content = $serializer->decode($request->getContent(), $request->getContentType());
     }
     else {
-      throw new HttpException(500, $this->t("The appropriate DecoderInterface was not found."));
+      throw new HttpException(500, $this->t('The appropriate DecoderInterface was not found.'));
     }
     if (!isset($content)) {
-      throw new HttpException(500, $this->t("The content of the request was empty."));
+      throw new HttpException(500, $this->t('The content of the request was empty.'));
     }
     $flood_config = $this->configFactory->get('user.flood');
     $username = $content['username'];
@@ -128,7 +122,8 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
             $this->flood->clear('services.failed_login_user', $identifier);
             $this->session->start();
             user_login_finalize($account);
-            drupal_set_message(t('User succesffully logged in'), 'status', FALSE);
+            drupal_set_message(t('User successfully logged in'), 'status', FALSE);
+
             return [
               'id' => $this->session->getId(),
               'name' => $this->session->getName(),
@@ -144,6 +139,7 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
     }
     // Always register an IP-based failed login event.
     $this->flood->register('services.failed_login_ip', $flood_config->get('ip_window'));
+
     return [];
   }
 
