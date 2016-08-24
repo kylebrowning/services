@@ -32,6 +32,18 @@ entity.service_endpoint.delete_form:
   requirements:
     _permission: 'manage services'
 
+entity.service_endpoint.resources:
+  path: '/admin/structure/service_endpoint/{service_endpoint}/resources'
+  defaults:
+    _title: 'Service resources'
+    _controller: \Drupal\services\Controller\ServiceEndpointResources::list
+  requirements:
+    _permission: 'manage services'
+  options:
+    parameters:
+      service_endpoint:
+        type: entity:service_endpoint
+
 entity.service_endpoint_resource.config_form:
   path: '/admin/structure/service_endpoint/{service_endpoint}/resource/{plugin_id}'
   defaults:

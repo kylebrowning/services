@@ -10,9 +10,7 @@ services.service_endpoint.*:
       label: 'Label'
     uuid:
       type: string
-    service_providers:
-      type: sequence
-      label: 'Service Providers'
+      label: 'Uuid'
     endpoint:
       type: string
       label: 'Endpoint'

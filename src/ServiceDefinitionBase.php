@@ -3,9 +3,7 @@
  * @file
  * Provides Drupal\services\ServiceDefinitionBase.
  */
-
 namespace Drupal\services;
-
 
 use Drupal\Core\Plugin\ContextAwarePluginBase;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,6 +49,13 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
   /**
    * {@inheritdoc}
    */
+  public function getMethods() {
+    return $this->pluginDefinition['methods'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getArguments() {
     return $this->pluginDefinition['arguments'];
   }
@@ -66,6 +71,5 @@ abstract class ServiceDefinitionBase extends ContextAwarePluginBase implements S
    * {@inheritdoc}
    */
   public function processResponse(Response $response) {}
-
 
 }

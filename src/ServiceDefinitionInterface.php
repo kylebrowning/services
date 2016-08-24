@@ -17,37 +17,50 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
 
   /**
    * Returns a translated string for the service title.
+   *
    * @return string
    */
   public function getTitle();
 
   /**
    * Returns a translated string for the category.
+   *
    * @return string
    */
   public function getCategory();
 
   /**
    * Returns the appended path for the service.
+   *
    * @return string
    */
   public function getPath();
 
   /**
    * Returns a translated description for the constraint description.
+   *
    * @return string
    */
   public function getDescription();
 
   /**
+   * Return an array of allowed methods.
+   *
+   * @return array
+   */
+  public function getMethods();
+
+  /**
    * Returns an array of service request arguments.
+   *
    * @return array
    */
   public function getArguments();
 
   /**
    * Returns a boolean if this service definition supports translations.
-   * @return boolean
+   *
+   * @return bool
    */
   public function supportsTranslation();
 
@@ -56,8 +69,6 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    *
    * @param \Symfony\Component\Routing\Route; $route
    *   The route match object.
-   *
-   *
    */
   public function processRoute(Route $route);
 
@@ -84,8 +95,6 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
    *
    * @param Response $response
    *   The response object that is about to be returned.
-   *
-   * @return void
    */
   public function processResponse(Response $response);
 
