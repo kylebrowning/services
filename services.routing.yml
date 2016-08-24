@@ -32,5 +32,12 @@ entity.service_endpoint.delete_form:
   requirements:
     _permission: 'manage services'
 
+services.csrf_token:
+  path: '/services/session/token'
+  defaults:
+    _controller: '\Drupal\services\Controller\Services::csrfToken'
+  requirements:
+    _access: 'TRUE'
+
 route_callbacks:
   - '\Drupal\services\Routing\ServiceEndpoint::routes'

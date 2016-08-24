@@ -98,6 +98,20 @@ class Services extends ControllerBase {
     // Be explicit about the caching needs of this response.
     $response->setVary('Accept');
     $service_def->processResponse($response);
+
     return $response;
   }
+
+  /**
+   * Generate a CSRF session token.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response.
+   *   A HTTP response object.
+   */
+  public function csrfToken() {
+    return new Response(
+      \Drupal::csrfToken()->get('services'), 200, ['Content-Type' => 'text/plain']
+    );
+  }
+
 }
