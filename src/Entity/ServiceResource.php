@@ -2,6 +2,7 @@
 
 namespace Drupal\services\Entity;
 
+use Drupal\Core\Authentication\AuthenticationProviderInterface;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\services\ServiceResourceInterface;
@@ -184,6 +185,34 @@ class ServiceResource extends ConfigEntityBase implements ServiceResourceInterfa
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    // Calculate the dependencies based on the selected authentications that
+    // have been selected for a given services resource.
+    if ($this instanceof ServiceResourceInterface) {
+      foreach ($this->getAuthentication() as $provider_id) {
+        $provider = $this->authenticationCollector()->getProvider($provider_id);
+
+        if (!$provider instanceof AuthenticationProviderInterface) {
+          continue;
+        }
+        $class_info = explode('\\', get_class($provider));
+        $module_name = $class_info[1];
+
+        // Make sure the module exists prior to requiring it as a dependency.
+        if (\Drupal::moduleHandler()->moduleExists($module_name)) {
+          $this->addDependency('module', $module_name);
+        }
+      }
+    }
+
+    return $this;
+  }
+
+  /**
    * Service plugin definition.
    *
    * @return \Drupal\Component\Plugin\PluginManagerInterface
@@ -203,6 +232,16 @@ class ServiceResource extends ConfigEntityBase implements ServiceResourceInterfa
     }
 
     return $uri_route_parameters;
+  }
+
+  /**
+   * Authentication collector.
+   *
+   * @return \Drupal\Core\Authentication\AuthenticationCollectorInterface.
+   *   An authentication collection object.
+   */
+  protected function authenticationCollector() {
+    return \Drupal::service('authentication_collector');
   }
 
 }
