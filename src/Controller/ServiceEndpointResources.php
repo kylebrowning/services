@@ -5,7 +5,6 @@ namespace Drupal\services\Controller;
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\services\ServiceEndpointInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
