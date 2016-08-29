@@ -4,7 +4,6 @@ namespace Drupal\services\Controller;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Url;
 
 /**
  * Provides a listing of service endpoint entities.
