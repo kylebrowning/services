@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Controller\Services.
- */
-
 namespace Drupal\services\Controller;
 
-use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Plugin\Context\Context;
@@ -18,47 +12,47 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
- * Class Services.
- *
- * @package Drupal\services\Controller
+ * Class \Drupal\services\Controller\Services.
  */
 class Services extends ControllerBase {
 
   /**
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $serviceDefinitionManager;
-
-  /**
+   * Serializer service.
+   *
    * @var \Symfony\Component\Serializer\SerializerInterface
    */
   protected $serializer;
 
   /**
-   * {@inheritdoc}
+   * Constructor for \Drupal\services\Controller\Services.
    */
-  public static function create(ContainerInterface $container) {
-    return new static($container->get('plugin.manager.services.service_definition'), $container->get('serializer'));
-  }
-
-  function __construct(PluginManagerInterface $service_definition_manager, SerializerInterface $serializer) {
-    $this->serviceDefinitionManager = $service_definition_manager;
+  public function __construct(SerializerInterface $serializer) {
     $this->serializer = $serializer;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('serializer')
+    );
+  }
 
   /**
-   * Processing the API request.
+   * Processing the service API request.
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, $service_endpoint_id, $service_definition_id) {
     /** @var $service_endpoint \Drupal\services\ServiceEndpointInterface */
     $service_endpoint = $this->entityManager()->getStorage('service_endpoint')->load($service_endpoint_id);
+    $service_resource = $service_endpoint->loadResourceProvider($service_definition_id);
 
     //TODO - pull in settings from service API and alter response
 
     /** @var $service_def \Drupal\services\ServiceDefinitionInterface */
-    $service_def = $this->serviceDefinitionManager->createInstance($service_definition_id, []);
-    /**
+    $service_def = $service_resource->createServicePluginInstance([]);
+
+    /*
      * Iterate over any contexts defined for this plugin and extract them from
      * the request defaults if the naming is identical. This means that a
      * context named 'node' would match to a url parameter {node} or a route
@@ -78,13 +72,13 @@ class Services extends ControllerBase {
     $messages = drupal_get_messages();
     if ($messages) {
       foreach ($messages as $type => $type_message) {
-        $headers["X-Drupal-Services-Messages-$type"] = implode("; ", $type_message);
+        $headers["X-Drupal-Services-Messages-$type"] = implode('; ', $type_message);
       }
     }
     // Find the request format to determin how we're going to serialize this data
     $format = $request->getRequestFormat();
     $data = $this->serializer->serialize($data, $format);
-    /**
+    /*
      * Create a new Cacheable Response object with our serialized data, set its
      * Content-Type to match the format of our Request and add the service
      * definition plugin as a cacheable dependency.
@@ -98,6 +92,20 @@ class Services extends ControllerBase {
     // Be explicit about the caching needs of this response.
     $response->setVary('Accept');
     $service_def->processResponse($response);
+
     return $response;
   }
+
+  /**
+   * Generate a CSRF session token.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response.
+   *   A HTTP response object.
+   */
+  public function csrfToken() {
+    return new Response(
+      \Drupal::csrfToken()->get('services'), 200, ['Content-Type' => 'text/plain']
+    );
+  }
+
 }

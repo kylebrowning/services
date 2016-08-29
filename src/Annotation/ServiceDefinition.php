@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Annotation\ServiceDefinition.
- */
-
 namespace Drupal\services\Annotation;
 
 use Drupal\Component\Annotation\Plugin;
@@ -49,7 +44,7 @@ class ServiceDefinition extends Plugin {
   public $path;
 
   /**
-   * The method this Service Definition utilizes
+   * The method this Service Definition utilizes.
    *
    * @var array
    */
@@ -64,11 +59,10 @@ class ServiceDefinition extends Plugin {
    */
   public $description;
 
-
   /**
    * The service definition supports translations.
    *
-   * @var boolean
+   * @var bool
    */
   public $translatable;
 

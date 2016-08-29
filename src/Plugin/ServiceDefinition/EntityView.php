@@ -1,10 +1,7 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityView.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
+
 use Drupal\Core\Asset\AssetCollectionRendererInterface;
 use Drupal\Core\Asset\AssetResolverInterface;
 use Drupal\Core\Asset\AttachedAssets;
@@ -26,7 +23,6 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   translatable = true,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityView"
  * )
- *
  */
 class EntityView extends ServiceDefinitionBase implements ContainerFactoryPluginInterface {
 
@@ -101,6 +97,7 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
         $result[$asset_type][] = $this->renderer->renderRoot($asset);
       }
     }
+
     return $result;
   }
   /**

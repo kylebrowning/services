@@ -1,11 +1,6 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityGet.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
-
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionBase;
@@ -22,7 +17,6 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   translatable = true,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityDelete"
  * )
- *
  */
 class EntityDelete extends ServiceDefinitionBase {
 

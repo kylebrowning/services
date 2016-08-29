@@ -6,3 +6,8 @@ services:
     class: Drupal\services\StackMiddleware\FormatSetter
     tags:
       - { name: http_middleware, priority: 201, responder: true }
+  services.csrf_token_access_check:
+    class: \Drupal\services\Access\CSRFTokenAccessCheck
+    arguments: ['@session_configuration']
+    tags:
+      - { name: access_check }

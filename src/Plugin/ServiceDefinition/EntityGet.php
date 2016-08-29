@@ -1,11 +1,6 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityGet.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
-
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\services\ServiceDefinitionBase;
@@ -22,7 +17,6 @@ use Symfony\Component\Routing\Route;
  *   translatable = true,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityGet"
  * )
- *
  */
 class EntityGet extends ServiceDefinitionBase {
 
@@ -39,6 +33,7 @@ class EntityGet extends ServiceDefinitionBase {
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
     /** @var $entity \Drupal\Core\Entity\EntityInterface */
     $entity = $this->getContextValue($this->getDerivativeId());
+
     return $entity->toArray();
   }
 
