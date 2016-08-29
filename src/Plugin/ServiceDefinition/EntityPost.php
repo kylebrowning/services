@@ -1,11 +1,6 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\EntityPost.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
-
 
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -25,7 +20,6 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   response_code = 201,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityPost"
  * )
- *
  */
 class EntityPost extends ServiceDefinitionEntityRequestContentBase {
   /**
@@ -44,7 +38,8 @@ class EntityPost extends ServiceDefinitionEntityRequestContentBase {
       try {
         $entity->save();
         if ($entity->id()) {
-          drupal_set_message($this->t("Entity of type @type was created.", ['@type' => $entity->getEntityType()->id()]));
+          drupal_set_message($this->t('Entity of type @type was created.', ['@type' => $entity->getEntityType()->id()]));
+
           return $entity->toArray();
         }
       }
@@ -52,7 +47,7 @@ class EntityPost extends ServiceDefinitionEntityRequestContentBase {
         throw new HttpException('500', $e->getMessage());
       }
     }
-    throw new HttpException('500', "The entity could not be created.");
+    throw new HttpException('500', 'The entity could not be created.');
   }
 
 }

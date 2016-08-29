@@ -1,14 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Entity\ServiceEndpoint.
- */
-
 namespace Drupal\services\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\services\ServiceEndpointInterface;
 
 /**
@@ -33,14 +27,16 @@ use Drupal\services\ServiceEndpointInterface;
  *     "uuid" = "uuid"
  *   },
  *   links = {
+ *     "collection" = "/admin/structure/service_endpoint",
  *     "canonical" = "/admin/structure/service_endpoint/{service_endpoint}",
  *     "edit-form" = "/admin/structure/service_endpoint/{service_endpoint}/edit",
  *     "delete-form" = "/admin/structure/service_endpoint/{service_endpoint}/delete",
- *     "collection" = "/admin/structure/service_endpoint"
+ *     "resources" =  "/admin/structure/service_endpoint/{service_endpoint}/resources"
  *   }
  * )
  */
 class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterface {
+
   /**
    * The services endpoint ID.
    *
@@ -63,13 +59,6 @@ class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterfa
   protected $endpoint;
 
   /**
-   * The service providers for the api.
-   *
-   * @var string
-   */
-  protected $service_providers;
-
-  /**
    * {@inheritdoc}
    */
   public function getEndpoint() {
@@ -79,18 +68,42 @@ class ServiceEndpoint extends ConfigEntityBase implements ServiceEndpointInterfa
   /**
    * {@inheritdoc}
    */
-  public function getServiceProviders() {
-    return $this->service_providers;
+  public function loadResourceProviders() {
+    return $this->getResourceStorage()
+      ->loadByProperties([
+        'service_endpoint_id' => $this->id(),
+      ]);
   }
 
-  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
-    parent::postSave($storage, $update);
-    \Drupal::service('router.builder')->setRebuildNeeded();
+  /**
+   * {@inheritdoc}
+   */
+  public function loadResourceProvider($plugin_id) {
+    $entities = $this->getResourceStorage()
+      ->loadByProperties([
+        'service_plugin_id' => $plugin_id,
+        'service_endpoint_id' => $this->id(),
+      ]);
+
+    return !empty($entities) ? reset($entities) : FALSE;
   }
 
-  public static function postDelete(EntityStorageInterface $storage, array $entities) {
-    parent::postDelete($storage, $entities);
-    \Drupal::service('router.builder')->setRebuildNeeded();
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    parent::delete();
+    $this->getResourceStorage()->delete($this->loadResourceProviders());
+  }
+
+  /**
+   * Get resource storage object.
+   *
+   * @return \Drupal\Core\Entity\EntityStorageInterface
+   *   Resource storage object.
+   */
+  protected function getResourceStorage() {
+    return $this->entityTypeManager()->getStorage('service_endpoint_resource');
   }
 
 }

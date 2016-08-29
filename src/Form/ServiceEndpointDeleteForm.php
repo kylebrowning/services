@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\services\Form\ServiceEndpointDeleteForm.
- */
-
 namespace Drupal\services\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
@@ -46,7 +41,7 @@ class ServiceEndpointDeleteForm extends EntityConfirmFormBase {
       $this->t('content @type: deleted @label.',
         [
           '@type' => $this->entity->bundle(),
-          '@label' => $this->entity->label()
+          '@label' => $this->entity->label(),
         ]
         )
     );

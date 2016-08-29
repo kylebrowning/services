@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\ServiceDefinition\NodePut.php
- */
 
 namespace Drupal\services\Plugin\ServiceDefinition;
 
@@ -23,7 +19,6 @@ use Symfony\Component\Routing\Route;
  *   translatable = true,
  *   deriver = "\Drupal\services\Plugin\Deriver\EntityPut"
  * )
- *
  */
 class EntityPut extends ServiceDefinitionEntityRequestContentBase {
   /**
@@ -53,12 +48,12 @@ class EntityPut extends ServiceDefinitionEntityRequestContentBase {
         }
       }
       $entity->save();
+
       return $entity->toArray();
     }
     catch (\Exception $e) {
-      throw new HttpException(422, "The supplied content body could not be serialized into an entity of the requested type.", $e);
+      throw new HttpException(422, 'The supplied content body could not be serialized into an entity of the requested type.', $e);
     }
   }
-
 
 }

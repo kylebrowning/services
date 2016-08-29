@@ -1,3 +1,13 @@
+services.settings:
+  type: config_object
+  label: 'Service Settings'
+  mapping:
+    default_formats:
+      type: sequence
+      label: 'Default formats'
+    default_authentication:
+      type: sequence
+      label: 'Default authentication'
 services.service_definition.plugin:
   type: mapping
   label: 'Service Definition'

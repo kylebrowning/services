@@ -1,15 +1,17 @@
 <?php
-/**
- * @file
- * Contains \Drupal\services\Plugin\Deriver\EntityIndex.php
- */
 
 namespace Drupal\services\Plugin\Deriver;
 
-
 use Drupal\ctools\Plugin\Deriver\EntityDeriverBase;
 
+/**
+ * Class \Drupal\services\Plugin\Deriver\EntityIndex.
+ */
 class EntityIndex extends EntityDeriverBase {
+
+  /**
+   * {@inheritdoc}
+   */
   public function getDerivativeDefinitions($base_plugin_definition) {
     foreach ($this->entityManager->getDefinitions() as $entity_type_id => $entity_type) {
       $this->derivatives[$entity_type_id] = $base_plugin_definition;
@@ -18,6 +20,7 @@ class EntityIndex extends EntityDeriverBase {
       $this->derivatives[$entity_type_id]['category'] = $this->t('@label', ['@label' => $entity_type->getLabel()]);
       $this->derivatives[$entity_type_id]['path'] = "$entity_type_id";
     }
+
     return $this->derivatives;
   }
 }

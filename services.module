@@ -2,9 +2,8 @@
 
 /**
  * @file
- * Contains services.module.
+ * The hook implementations for the services module.
  */
-
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Session\AccountInterface;
 
