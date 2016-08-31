@@ -46,7 +46,7 @@ class ServiceEndpointResources extends ControllerBase {
    * @return array
    *   An renderable array.
    */
-  public function list(ServiceEndpointInterface $service_endpoint = NULL) {
+  public function displayList(ServiceEndpointInterface $service_endpoint = NULL) {
     $build = [];
 
     foreach ($this->getCategoryDefinitions($service_endpoint) as $category => $definitions) {
