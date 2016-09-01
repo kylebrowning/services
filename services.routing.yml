@@ -36,7 +36,7 @@ entity.service_endpoint.resources:
   path: '/admin/structure/service_endpoint/{service_endpoint}/resources'
   defaults:
     _title: 'Service resources'
-    _controller: \Drupal\services\Controller\ServiceEndpointResources::list
+    _controller: \Drupal\services\Controller\ServiceEndpointResources::displayList
   requirements:
     _permission: 'manage services'
   options:
