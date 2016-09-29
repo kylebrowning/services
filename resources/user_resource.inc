@@ -495,7 +495,7 @@ function _user_resource_update_services_user($uid, $time) {
   //If so that means we are updating it.
   $result = db_select('services_user', 'su')
     ->fields('su')
-    ->condition('uid', $uid,'=')
+    ->condition('uid', $uid, '=')
     ->execute()
     ->fetchAssoc();
   //check the result
@@ -514,6 +514,7 @@ function _user_resource_update_services_user($uid, $time) {
           'changed' => $time,
         )
       )
+      ->condition('uid', $uid, '=')
       ->execute();
   }
 }
