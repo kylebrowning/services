@@ -56,8 +56,11 @@ class ServiceSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->getConfig()
+      ->setData($form_state->cleanValues()->getValues())
+      ->save();
+
     parent::submitForm($form, $form_state);
-    $this->getConfig()->setData($form_state->cleanValues()->getValues());
   }
 
   /**
