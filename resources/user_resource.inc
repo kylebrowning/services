@@ -660,12 +660,17 @@ function _user_resource_logout() {
 
   watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
 
+  $original_session_state = drupal_save_session();
+  drupal_save_session(TRUE);
+
   // Destroy the current session.
   module_invoke_all('user_logout', $user);
   session_destroy();
 
   // Load the anonymous user.
   $user = drupal_anonymous_user();
+
+  drupal_save_session($original_session_state);
 
   return TRUE;
 }
