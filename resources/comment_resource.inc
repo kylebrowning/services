@@ -247,11 +247,12 @@ function _comment_resource_create($comment) {
 function _comment_resource_retrieve($cid) {
 
   $comment = comment_load($cid);
+  if ($comment) {
+    //Lets check field_permissions
+    $comment = services_field_permissions_clean('view', 'comment', $comment);
 
-  //Lets check field_permissions
-  $comment = services_field_permissions_clean('view', 'comment', $comment);
-
-  return $comment;
+    return $comment;
+  }
 }
 
 /**
