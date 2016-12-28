@@ -52,7 +52,8 @@ class CSRFTokenAccessCheck implements AccessCheckInterface {
       $csrf_token = $request->headers->get('X-CSRF-Token');
 
       if (!\Drupal::csrfToken()->validate($csrf_token, 'services')) {
-        return AccessResult::forbidden()->setCacheMaxAge(0);
+        return AccessResult::forbidden('CSRF validation failed')
+          ->setCacheMaxAge(0);
       }
     }
 
