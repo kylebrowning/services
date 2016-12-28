@@ -26,7 +26,7 @@ class EntityPost extends ServiceDefinitionEntityRequestContentBase {
    * {@inheritdoc}
    */
   public function processRoute(Route $route) {
-    $route->setRequirement('_entity_access', $this->getDerivativeId() . '.create');
+    $route->setRequirement('_services_entity_access_create', $this->getDerivativeId());
   }
 
   /**
