@@ -25,4 +25,5 @@ class AliasGet extends EntityDeriverBase {
 
     return $this->derivatives;
   }
+
 }

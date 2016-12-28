@@ -27,4 +27,5 @@ class EntityGet extends EntityDeriverBase {
 
     return $this->derivatives;
   }
+
 }

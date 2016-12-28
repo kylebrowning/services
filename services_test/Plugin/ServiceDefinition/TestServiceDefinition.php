@@ -32,10 +32,12 @@ use Symfony\Component\HttpFoundation\Request;
  * )
  */
 class TestServiceDefinition extends ServiceDefinitionBase {
+
   /**
    * Testing hello world style request.
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match) {
     return SafeMarkup::escape($request->getMethod() . ' - ' . $request->getUri());
   }
+
 }

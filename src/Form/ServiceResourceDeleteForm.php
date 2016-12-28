@@ -42,7 +42,7 @@ class ServiceResourceDeleteForm extends EntityConfirmFormBase {
 
     drupal_set_message(
       $this->t('Resource "@label" configurations have been deleted!', [
-          '@label' => $this->entity->label(),
+        '@label' => $this->entity->label(),
       ])
     );
 

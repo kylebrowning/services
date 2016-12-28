@@ -20,7 +20,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  *   path = "user/logout"
  * )
  */
-class UserLogout extends ServiceDefinitionBase  {
+class UserLogout extends ServiceDefinitionBase {
 
   /**
    * {@inheritdoc}

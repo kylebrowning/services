@@ -43,13 +43,12 @@ class Services extends ControllerBase {
    * Processing the service API request.
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, $service_endpoint_id, $service_definition_id) {
-    /** @var $service_endpoint \Drupal\services\ServiceEndpointInterface */
+    /* @var $service_endpoint \Drupal\services\ServiceEndpointInterface */
     $service_endpoint = $this->entityManager()->getStorage('service_endpoint')->load($service_endpoint_id);
     $service_resource = $service_endpoint->loadResourceProvider($service_definition_id);
 
-    //TODO - pull in settings from service API and alter response
-
-    /** @var $service_def \Drupal\services\ServiceDefinitionInterface */
+    // TODO - pull in settings from service API and alter response.
+    /* @var $service_def \Drupal\services\ServiceDefinitionInterface */
     $service_def = $service_resource->createServicePluginInstance([]);
 
     /*
@@ -75,7 +74,8 @@ class Services extends ControllerBase {
         $headers["X-Drupal-Services-Messages-$type"] = implode('; ', $type_message);
       }
     }
-    // Find the request format to determin how we're going to serialize this data
+    // Find the request format to determin how we're going to serialize this
+    // data.
     $format = $request->getRequestFormat();
     $data = $this->serializer->serialize($data, $format);
     /*

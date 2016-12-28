@@ -30,17 +30,18 @@ class ServiceEndpoint {
           ];
         }
 
-        // Dynamically building custom routes per enabled plugin on an endpoint entity.
+        // Dynamically building custom routes per enabled plugin on an endpoint
+        // entity.
         $route = (new Route('/' . $endpoint->getEndpoint() . '/' . $instance->getPath()))
           ->setDefaults([
-              '_controller' => '\Drupal\services\Controller\Services::processRequest',
-              'service_endpoint_id' => $endpoint->id(),
-              'service_definition_id' => $instance->getPluginId(),
-            ])
+            '_controller' => '\Drupal\services\Controller\Services::processRequest',
+            'service_endpoint_id' => $endpoint->id(),
+            'service_definition_id' => $instance->getPluginId(),
+          ])
           ->setOptions([
-              'parameters' => $parameters,
-              '_auth' => $resource->getAuthentication(),
-            ])
+            'parameters' => $parameters,
+            '_auth' => $resource->getAuthentication(),
+          ])
           ->setMethods($instance->getMethods());
 
         if ($formats = $resource->getFormats()) {

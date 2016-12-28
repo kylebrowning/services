@@ -27,4 +27,5 @@ class EntityDelete extends EntityDeriverBase {
 
     return $this->derivatives;
   }
+
 }

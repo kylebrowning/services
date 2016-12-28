@@ -128,7 +128,7 @@ class UserLogin extends ServiceDefinitionBase implements ContainerFactoryPluginI
               'id' => $this->session->getId(),
               'name' => $this->session->getName(),
             ];
-            //return $this->entityManager->getStorage('user')->load($uid);
+            // Return $this->entityManager->getStorage('user')->load($uid);
           }
           else {
             // Register a per-user failed login event.

@@ -106,11 +106,11 @@ class ServiceEndpointResources extends ControllerBase {
     $row = [];
 
     $row['title']['data'] = [
-      '#markup' => $definition['title']
+      '#markup' => $definition['title'],
     ];
 
     $row['endpoint']['data'] = [
-      '#markup' => $definition['path']
+      '#markup' => $definition['path'],
     ];
 
     return $row;

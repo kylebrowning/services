@@ -67,7 +67,7 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     if ($request->query->has('view_mode')) {
       $view_mode = $request->query->get('view_mode');
     }
-    /** @var $entity \Drupal\Core\Entity\EntityInterface */
+    /* @var $entity \Drupal\Core\Entity\EntityInterface */
     $entity = $this->getContextValue($this->getDerivativeId());
     $view_builder = \Drupal::entityManager()->getViewBuilder($entity->getEntityTypeId());
     $render_array = $view_builder->view($entity, $view_mode);
@@ -120,7 +120,7 @@ class EntityView extends ServiceDefinitionBase implements ContainerFactoryPlugin
     $variables['scripts'] = $this->jsCollectionRenderer->render($js_assets_header);
     $variables['scripts_bottom'] = $this->jsCollectionRenderer->render($js_assets_footer);
     // @todo Handle all non-asset attachments.
-    //$variables['head'] = drupal_get_html_head(FALSE);
+    // $variables['head'] = drupal_get_html_head(FALSE);
     return $variables;
   }
 

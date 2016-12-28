@@ -23,4 +23,5 @@ class EntityIndex extends EntityDeriverBase {
 
     return $this->derivatives;
   }
+
 }

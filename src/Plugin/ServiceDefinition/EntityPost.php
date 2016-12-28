@@ -43,7 +43,7 @@ class EntityPost extends ServiceDefinitionEntityRequestContentBase {
           return $entity->toArray();
         }
       }
-      catch(EntityStorageException $e) {
+      catch (EntityStorageException $e) {
         throw new HttpException('500', $e->getMessage());
       }
     }

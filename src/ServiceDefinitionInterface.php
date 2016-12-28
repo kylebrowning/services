@@ -67,7 +67,7 @@ interface ServiceDefinitionInterface extends ContextAwarePluginInterface, Cachea
   /**
    * Checks access for the ServiceDefintion.
    *
-   * @param \Symfony\Component\Routing\Route; $route
+   * @param \Symfony\Component\Routing\Route $route
    *   The route match object.
    */
   public function processRoute(Route $route);

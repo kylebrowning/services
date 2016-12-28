@@ -31,7 +31,7 @@ class EntityDelete extends ServiceDefinitionBase {
    * {@inheritdoc}
    */
   public function processRequest(Request $request, RouteMatchInterface $route_match, SerializerInterface $serializer) {
-    /** @var $entity \Drupal\Core\Entity\EntityInterface */
+    /* @var $entity \Drupal\Core\Entity\EntityInterface */
     $entity = $this->getContextValue($this->getDerivativeId());
     $entity->delete();
   }

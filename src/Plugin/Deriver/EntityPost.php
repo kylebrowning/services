@@ -23,4 +23,5 @@ class EntityPost extends EntityDeriverBase {
 
     return $this->derivatives;
   }
+
 }
